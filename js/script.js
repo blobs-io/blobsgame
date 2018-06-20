@@ -23,12 +23,18 @@ setInterval(function(){
 			if(blobPosition.y < 0) return;
 			blobPosition.y--; 
 		break;
-		case 1: blobPosition.x++; break;
+		case 1: 
+			if(blobPosition.x > canvas.width - 75) return;
+			blobPosition.x++; 
+		break;
 		case 2: 
-			if(blobPosition.y > canvas.height) return;
+			if(blobPosition.y > canvas.height - 75) return;
 			blobPosition.y++; 
 		break;
-		case 3: blobPosition.x--; break;
+		case 3:
+			if(blobPosition.x < 10) return;
+			blobPosition.x--; 
+		break;
 	}
 	
 	ctx.clearRect(blobPosition.x - 20, blobPosition.y - 20, 100, 100);
