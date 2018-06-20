@@ -23,15 +23,15 @@ setInterval(function(){
 			if(blobPosition.y < 0) return;
 			blobPosition.y--; 
 		break;
-		case 1: blobPosition.x--; break;
+		case 1: blobPosition.x++; break;
 		case 2: 
 			if(blobPosition.y > canvas.height) return;
 			blobPosition.y++; 
 		break;
-		case 3: blobPosition.x++; break;
+		case 3: blobPosition.x--; break;
 	}
 	
-	ctx.clearRect(blobPosition.x, blobPosition.y, 70, 70);
+	ctx.clearRect(blobPosition.x - 20, blobPosition.y - 20, 100, 100);
 	ctx.drawImage(image, blobPosition.x, blobPosition.y, 70, 70);
 }, 5);
 
@@ -39,7 +39,11 @@ window.addEventListener("keypress", function(data){
 	if(!ready) return;
 	if(data.charCode == 119){
 		blobPosition.direction = 0;
+	} else if(data.charCode === 100){
+		blobPosition.direction = 1;
 	} else if(data.charCode === 115){
 		blobPosition.direction = 2;
+	} else if(data.charCode === 97){
+		blobPosition.direction = 3;
 	}
 });
