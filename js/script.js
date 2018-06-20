@@ -17,15 +17,19 @@ image.onload = function(){
 }
 
 setInterval(function(){
-	if(!ready);
+	if(!ready) return;
 	switch(blobPosition.direction){
-		case 0: blobPosition.y--; break;
+		case 0: 
+			if(blobPosition.y < 0) return;
+			blobPosition.y--; 
+		break;
 		case 1: blobPosition.x--; break;
-		case 2: blobPosition.y++; break;
+		case 2: 
+			if(blobPosition.y > canvas.height) return;
+			blobPosition.y++; 
+		break;
 		case 3: blobPosition.x++; break;
 	}
-	
-	if(blobPosition.y < 0 || blobPosition.y > canvas.height- 50) return;
 	
 	ctx.clearRect(blobPosition.x, blobPosition.y, 70, 70);
 	ctx.drawImage(image, blobPosition.x, blobPosition.y, 70, 70);
@@ -35,5 +39,7 @@ window.addEventListener("keypress", function(data){
 	if(!ready) return;
 	if(data.charCode == 119){
 		blobPosition.direction = 0;
-	} 
+	} else if(data.charCode === 115){
+		blobPosition.direction = 2;
+	}
 });
