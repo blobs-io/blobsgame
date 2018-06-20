@@ -53,3 +53,8 @@ window.addEventListener("keypress", function(data){
 		blobPosition.direction = 3;
 	}
 });
+
+window.addEventListener("resize", function(){
+	canvas.width = window.innerWidth / 2;
+	canvas.height = window.innerHeight / 2;
+});
