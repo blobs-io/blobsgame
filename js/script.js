@@ -7,8 +7,8 @@ let ready = false,
 		direction: 0 // 0 = up, 1 = right, 2 = bottom, 3 = left
 	};
 
-canvas.width = window.innerWidth / 2;
-canvas.height = window.innerHeight / 2;
+canvas.width = window.innerWidth / 1.25;
+canvas.height = window.innerHeight / 1.25;
 const image = new Image();
 image.src = "https://discordemoji.com/assets/emoji/blobowo.png";
 image.onload = function(){
@@ -55,6 +55,6 @@ window.addEventListener("keypress", function(data){
 });
 
 window.addEventListener("resize", function(){
-	canvas.width = window.innerWidth / 2;
-	canvas.height = window.innerHeight / 2;
+	canvas.width = window.innerWidth / 1.25;
+	canvas.height = window.innerHeight / 1.25;
 });
