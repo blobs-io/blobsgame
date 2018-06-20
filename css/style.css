@@ -1,3 +1,7 @@
 canvas {
-	border: 1px solid black;
+	border: 1px solid white;
+}
+
+body {
+	background-color: #2C2F33;
 }
