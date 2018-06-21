@@ -15,3 +15,14 @@ window.addEventListener("resize", function(){
 	canvas.width = window.innerWidth / 1.25;
 	canvas.height = window.innerHeight / 1.25;
 });
+
+window.addEventListener("click", function(data){
+	if(mode === "main"){
+		if(data.clientX > (headerPos.blobs - 200) &&
+			data.clientX < (headerPos.blobs + 50) &&
+			data.clientY > 200 && 
+			data.clientY < 300){
+				// If singleplayer rectangle is clicked
+			}
+	}
+});
