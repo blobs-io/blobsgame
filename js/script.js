@@ -1,6 +1,6 @@
 let nickname;
 while((nickname = prompt("Nickname", "Player")).length > 10){
-	alert("Nickname must not be longer than 16 characters.");
+	alert("Nickname must not be longer than 10 characters.");
 }
 let ready = false,
 	blobPosition = {
@@ -10,7 +10,7 @@ let ready = false,
 	};
 	
 const image = new Image();
-image.src = "https://discordemoji.com/assets/emoji/blobowo.png";
+image.src = "assets/blobowo.png";
 image.onload = function(){
 	ready = true;
 	ctx.drawImage(image, blobPosition.x, blobPosition.y, 70, 70);
