@@ -1,5 +1,3 @@
-const canvas = document.getElementsByTagName("canvas")[0],
-ctx = canvas.getContext("2d");
 let nickname;
 while((nickname = prompt("Nickname", "Player")).length > 10){
 	alert("Nickname must not be longer than 16 characters.");
@@ -10,11 +8,7 @@ let ready = false,
 		y: (canvas.height / 2) - 50,
 		direction: 0 // 0 = up, 1 = right, 2 = bottom, 3 = left
 	};
-
-canvas.width = window.innerWidth / 1.25;
-canvas.height = window.innerHeight / 1.25;
-ctx.font = "20px arial";
-ctx.fillStyle = "white";
+	
 const image = new Image();
 image.src = "https://discordemoji.com/assets/emoji/blobowo.png";
 image.onload = function(){
@@ -47,21 +41,3 @@ setInterval(function(){
 	ctx.drawImage(image, blobPosition.x, blobPosition.y, 70, 70);
 	ctx.fillText(nickname, blobPosition.x, blobPosition.y - 25);
 }, 5);
-
-window.addEventListener("keypress", function(data){
-	if(!ready) return;
-	if(data.charCode == 119){
-		blobPosition.direction = 0;
-	} else if(data.charCode === 100){
-		blobPosition.direction = 1;
-	} else if(data.charCode === 115){
-		blobPosition.direction = 2;
-	} else if(data.charCode === 97){
-		blobPosition.direction = 3;
-	}
-});
-
-window.addEventListener("resize", function(){
-	canvas.width = window.innerWidth / 1.25;
-	canvas.height = window.innerHeight / 1.25;
-});
