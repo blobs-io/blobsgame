@@ -3,6 +3,91 @@ canvas {
 }
 
 body {
-	background-color: #2C2F33;
+	background-color: #2C2F33; 
 	color: #ddd;
+	font-family: "Open Sans";
+}
+
+#auth {
+	background-color: #36393f;
+	margin: 15% 35% 0 35%;
+	border-radius: 2px;
+	text-align: center;
+	padding: 0 0 12.5px 0;
+	overflow: auto;
+}
+
+input[placeholder=Username], input[placeholder=Password]{
+	margin-top: 20px;
+}
+
+input {
+	outline: none !important;
+	width: 125px;
+	border: 0px solid white;
+	border-bottom: 1.4px solid #2980b9;
+	background: transparent;
+	color: #7f8c8d;
+	font-size: 15px;
+	height: 20px;
+}
+
+input[type=submit] {
+	background-color: #2980b9;
+	margin-top: 25px;
+	border: none;
+	width: 300px;
+	color: white;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-radius: 2px;
+	height: 40px;
+}
+
+.reg-label {
+	margin-top: 7px;
+	font-size: 14px;
+	float: left;
+	margin-left: 40px;
+	color: #7f8c8d;
+}
+
+a {
+	color: #3498db;
+}
+
+a:visited {
+	color: #3498db;
+}
+
+#peek {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: 50px;
+	height: 50px;
+	background-size: cover;
+	background-image: url("../assets/blobpeek.png");
+}
+
+#peek:hover + .peek-label {
+	display: block;
+}
+
+.peek-label {
+	display: none;
+	position: fixed;
+	bottom: 52px;
+	transform: rotate(320deg);
+	font-size: 11px;
+	right: 0;
+}
+
+/* Color classes */
+.green {
+	color: #2ecc71 !important;
+}
+
+.blue {
+	color: #2980b9 !important;
 }
