@@ -1,0 +1,19 @@
+{
+  "name": "blobs-io",
+  "version": "0.0.1",
+  "description": "The blobs.io game",
+  "main": "backend/server.js",
+  "dependencies": {
+    "express": "^4.16.3",
+    "sqlite": "*",
+    "socket.io": "*"
+  },
+  "engines": {
+    "node": "8.x"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "pm2": "*"
+  },
+  "author": "y21"
+}
