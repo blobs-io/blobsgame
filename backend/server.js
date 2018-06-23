@@ -9,7 +9,9 @@ const sqlite = require("sqlite");
 const { existsSync, writeFileSync } = require("fs");
 app.use(express.static("public"));
 if(!existsSync("./db.sqlite")) writeFileSync("", "db.sqlite");
-sqlite.open("db.sqlite");
+sqlite.open("db.sqlite").then(()=>{
+  sqlite.all("SELECT * FROM accounts").then(console.log);
+});
 const io = socket(server);
 
 function displayError(msg, data, event, status){
@@ -39,6 +41,9 @@ io.on("connection", data => {
             status: 400,
             message: "Password needs to be at least 5 characters long and must not be longer than 32 characters."
         });
+      
+        if(/[^\w ]+/.test(res.username)) return displayError("Username should only contain A-Za-z_ ", data, "register", 400);
+      
         let hash = bcrypt.hashSync(res.password, 10);
         
        sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
