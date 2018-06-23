@@ -6,7 +6,9 @@ const server = app.listen(process.env.PORT, () => {
 });
 const bcrypt = require("bcrypt");
 const sqlite = require("sqlite");
+const { existsSync, writeFileSync } = require("fs");
 app.use(express.static("public"));
+if(!existsSync("./db.sqlite")) writeFileSync("", "db.sqlite");
 sqlite.open("db.sqlite");
 const io = socket(server);
 
