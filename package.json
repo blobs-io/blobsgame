@@ -6,7 +6,8 @@
   "dependencies": {
     "express": "^4.16.3",
     "sqlite": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "bcrypt": "*"
   },
   "engines": {
     "node": "8.x"
