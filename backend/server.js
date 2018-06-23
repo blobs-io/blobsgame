@@ -44,7 +44,7 @@ io.on("connection", data => {
       
         if(/[^\w ]+/.test(res.username)) return displayError("Username should only contain A-Za-z_ ", data, "register", 400);
       
-        let hash = bcrypt.hashSync(res.password, 10);
+        const hash = bcrypt.hashSync(res.password, 10);
         
        sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
          prepare.get([ res.username ]).then(result => {
