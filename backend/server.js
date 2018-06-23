@@ -10,6 +10,10 @@ const io = socket(server);
 
 io.on("connection", data => {
 	data.on("register", res => {
-		console.log("test");
+		// If username/password is undefined
+		if(!res.username || !res.password) return io.to(data.id).emit("register", {
+			status: 400,
+			message: "Either username or password is undefined."
+		});
 	});
 });
