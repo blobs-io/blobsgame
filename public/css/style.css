@@ -83,6 +83,14 @@ a:visited {
 	right: 0;
 }
 
+#success-notif {
+	background-color: #2ecc71;
+	padding: 15px;
+	margin-left: 25px;
+	margin-right: 25px;
+	margin-top: 10px;
+}
+
 /* Color classes */
 .green {
 	color: #2ecc71 !important;
