@@ -91,6 +91,14 @@ a:visited {
 	margin-top: 10px;
 }
 
+#failure-notif {
+	background-color: #c0392b;
+	padding: 15px;
+	margin-left: 25px;
+	margin-right: 25px;
+	margin-top: 10px;
+}
+
 /* Color classes */
 .green {
 	color: #2ecc71 !important;
