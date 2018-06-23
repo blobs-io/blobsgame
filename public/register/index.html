@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>blobs.io</title>
+		<link rel="stylesheet" href="../css/style.css">
+		<meta name="description" content="An IO game based on blobs">
+		<meta name="author" content="y21">
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+	</head>
+	<body>
+		<div id="auth">
+			<h1>Blobs<span class="green">.</span><span class="blue">io</span></h1>
+			<input type="text" placeholder="Username" id="user" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="password" placeholder="Password" id="pass" /><br/>
+			<input type="submit" value="Register" id="register-btn" /><br/>
+		</div>
+		<div id="peek"></div>
+		<span class="peek-label">Peek into the source</span>
+	</body>
+  <script src="../js/sockets.js"></script>
+</html>
