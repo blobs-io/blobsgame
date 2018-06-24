@@ -16,10 +16,10 @@ exports.registerID = (database, username, session, expires) => {
             if (typeof session === "undefined") {
                 session = "";
                 for (let i = 0; i < 8; ++i) {
-                    session += (crypto.randomBytes(1).readUInt8() & 0xFF).toString(36);
+                    session += (randomBytes(1).readUInt8() & 0xFF).toString(36);
                 }
             }
-            if (typeof expired === "undefined") expired = Date.now() + 9e5;
+            if (typeof expires === "undefined") expires = Date.now() + 9e5;
             if (!(expires instanceof Date) && typeof (expires) !== "number") throw new ReferenceError("Fourth parameter (expires) has to be either a number or a date object.");
             database.prepare("INSERT INTO sessionids VALUES (?, ?, ?)").then(prepare => {
                 prepare.run([username, session, expires]).then(result => {
