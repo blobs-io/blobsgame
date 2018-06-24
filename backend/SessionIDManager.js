@@ -5,7 +5,7 @@ const { randomBytes } = require("crypto");
  * @param {string} username The username
  * @param {string=} session The session id (recommended length: 16)
  * @param {object=|number=} expires Either a timestamp or a date object when the session id expires (default: 15 minutes)
- * @returns {promise<string>} The registered 
+ * @returns {promise<string>} The registered session id
  */
 exports.registerID = (database, username, session, expires) => {
     // Assign random value to session if undefined
