@@ -81,3 +81,22 @@ exports.exists = (database, data) => {
         }
     });
 }
+
+/**
+ * Gets the session object by session id
+ * 
+ * @param {object} database The database object
+ * @param {string} session The session id
+ * @returns {promise<object>} The session object (username, sessionid, expires)
+ */
+exports.getSession = (database, session) => {
+    return new Promise((resolve, reject) => {
+        try {
+            database.prepare("SELECT * FROM sessionids WHERE sessionid = ?").then(prepare => {
+                prepare.get([session]).then(resolve).catch(reject);
+            }).catch(reject);
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
