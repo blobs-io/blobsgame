@@ -7,16 +7,18 @@
 		<meta name="description" content="An IO game based on blobs">
 		<meta name="author" content="y21">
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
 	</head>
 	<body>
 		<div id="auth">
 			<h1>Blobs<span class="green">.</span><span class="blue">io</span></h1>
-			<input type="text" placeholder="Username" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			<input type="password" placeholder="Password" /><br/>
-			<input type="submit" value="Sign In"/><br/>
+			<input type="text" placeholder="Username" id="user" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="password" placeholder="Password" id="pass" /><br/>
+			<input type="submit" value="Sign In" id="login-btn" /><br/>
 			<span class="reg-label">No account yet? <a href="../register">Register</a></span>
 		</div>
 		<div id="peek"></div>
 		<span class="peek-label">Peek into the source</span>
 	</body>
+	<script src="../js/sockets.js"></script>
 </html>
