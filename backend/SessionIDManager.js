@@ -2,6 +2,7 @@ const {
     randomBytes
 } = require("crypto");
 /**
+ * Registers a session ID
  * 
  * @param {object} database The database object (must have a run method - recommended sql client: sqlite)
  * @param {string} username The username (does not need to be escaped)
@@ -28,11 +29,55 @@ exports.registerID = (database, username, session, expires) => {
             }).catch(error => {
                 if (error.toString().includes("no such table: sessionids")) {
                     database.run("CREATE TABLE sessionids (`username` TEXT, `sessionid` TEXT, `expires` TEXT)").catch(reject);
-                    reject({ toString: () => "Table was not present at execution. It has been created now." });
+                    reject({
+                        toString: () => "Table was not present at execution. It has been created now."
+                    });
                 } else console.log(error);
             });
         } catch (e) {
             reject(e);
+        }
+    });
+}
+
+/**
+ * Checks if a session ID exists
+ * 
+ * @param {object} database The database object (must have a run method - recommended sql client: sqlite)
+ * @param {object} data An object with both a type property (search keyword, either: session, username or expiresAt) and a value property
+ * @returns {promise<boolean|object>} Whether the session ID exists or not (or an object with error information)
+ */
+exports.exists = (database, data) => {
+    return new Promise((resolve, reject) => {
+        try {
+            switch (data.type) {
+                case "session":
+                    database.prepare("SELECT * FROM sessionids WHERE sessionid = ?").then(prepare => {
+                        prepare.get([data.value]).then(result => {
+                            if (typeof result === "undefined") resolve(false);
+                            else resolve(true);
+                        });
+                    }).catch(reject);
+                    break;
+                case "username":
+                    database.prepare("SELECT * FROM sessionids WHERE username = ?").then(prepare => {
+                        prepare.get([data.value]).then(result => {
+                            if (typeof result === "undefined") resolve(false);
+                            else resolve(true);
+                        });
+                    }).catch(reject);
+                    break;
+                case "expiresAt":
+                    database.prepare("SELECT * FROM sessionids WHERE expires = ?").then(prepare => {
+                        prepare.get([data.value]).then(result => {
+                            if (typeof result === "undefined") resolve(false);
+                            else resolve(true);
+                        });
+                    }).catch(reject);
+                    break;
+            }
+        } catch (e) {
+            reject(e)
         }
     });
 }
