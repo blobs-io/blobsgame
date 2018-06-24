@@ -14,11 +14,20 @@ sqlite.open("db.sqlite").then(()=>{
 });
 const io = socket(server);
 
-function displayError(msg, data, event, status){
-  io.to(data.id).emit(event, {
-    status: status,
-    message: msg
-  });
+/**
+ * Displays an error by emitting to websocket on clientside
+ * 
+ * @param {string} msg The error message
+ * @param {Object} data The data object (socket)
+ * @param {string} event The event that should get emitted
+ * @param {number} status HTTP status code (200 OK, 4xx Client, 5xx Server)
+ * @return {undefined}
+ */
+function displayError(msg, data, event, status) {
+    io.to(data.id).emit(event, {
+        status: status,
+        message: msg
+    });
 }
 
 
