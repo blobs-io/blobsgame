@@ -16,4 +16,5 @@ exports.registerID = (database, username, session, expires) => {
         }
     }
     if(typeof expired === "undefined") expired = Date.now() + 9e5;
+    if(!(expires instanceof Date) && typeof(expires) !== "number") throw new ReferenceError("Fourth parameter (expires) has to be either a number or a date object.");
 }
