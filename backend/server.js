@@ -8,7 +8,7 @@ const bcrypt = require("bcrypt");
 const sqlite = require("sqlite");
 const { existsSync, writeFileSync } = require("fs");
 app.use(express.static("public"));
-if(!existsSync("./db.sqlite")) writeFileSync("", "db.sqlite");
+if(!existsSync("./db.sqlite")) writeFileSync("db.sqlite", "");
 sqlite.open("db.sqlite").then(()=>{
   sqlite.all("SELECT * FROM accounts").then(console.log);
 });
