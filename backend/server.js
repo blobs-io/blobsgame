@@ -34,7 +34,7 @@ function displayError(msg, data, event, status) {
 io.on("connection", data => {
     data.on("login", res => {
         // If username/password is undefined
-        if (!res.username || !res.password) return io.to(data.id).emit("register", {
+        if (!res.username || !res.password) return io.to(data.id).emit("login", {
             status: 400,
             message: "Either username or password is undefined."
         });
