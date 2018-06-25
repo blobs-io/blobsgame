@@ -87,7 +87,7 @@ exports.exists = (database, data) => {
  * 
  * @param {object} database The database object
  * @param {object} data An object with both a type property (search keyword, either: session, username or expiresAt) and a value property
- * @returns {promise<object|string>} The session object (username, sessionid, expires)
+ * @returns {promise<object|string|undefined>} The session object (username, sessionid, expires)
  */
 exports.getSession = (database, data) => {
     return new Promise((resolve, reject) => {
@@ -128,4 +128,23 @@ exports.generateSessionID = length => {
         session += (randomBytes(1).readUInt8() & 0xFF).toString(36);
     }
     return session;
+}
+
+/**
+ * Deletes a session id from database
+ * 
+ * @param {object} database The database object
+ * @param {string} session The session id
+ * @returns {promise<string>} The deleted session id
+ */
+exports.deleteSession = (database, session) => {
+    return new Promise((resolve, reject) => {
+        try {
+            database.prepare("SELECT * FROM sessionids WHERE sessionid = ?").then(prepare => {
+                prepare.run([session]).then(() => resolve(session)).catch(reject);
+            }).catch(reject);
+        } catch(e){
+            reject(e);
+        }
+    });
 }
