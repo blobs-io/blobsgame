@@ -1,4 +1,5 @@
-const socket = io.connect("localhost:3000");
+const server = "http://localhost:3000";
+const socket = io.connect(server);
 const message = "<div id=\"<type>-notif\"><message></div>";
 
 if (/register(\/.*)?$/.test(window.location.href)) {
@@ -36,6 +37,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
                 document.getElementById("auth").innerHTML = message.replace("<type>", "failure").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
             } else {
                 document.getElementById("auth").innerHTML = message.replace("<type>", "success").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
+                if(typeof data.session_id !== "undefined") document.location.href = server + "/app?sessionid=" + data.session_id;
             }
         });
     });
