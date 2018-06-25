@@ -66,17 +66,22 @@ io.on("connection", data => {
                         type: "username",
                         value: res.username
                     }).then(session => {
-                        if (session) {
-                            sessions.deleteSession(sqlite, session.sessionid).catch(error => displayError(error.toString(), data, "login", 500));
+                        if(session){
+                            sessions.deleteSession(sqlite, {
+                                type: "username",
+                                value: res.username
+                            }).catch(console.log);
                         }
                         sessions.registerID(sqlite, res.username).then(id => {
                             io.to(data.id).emit("login", {
                                 status: 200,
                                 message: "Successfully logged in.",
                                 session_id: id
-                            });
-                        }).catch(console.log);
-                    }).catch(console.log);
+                            })
+                        }).catch(error => {
+                            displayError(error.toString(), data, "login", 500)
+                        });
+                    });
                 } else {
                     displayError("Incorrect username or password.", data, "login", 400);
                 }
