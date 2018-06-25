@@ -107,3 +107,8 @@ a:visited {
 .blue {
 	color: #2980b9 !important;
 }
+
+canvas {
+	border: 1px solid white;
+	margin-top: 15px;
+}
