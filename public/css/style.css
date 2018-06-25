@@ -3,7 +3,7 @@ canvas {
 }
 
 body {
-	background-color: #2C2F33; 
+	background-color: #2C2F33;
 	color: #ddd;
 	font-family: "Open Sans";
 }
@@ -17,7 +17,8 @@ body {
 	overflow: auto;
 }
 
-input[placeholder=Username], input[placeholder=Password]{
+input[placeholder=Username],
+input[placeholder=Password] {
 	margin-top: 20px;
 }
 
@@ -70,7 +71,7 @@ a:visited {
 	background-image: url("../assets/blobpeek.png");
 }
 
-#peek:hover + .peek-label {
+#peek:hover+.peek-label {
 	display: block;
 }
 
@@ -100,6 +101,7 @@ a:visited {
 }
 
 /* Color classes */
+
 .green {
 	color: #2ecc71 !important;
 }
@@ -109,6 +111,7 @@ a:visited {
 }
 
 canvas {
-	border: 1px solid white;
+	border: 1px solid #2980b9;
 	margin-top: 15px;
+	overflow: hidden;
 }
