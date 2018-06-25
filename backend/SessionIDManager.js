@@ -119,11 +119,12 @@ exports.getSession = (database, data) => {
 /**
  * Generates a 16-chars long session ID (using crypto)
  * 
- * @returns {string} The generated session ID
+ * @param {number} length The length of session id
+ * @returns {string=} The generated session ID
  */
-exports.generateSessionID = () => {
+exports.generateSessionID = length => {
     let session = "";
-    for (let i = 0; i < 8; ++i) {
+    for (let i = 0; i < ((length || 16) / 2); ++i) {
         session += (randomBytes(1).readUInt8() & 0xFF).toString(36);
     }
     return session;
