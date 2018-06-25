@@ -2,6 +2,11 @@ const socket = io.connect("localhost:3000");
 const message = "<div id=\"<type>-notif\"><message></div>";
 
 if (/register(\/.*)?$/.test(window.location.href)) {
+    socket.emit("captcha", Date.now());
+    socket.on("captcha", function(data){
+        const ctx = document.getElementsByTagName("canvas")[0].getContext("2d");
+    });
+
     document.getElementById("register-btn").addEventListener("click", function () {
         socket.emit("register", {
             username: document.getElementById("user").value,
