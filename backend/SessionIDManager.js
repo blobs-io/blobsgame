@@ -124,7 +124,7 @@ exports.getSession = (database, data) => {
  */
 exports.generateSessionID = length => {
     let session = "";
-    for (let i = 0; i < ((length || 16) / 2); ++i) {
+    for (let i = 0; i < ((parseInt(length) || 16) / 2); ++i) {
         session += (randomBytes(1).readUInt8() & 0xFF).toString(36);
     }
     return session;
