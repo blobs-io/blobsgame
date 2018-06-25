@@ -83,18 +83,33 @@ exports.exists = (database, data) => {
 }
 
 /**
- * Gets the session object by session id
+ * Gets the session object by keyword
  * 
  * @param {object} database The database object
- * @param {string} session The session id
- * @returns {promise<object>} The session object (username, sessionid, expires)
+ * @param {object} data An object with both a type property (search keyword, either: session, username or expiresAt) and a value property
+ * @returns {promise<object|string>} The session object (username, sessionid, expires)
  */
-exports.getSession = (database, session) => {
+exports.getSession = (database, data) => {
     return new Promise((resolve, reject) => {
         try {
-            database.prepare("SELECT * FROM sessionids WHERE sessionid = ?").then(prepare => {
-                prepare.get([session]).then(resolve).catch(reject);
-            }).catch(reject);
+            switch (data.type) {
+                case "session":
+                    database.prepare("SELECT * FROM sessionids WHERE sessionid = ?").then(prepare => {
+                        prepare.get([data.value]).then(resolve).catch(reject);
+                    }).catch(reject);
+                    break;
+                case "username":
+                    database.prepare("SELECT * FROM sessionids WHERE username = ?").then(prepare => {
+                        prepare.get([data.value]).then(resolve).catch(reject);
+                    }).catch(reject);
+                case "expiresAt":
+                    database.prepare("SELECT * FROM sessionids WHERE expires = ?").then(prepare => {
+                        prepare.get([data.value]).then(resolve).catch(reject);
+                    }).catch(reject);
+                    break;
+                default:
+                    reject("data.type must be either session, username or expiresAt but provided was " + data.type);
+            }
         } catch (e) {
             reject(e);
         }
