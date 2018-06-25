@@ -116,6 +116,11 @@ exports.getSession = (database, data) => {
     });
 }
 
+/**
+ * Generates a 16-chars long session ID (using crypto)
+ * 
+ * @returns {string} The generated session ID
+ */
 exports.generateSessionID = () => {
     let session = "";
     for (let i = 0; i < 8; ++i) {
