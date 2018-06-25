@@ -100,3 +100,11 @@ exports.getSession = (database, session) => {
         }
     });
 }
+
+exports.generateSessionID = () => {
+    let session = "";
+    for (let i = 0; i < 8; ++i) {
+        session += (randomBytes(1).readUInt8() & 0xFF).toString(36);
+    }
+    return session;
+}
