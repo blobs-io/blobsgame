@@ -86,6 +86,8 @@ a:visited {
 	right: 0;
 }
 
+/* Notifications */
+
 #success-notif {
 	background-color: #2ecc71;
 	padding: 15px;
