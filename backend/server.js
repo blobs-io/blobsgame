@@ -32,9 +32,13 @@ function displayError(msg, data, event, status) {
 }
 
 io.on("connection", data => {
-    data.on("captcha", () => {
+    data.on("getCaptcha", () => {
         io.to(data.id).emit("captcha", {
-            captcha: sessions.generateSessionID()
+            captcha: sessions.generateSessionID().substr(0, 6),
+            position: {
+                x: Math.floor(Math.random() * 150) + 25,
+                y: Math.floor(Math.random() * 65) + 25
+            }
         });
     });
     
