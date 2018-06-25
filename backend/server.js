@@ -14,6 +14,8 @@ app.use(express.static("public"));
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 const io = socket(server);
 sqlite.open("db.sqlite");
+const sessions = require("./SessionIDManager");
+const captchas = new Map();
 
 /**
  * Displays an error by emitting to websocket on clientside
@@ -31,17 +33,21 @@ function displayError(msg, data, event, status) {
     });
 }
 
+
+
 io.on("connection", data => {
     data.on("getCaptcha", () => {
+        const captcha = sessions.generateSessionID().substr(0, 6);
         io.to(data.id).emit("captcha", {
-            captcha: sessions.generateSessionID().substr(0, 6),
+            captcha: captcha,
             position: {
                 x: Math.floor(Math.random() * 150) + 25,
                 y: Math.floor(Math.random() * 65) + 25
             }
         });
+        captchas.set(data.id, captcha);
     });
-    
+
     data.on("login", res => {
         // If username/password is undefined
         if (!res.username || !res.password) return io.to(data.id).emit("login", {
@@ -87,6 +93,8 @@ io.on("connection", data => {
         });
 
         if (/[^\w ]+/.test(res.username)) return displayError("Username should only contain A-Za-z_ ", data, "register", 400);
+
+        if(res.captcha !== captchas.get(data.id)) return displayError("Captcha is not correct", data, "register", 400);
 
         const hash = bcrypt.hashSync(res.password, 10);
 
