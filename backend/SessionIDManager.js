@@ -117,7 +117,7 @@ exports.getSession = (database, data) => {
 }
 
 /**
- * Generates a 16-chars long session ID (using crypto)
+ * Generates a n-chars long session ID (using crypto)
  * 
  * @param {number} length The length of session id
  * @returns {string=} The generated session ID
