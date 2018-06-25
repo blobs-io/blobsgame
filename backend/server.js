@@ -61,11 +61,22 @@ io.on("connection", data => {
         });
         sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
             prepare.get([res.username]).then(result => {
-                if(bcrypt.compareSync(res.password, result.password)){
-                    io.to(data.id).emit("login", {
-                        status: 200,
-                        message: "Successfully logged in."
-                    });
+                if (bcrypt.compareSync(res.password, result.password)) {
+                    sessions.getSession(sqlite, {
+                        type: "username",
+                        value: res.username
+                    }).then(session => {
+                        if (session) {
+                            sessions.deleteSession(sqlite, session.sessionid).catch(error => displayError(error.toString(), data, "login", 500));
+                        }
+                        sessions.registerID(sqlite, res.username).then(id => {
+                            io.to(data.id).emit("login", {
+                                status: 200,
+                                message: "Successfully logged in.",
+                                session_id: id
+                            });
+                        }).catch(console.log);
+                    }).catch(console.log);
                 } else {
                     displayError("Incorrect username or password.", data, "login", 400);
                 }
@@ -99,8 +110,8 @@ io.on("connection", data => {
 
         if (/[^\w ]+/.test(res.username)) return displayError("Username should only contain A-Za-z_ ", data, "register", 400);
 
-        if(!captchas.find(val => val.captcha === res.captcha)) return displayError("Captcha is not correct", data, "register", 400);
-        
+        if (!captchas.find(val => val.captcha === res.captcha)) return displayError("Captcha is not correct", data, "register", 400);
+
         const hash = bcrypt.hashSync(res.password, 10);
 
         sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
