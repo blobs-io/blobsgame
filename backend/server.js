@@ -15,7 +15,7 @@ if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 const io = socket(server);
 sqlite.open("db.sqlite");
 const sessions = require("./SessionIDManager");
-const captchas = new Map();
+let captchas = new Array();
 
 /**
  * Displays an error by emitting to websocket on clientside
@@ -33,7 +33,9 @@ function displayError(msg, data, event, status) {
     });
 }
 
-
+setInterval(() => {
+    captchas = captchas.filter(val => (val.createdAt + 18e4) > Date.now());
+}, 1000);
 
 io.on("connection", data => {
     data.on("getCaptcha", () => {
@@ -45,7 +47,10 @@ io.on("connection", data => {
                 y: Math.floor(Math.random() * 65) + 25
             }
         });
-        captchas.set(data.id, captcha);
+        captchas.push({
+            captcha: captcha,
+            createdAt: Date.now()
+        });
     });
 
     data.on("login", res => {
@@ -94,8 +99,8 @@ io.on("connection", data => {
 
         if (/[^\w ]+/.test(res.username)) return displayError("Username should only contain A-Za-z_ ", data, "register", 400);
 
-        if(res.captcha !== captchas.get(data.id)) return displayError("Captcha is not correct", data, "register", 400);
-
+        if(!captchas.find(val => val.captcha === res.captcha)) return displayError("Captcha is not correct", data, "register", 400);
+        
         const hash = bcrypt.hashSync(res.password, 10);
 
         sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
@@ -107,6 +112,7 @@ io.on("connection", data => {
                             status: 200,
                             message: "Account successfully created!"
                         });
+                        captchas.splice(captchas.findIndex(val => val.captcha === res.captcha), captchas.findIndex(val => val.captcha === res.captcha));
                     }).catch(console.log);
                 }).catch(console.log);
             });
