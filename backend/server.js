@@ -61,6 +61,7 @@ io.on("connection", data => {
         });
         sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
             prepare.get([res.username]).then(result => {
+                if(!result) return displayError("Incorrect username or password.", data, "login", 400);
                 if (bcrypt.compareSync(res.password, result.password)) {
                     sessions.getSession(sqlite, {
                         type: "username",
