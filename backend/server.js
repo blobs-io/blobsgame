@@ -32,6 +32,12 @@ function displayError(msg, data, event, status) {
 }
 
 io.on("connection", data => {
+    data.on("captcha", () => {
+        io.to(data.id).emit("captcha", {
+            captcha: sessions.generateSessionID()
+        });
+    });
+    
     data.on("login", res => {
         // If username/password is undefined
         if (!res.username || !res.password) return io.to(data.id).emit("login", {
