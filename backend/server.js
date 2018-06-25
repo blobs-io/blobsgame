@@ -57,7 +57,7 @@ io.on("connection", data => {
         // If username/password is undefined
         if (!res.username || !res.password) return io.to(data.id).emit("login", {
             status: 400,
-            message: "Either username or password is undefined."
+            message: "Please fill in both the username and password fields."
         });
         sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
             prepare.get([res.username]).then(result => {
@@ -100,7 +100,7 @@ io.on("connection", data => {
         // If username/password is undefined
         if (!res.username || !res.password) return io.to(data.id).emit("register", {
             status: 400,
-            message: "Either username or password is undefined."
+            message: "Please fill in both the username and password fields."
         });
 
         // Username/Password length check
@@ -114,9 +114,9 @@ io.on("connection", data => {
             message: "Password needs to be at least 5 characters long and must not be longer than 32 characters."
         });
 
-        if (/[^\w ]+/.test(res.username)) return displayError("Username should only contain A-Za-z_ ", data, "register", 400);
+        if (/[^\w ]+/.test(res.username)) return displayError("Username should only contain A-Z, _ and space.", data, "register", 400);
 
-        if (!captchas.find(val => val.captcha === res.captcha)) return displayError("Captcha is not correct", data, "register", 400);
+        if (!captchas.find(val => val.captcha === res.captcha)) return displayError("The captcha answer is incorrect.", data, "register", 400);
 
         const hash = bcrypt.hashSync(res.password, 10);
 
