@@ -13,7 +13,8 @@ if (/register(\/.*)?$/.test(window.location.href)) {
     document.getElementById("register-btn").addEventListener("click", function () {
         socket.emit("register", {
             username: document.getElementById("user").value,
-            password: document.getElementById("pass").value
+            password: document.getElementById("pass").value,
+            captcha: document.getElementById("captcha-input").value
         });
     });
 
