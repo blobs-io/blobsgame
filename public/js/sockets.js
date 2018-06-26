@@ -44,11 +44,9 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 } else if (/app(\/.*)?/.test(window.location.href)) {
     const sessionid = (window.location.search.match(/[\?\&]sessionid=[^\&]{12,20}/) || []);
     if (sessionid.length > 0) {
-        socket.emit("appCreate", {
-            sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1)
-        });
+        socket.emit("appCreate", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
         socket.on("appCreate", function (data) {
-            if (data.status === 400) document.location.href = server + "/login/";
+            if (data.status >= 400 && data.status < 500) document.location.href = server + "/login/";
         });
     } else {
         document.location.href = server + "/login/";
