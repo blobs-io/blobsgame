@@ -4,7 +4,7 @@ const message = "<div id=\"<type>-notif\"><message></div>";
 
 if (/register(\/.*)?$/.test(window.location.href)) {
     socket.emit("getCaptcha");
-    socket.on("captcha", function(data){
+    socket.on("captcha", function (data) {
         const ctx = document.getElementsByTagName("canvas")[0].getContext("2d");
         ctx.font = "20px Arial";
         ctx.fillStyle = "white";
@@ -37,8 +37,20 @@ if (/register(\/.*)?$/.test(window.location.href)) {
                 document.getElementById("auth").innerHTML = message.replace("<type>", "failure").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
             } else {
                 document.getElementById("auth").innerHTML = message.replace("<type>", "success").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
-                if(typeof data.session_id !== "undefined") document.location.href = server + "/app?sessionid=" + data.session_id;
+                if (typeof data.session_id !== "undefined") document.location.href = server + "/app?sessionid=" + data.session_id;
             }
         });
     });
+} else if (/app(\/.*)?/.test(window.location.href)) {
+    const sessionid = (window.location.search.match(/[\?\&]sessionid=[^\&]{12,20}/) || []);
+    if (sessionid.length > 0) {
+        socket.emit("appCreate", {
+            sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1)
+        });
+        socket.on("appCreate", function (data) {
+            if (data.status === 400) document.location.href = server + "/login/";
+        });
+    } else {
+        document.location.href = server + "/login/";
+    }
 }
