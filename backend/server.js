@@ -29,24 +29,17 @@ sqlite.open("db.sqlite").then(() => {
         } else console.log(err);
     });
 }).catch(console.log);
-const sessions = require("./SessionIDManager");
-let captchas = new Array();
+const sessions = require("./SessionIDManager"),
+utils = { };
+let captchas = new Array(),
+sockets = new Map();
 
-/**
- * Displays an error by emitting to websocket on clientside
- * 
- * @param {string} msg The error message
- * @param {Object} data The data object (socket)
- * @param {string} event The event that should get emitted
- * @param {number} status HTTP status code (200 OK, 4xx Client, 5xx Server)
- * @return {undefined}
- */
-function displayError(msg, data, event, status) {
-    io.to(data.id).emit(event, {
-        status: status,
-        message: msg
-    });
-}
+require("./utils/utilManager")().then(utilities => {
+    for(const val of utilities){
+        utils[val.name] = val.method;
+    }
+});
+
 
 setInterval(() => {
     captchas = captchas.filter(val => (val.createdAt + 18e4) > Date.now());
@@ -54,8 +47,8 @@ setInterval(() => {
 
 io.on("connection", data => {
     // Event listeners
-    data.on("appCreate", _ => require("./events/appCreate").run(_, displayError, sessions, io, data, sqlite));
+    data.on("appCreate", _ => require("./events/appCreate").run(_, utils.displayError, sessions, io, data, sqlite));
     data.on("getCaptcha", () => require("./events/getCaptcha").run(sessions, io, data, captchas).then(res => captchas = res));
-    data.on("login", res => require("./events/login").run(res, io, data, sqlite, bcrypt, sessions, displayError));
-    data.on("register", res => require("./events/register").run(res, io, data, displayError, captchas, bcrypt, sqlite));
+    data.on("login", res => require("./events/login").run(res, io, data, sqlite, bcrypt, sessions, utils.displayError));
+    data.on("register", res => require("./events/register").run(res, io, data, utils.displayError, captchas, bcrypt, sqlite));
 });
