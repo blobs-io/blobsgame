@@ -1,3 +1,10 @@
+/**
+ * Returns the amount of BR from a specific player
+ * 
+ * @param {string} username The username to obtain BR from
+ * @param {object} sqlite Opened sqlite database
+ * @returns {Promise<number>} The amount of BR the user has
+ */
 module.exports = (username, sqlite) => {
     return new Promise((resolve, reject) => {
         sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
