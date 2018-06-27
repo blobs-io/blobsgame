@@ -8,14 +8,14 @@ class appCreateEvent {};
 appCreateEvent.run = (...args) => {
     const [sessionid, displayError, sessions, io, data, sqlite] = args;
     return new Promise(resolve => {
-        if (!sessionid) return displayError("No session ID provided.", data, "appCreate", 400);
+        if (!sessionid) return displayError("No session ID provided.", data, "appCreate", 400, io);
         sessions.getSession(sqlite, {
             type: "session",
             value: sessionid
         }).then(session => {
             if (!session) {
                 resolve(false);
-                return displayError("Session ID not found", data, "appCreate", 401);
+                return displayError("Session ID not found", data, "appCreate", 401, io);
             } else {
                 resolve(true);
                 io.to(data.id).emit("appCreate", {
