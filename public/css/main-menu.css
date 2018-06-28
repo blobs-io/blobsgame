@@ -1,0 +1,41 @@
+body {
+    font-size: 17px;
+}
+
+.mm-box #blob {
+    width: 20%;
+}
+
+#auth {
+    margin-top: 5%;
+    margin-left: 5%;
+    margin-right: 5%;
+    height: 80%;
+    opacity: 0.98;
+    border-radius: 3px;
+}
+
+.mm-br-label {
+    margin-left: 15px;
+    margin-top: 5px;
+    float: left;
+}
+
+.mm-logout-btn {
+    padding: 5px;
+    border-left: 1px solid #e74c3c;
+    border-bottom: 1px solid #e74c3c;
+    float: right;
+}
+
+.mm-box {
+    width: 20%;
+    float: left;
+    border: 1px solid #3498db;
+    margin-left: 250px;
+    height: 150px;
+}
+
+.mm-stg-box, .mm-blobs-box {
+    margin-top: 50px;
+}
