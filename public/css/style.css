@@ -119,3 +119,10 @@ canvas {
 	margin-top: 15px;
 	overflow: hidden;
 }
+
+/* Loading */
+#loading-ws {
+	margin-top: 5%;
+	font-family: "Ubuntu";
+	font-size: 32px;
+}
