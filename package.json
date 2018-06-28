@@ -7,7 +7,8 @@
     "express": "^4.16.3",
     "sqlite": "*",
     "socket.io": "*",
-    "bcrypt": "*"
+    "bcrypt": "*",
+    "snekfetch": "*"
   },
   "engines": {
     "node": "8.x"
