@@ -47,6 +47,8 @@ if (/register(\/.*)?$/.test(window.location.href)) {
         socket.emit("appCreate", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
         socket.on("appCreate", function (data) {
             if (data.status >= 400 && data.status < 500) document.location.href = server + "/login/";
+            document.getElementById("username").innerHTML = data.username;
+            document.getElementById("br").innerHTML = data.br;
         });
     } else {
         document.location.href = server + "/login/";
