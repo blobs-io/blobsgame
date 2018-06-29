@@ -1,2 +1,4 @@
 node_modules
 db.sqlite
+
+package-lock\.json

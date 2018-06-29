@@ -17,6 +17,14 @@ appCreateEvent.run = (...args) => {
                 resolve(false);
                 return displayError("Session ID not found", data, "appCreate", 401, io);
             } else {
+                if (Date.now() > session.expires) {
+                    sessions.deleteSession(sqlite, {
+                        type: "session",
+                        value: sessionid
+                    }).then(() => {
+                        displayError("Session expired", data, "appCreate", 403, io);
+                    }).catch(console.log);
+                }
                 require("../utils/getBRFromPlayer")(session.username, sqlite).then(playerBR => {
                     io.to(data.id).emit("appCreate", {
                         status: 200,
