@@ -125,6 +125,11 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             elements.authDiv.appendChild(elements.mmBoxesSTG);
             elements.mmBoxesSTG.appendChild(elements.stgHeading);
             elements.mmBoxesSTG.appendChild(elements.blobPeekIMG);
+            
+            elements.logoutBtn.addEventListener("click", () => {
+                socket.emit("sessionDelete", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
+            });
+            socket.on("sessionDelete", () => document.location.href = "/login/");
         });
     } else {
         document.location.href = server + "/login/";
