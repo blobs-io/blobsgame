@@ -20,9 +20,18 @@ if (/register(\/.*)?$/.test(window.location.href)) {
     });
 
     socket.on("register", function (data) {
+        const element = document.createElement("div");
+        if(document.getElementById("failure-notif")) {
+            document.getElementById("auth").removeChild(document.getElementById("failure-notif"));
+        }
         if ([400, 500].indexOf(data.status) > -1) {
-            document.getElementById("auth").innerHTML = message.replace("<type>", "failure").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
+            element.id = "failure-notif";
+            element.innerHTML = data.message;
+            document.getElementById("auth").prepend(element);
         } else {
+            if(document.getElementById("success-notif")){
+                document.getElementById("auth").removeChild(document.getElementById("success-notif"));
+            }
             document.getElementById("auth").innerHTML = message.replace("<type>", "success").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
         }
     });
