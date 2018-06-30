@@ -56,6 +56,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
         socket.emit("appCreate", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
         socket.on("appCreate", function (data) {
             if (data.status != 200){
+                console.error(JSON.stringify(data));
                 document.location.href = server + "/login/";
             }
             const body = document.getElementsByTagName("body")[0]
