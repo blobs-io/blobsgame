@@ -1,0 +1,1 @@
+These favicons were generated using the [Favicon Generator](https://www.favicon-generator.org/) tool.
