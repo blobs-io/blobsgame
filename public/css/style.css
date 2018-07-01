@@ -55,10 +55,12 @@ input[type=submit] {
 
 a {
 	color: #3498db;
+	text-decoration: none;
 }
 
 a:visited {
 	color: #3498db;
+	text-decoration: none;
 }
 
 /* Cute stuff */
