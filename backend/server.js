@@ -3,14 +3,12 @@ const { socket, server, bcrypt, sqlite, io, sessions, utils } = Base;
 let { captchas, sockets } = Base;
 const express = Base.express.express;
 const app = Base.express.app;
-
-
-
-
 const {
     existsSync,
     writeFileSync
 } = require("fs");
+
+// SQLite initalization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 sqlite.open("db.sqlite").then(() => {
     sqlite.get("SELECT * FROM accounts").catch(err => {
@@ -28,8 +26,6 @@ sqlite.open("db.sqlite").then(() => {
         } else console.log(err);
     });
 }).catch(console.log);
-
-
 
 setInterval(() => {
     captchas = captchas.filter(val => (val.createdAt + 18e4) > Date.now());
