@@ -1,18 +1,17 @@
-const express = require("express");
-const app = express();
-const socket = require("socket.io");
-const server = app.listen(process.env.PORT, () => {
-    console.log("App started");
-});
-const bcrypt = require("bcrypt");
-const sqlite = require("sqlite");
+const Base = require("./Base");
+const { socket, server, bcrypt, sqlite, io, sessions, utils } = Base;
+let { captchas, sockets } = Base;
+const express = Base.express.express;
+const app = Base.express.app;
+
+
+
+
 const {
     existsSync,
     writeFileSync
 } = require("fs");
-app.use(express.static("public"));
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
-const io = socket(server);
 sqlite.open("db.sqlite").then(() => {
     sqlite.get("SELECT * FROM accounts").catch(err => {
         if (err.toString().includes("no such table: accounts")) {
@@ -29,16 +28,8 @@ sqlite.open("db.sqlite").then(() => {
         } else console.log(err);
     });
 }).catch(console.log);
-const sessions = require("./SessionIDManager"),
-utils = { };
-let captchas = new Array(),
-sockets = new Array();
 
-require("./utils/utilManager")().then(utilities => {
-    for(const val of utilities){
-        utils[val.name] = val.method;
-    }
-});
+
 
 setInterval(() => {
     captchas = captchas.filter(val => (val.createdAt + 18e4) > Date.now());
