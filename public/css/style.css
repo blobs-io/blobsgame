@@ -63,6 +63,52 @@ a:visited {
 	text-decoration: none;
 }
 
+.heading {
+	text-align: center;
+}
+
+#hr {
+	margin-top: 15px;
+	margin-bottom: 15px;
+	text-decoration: underline;
+	width: 100%;
+	height: 3px;
+	background-color: rgb(83, 83, 83);
+}
+
+.warning {
+	border: 1px solid #f0932b;
+	color: #f0932b;
+	padding: 2px 5px 2px 5px;
+	margin-bottom: 15px;
+}
+
+.red-btn {
+	background: transparent;
+	border: 1px solid #eb4d4b;
+	color: #eb4d4b;
+	padding: 5px 15px 5px 15px;
+	outline: none;
+}
+
+.red-btn:hover {
+	border: 1px solid #ff7979;
+	color: #ff7979;
+}
+
+.change-pw-btn {
+	background: transparent;
+	border: 1px solid #686de0;
+	color: #686de0;
+	padding: 5px 15px 5px 15px;
+	outline: none;
+}
+
+.change-pw-btn:hover {
+	border: 1px solid #878bff;
+	color: #878bff;
+}
+
 /* Cute stuff */
 
 #peek {
