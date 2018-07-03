@@ -22,7 +22,7 @@ class MenuFunction {
     }
 
     /**
-     * Binds events for a specific menu (must be overwritten by child)
+     * Binds events for a specific menu  (must be overwritten by child)
      * @returns {undefined}
      */
     bindEvents() {
@@ -130,11 +130,23 @@ class MainMenu extends MenuFunction {
      * Hides HTMLElements.authDiv || this.elements.authDiv
      * 
      * @param {object=} HTMLElements An object with HTMLElements, only required when this.elements is undefined
-     * @returns {Promise<object>} The hidden object (auth essentially)
+     * @returns {Promise<string>} The new display style ("none")
      */
     hide(HTMLElements) {
         return new Promise(resolve => {
-            resolve(document.body.removeChild(((this.elements || { authDiv: undefined }).authDiv || HTMLElements).authDiv));
+            resolve(((this.elements || { authDiv: undefined }).authDiv || HTMLElements).authDiv.style.display = "none");
+        });
+    }
+
+    /**
+     * Displays HTMLElements.authDiv || this.elements.authDiv (auth element needs to exist!)
+     * 
+     * @param {object=} HTMLElements An object with HTMLElements, only required when this.elements is undefined
+     * @returns {Promise<string>} The new display style ("block")
+     */
+    show(HTMLElements) {
+        return new Promise(resolve => {
+            resolve(((this.elements || { authDiv: undefined }).authDiv || HTMLElements).authDiv.style.display = "block");
         });
     }
 }
@@ -304,7 +316,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
                 const settingElements = await settingsMenu.run(elements);
                 settingElements.backBtn.addEventListener("click", async () => {
                     await settingsMenu.hide(settingElements);
-                    await mainMenu.run(data);
+                    await mainMenu.show(elements);
                 });
             });
             elements.logoutBtn.addEventListener("click", () => {
