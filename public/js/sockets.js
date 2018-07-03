@@ -9,7 +9,7 @@ class MenuFunction {
      * @abstract
      */
     run() {
-        throw new ReferenceError("run function must be called from child class")
+        throw new ReferenceError("run function must be called from child class");
     }
 
     /**
@@ -18,7 +18,15 @@ class MenuFunction {
      * @abstract
      */
     hide() {
-        throw new ReferenceError("hide function must be called from child class")
+        throw new ReferenceError("hide function must be called from child class");
+    }
+
+    /**
+     * Binds events for a specific menu (must be overwritten by child)
+     * @returns {undefined}
+     */
+    bindEvents() {
+        throw new ReferenceError("bindEvents function must be called from child class");
     }
 };
 
