@@ -15,6 +15,35 @@ body {
     border-radius: 3px;
 }
 
+#auth-small {
+    margin-top: 5%;
+    margin-left: 20%;
+    margin-right: 20%;
+    height: 80%;
+    opacity: 0.98;
+    border-radius: 3px;
+    background-color: #36393f;
+    padding: 15px;
+}
+
+#new-pw {
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.heading {
+    width: 60px;
+}
+
+.back-btn {
+    background-color: transparent;
+    color: white;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    float: left;
+}
+
 .mm-br-label {
     margin-left: 15px;
     margin-top: 5px;
