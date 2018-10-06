@@ -8,23 +8,12 @@ const {
     writeFileSync
 } = require("fs");
 
-// SQLite initalization
-if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
-sqlite.open("db.sqlite").then(() => {
-    sqlite.get("SELECT * FROM accounts").catch(err => {
-        if (err.toString().includes("no such table: accounts")) {
-            sqlite.run("CREATE TABLE accounts (`username` TEXT, `password` TEXT, `br` INTEGER)").then(() => {
-                console.log(`[${new Date().toLocaleString()}] Created table: accounts.`);
-            }).catch(console.log);
-        } else console.log(err);
-    });
-    sqlite.get("SELECT * FROM sessionids").catch(err => {
-        if (err.toString().includes("no such table: sessionids")) {
-            sqlite.run("CREATE TABLE sessionids (`username` TEXT, `sessionid` TEXT, `expires` TEXT)").then(() => {
-                console.log(`[${new Date().toLocaleString()}] Created table: sessionids.`);
-            }).catch(console.log);
-        } else console.log(err);
-    });
+// SQLite initalization                                                                                                              
+if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");                                                                    
+sqlite.open("db.sqlite").then(async () => {                                                                                          
+    // Create tables if they don't already exist                                                                                 
+    await sqlite.run("CREATE TABLE IF NOT EXISTS accounts (`username` TEXT, `password` TEXT, `br` INTEGER)");                    
+    await sqlite.run("CREATE TABLE IF NOT EXISTS sessionids (`username` TEXT, `sessionid` TEXT, `expires` TEXT)");               
 }).catch(console.log);
 
 setInterval(() => {
