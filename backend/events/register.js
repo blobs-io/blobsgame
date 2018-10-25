@@ -31,8 +31,8 @@ registerEvent.run = (...args) => {
 
         const hash = bcrypt.hashSync(res.password, 10);
 
-        sqlite.prepare("SELECT * FROM accounts WHERE username = ?").then(prepare => {
-            prepare.get([res.username]).then(result => {
+        sqlite.prepare("SELECT * FROM accounts WHERE upper(username) = ?").then(prepare => {
+            prepare.get([res.username.toUpperCase()]).then(result => {
                 if (result) return displayError("Username is already taken.", data, "register", 400, io);
                 sqlite.prepare("INSERT INTO accounts VALUES (?, ?, 0)").then(prepare2 => {
                     prepare2.run([res.username, hash]).then(() => {
