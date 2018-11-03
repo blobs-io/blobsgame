@@ -1,0 +1,59 @@
+#heading {
+	font-size: 10px;
+	display: inline;
+}
+
+#auth {
+	width: 250px;
+	margin: 0 auto;
+	margin-top: 15%;
+}
+
+input {
+	width: 100px;
+}
+
+#login-btn, #guest-btn, #register-btn {
+	width: 150px;
+}
+
+canvas {
+	width: 230px;
+}
+
+.reg-label {
+	margin-left: 15px;
+}
+
+.online-count {
+	margin-left: 15px;
+	float: left;
+}
+
+/* Main menu overriding */
+#auth {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+.mm-box {
+	width: 100%;
+	float: unset;
+	margin-left: 0;
+	margin-top: 15px;
+	border: none;
+}
+
+.mm-stg-box, .mm-blobs-box {
+	margin-top: 0;
+}
+
+.mm-sp-box {
+	border-top: 1px solid #BFBFBF;
+}
+
+#blob {
+	width: 40px;
+	height: 70px;
+}
