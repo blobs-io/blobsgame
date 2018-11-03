@@ -300,6 +300,13 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             }
         });
     });
+    socket.emit("requestOnlineCount");
+    socket.on("onlineCount", r => {
+		const userCountElement = document.createElement("span");
+		userCountElement.className = "online-count";
+		userCountElement.innerHTML = `${r} online`;
+		document.getElementById("auth").appendChild(userCountElement);
+	});
 } else if (/app(\/.*)?/.test(window.location.href)) {
     var ready = false;
     const sessionid = (window.location.search.match(/[\?\&]sessionid=[^\&]{12,20}/) || []);
