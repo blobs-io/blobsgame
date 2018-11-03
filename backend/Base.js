@@ -8,6 +8,7 @@ Base.socket = require("socket.io");
 Base.server = Base.express.app.listen(process.env.PORT || 3000, () => {
     console.log("App started.");
 });
+Base.algorith = "./b {ownbr} {opponentbr} 1";
 Base.bcrypt = require("bcrypt");
 Base.sqlite = require("sqlite");
 Base.express.app.use(Base.express.express.static("public"));
@@ -15,6 +16,15 @@ Base.io = Base.socket(Base.server);
 Base.sessions = require("./SessionIDManager");
 Base.utils = { };
 Base.captchas = Base.sockets = [ ];
+Base.gamemodes = {
+	ffa: {
+		players: [],
+		objects: {
+			walls: []
+		}
+	}
+};
+
 
 // Utilities
 require("./utils/utilManager")().then(utilities => {

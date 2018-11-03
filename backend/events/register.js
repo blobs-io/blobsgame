@@ -34,8 +34,8 @@ registerEvent.run = (...args) => {
         sqlite.prepare("SELECT * FROM accounts WHERE upper(username) = ?").then(prepare => {
             prepare.get([res.username.toUpperCase()]).then(result => {
                 if (result) return displayError("Username is already taken.", data, "register", 400, io);
-                sqlite.prepare("INSERT INTO accounts VALUES (?, ?, 0)").then(prepare2 => {
-                    prepare2.run([res.username, hash]).then(() => {
+                sqlite.prepare("INSERT INTO accounts VALUES (?, ?, 0, ?, 0)").then(prepare2 => {
+                    prepare2.run([res.username, hash, Date.now()]).then(() => {
                         io.to(data.id).emit("register", {
                             status: 200,
                             message: "Account successfully created!"
@@ -49,17 +49,8 @@ registerEvent.run = (...args) => {
                 }).catch(console.log);
             });
         }).catch(err => {
-            if (err.toString().includes("no such table: accounts")) {
-                displayError("A problem occured on the server-side.", data, "register", 500, io);
-                sqlite.run("CREATE TABLE accounts (`username` TEXT, `password` TEXT, `br` INTEGER)").catch(console.log);
-            }
+            displayError("A problem occured on the server-side.", data, "register", 500, io);
         });
-
-
-
-
-
-
     });
 };
 
