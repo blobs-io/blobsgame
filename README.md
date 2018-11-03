@@ -2,8 +2,11 @@
 The official repository for the blobs.io website<br/>
 **Note:** This game is still in development. It may not work yet.
 
+### What is this?
+__A:__ Blobs.io is a work-in-progress multiplayer game that involves blob characters (you may know these from Android) that “nom” players in order to gain blob rating, which shows how skilled you are at the game.
+
 ### Where can I play this game?
-__A:__ As stated above, this game is still a WIP and may not work yet. For now (as of 11/04) it doesn't work at all and is not playable. Its interface (login, registration and main menu) does exist and can be accessed through the internet by anybody [here](https://blobs-io.glitch.me) and all other pages should work well, means that you can register and login without any problems.
+__A:__ As stated above, this game is still a WIP and may not work yet. For now (as of 11/03/2018) it doesn't work at all and is not playable. Its interface (login, registration and main menu) does exist and can be accessed through the internet by anybody [here](https://blobs-io.glitch.me) and all other pages should work well, means that you can register and login without any problems.
 
 ### Any ETA when this game is ready?
 __A:__ No, we do not know when this game is playable.
