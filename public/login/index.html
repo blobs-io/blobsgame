@@ -3,7 +3,8 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>blobs.io – login</title>
-		<link rel="stylesheet" href="../css/style.css">
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+		<link rel="stylesheet" type="text/css" media="only screen and (max-width: 1025px)" href="../css/style.small.css" />
 		<meta name="description" content="Be the best blob!">
 		<meta name="author" content="y21">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,15 +31,13 @@
 	</head>
 	<body>
 		<div id="auth">
-			<h1>Blobs<span class="green">.</span><span class="blue">io</span></h1>
+			<div id="heading"><h1>Blobs<span class="green">.</span><span class="blue">io</span></h1></div>
 			<input type="text" placeholder="Username" id="user" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			<input type="password" placeholder="Password" id="pass" /><br/>
 			<input type="submit" value="Sign In" id="login-btn" /><br/>
 			<span class="reg-label">No account yet? <a href="../register">Register</a></span>
 		</div>
-		<center><input type="submit" value="No thanks, continue as guest" id="guest-btn" style="
-    background-color: #27ae60;
-    "></center>
+		<center><input type="submit" value="Play as guest" id="guest-btn" style="background-color: #27ae60;"></center>
 		<a href="https://github.com/blobs-io/blobs.io" id="peek"></a>
 		<span class="peek-label">Peek into the source</span>
 	</body>
