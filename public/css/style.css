@@ -109,6 +109,14 @@ a:visited {
 	color: #878bff;
 }
 
+.online-count {
+	margin-top: 7px;
+	font-size: 14px;
+	float: right;
+	margin-right: 40px;
+	color: #7f8c8d;
+}
+
 /* Cute stuff */
 
 #peek {
