@@ -81,7 +81,7 @@ io.on("connection", data => {
         });
 
         // Other events
-
+        data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", sockets.length));
         data.on("getCaptcha", () => require("./events/getCaptcha").run(sessions, io, data, captchas).then(res => captchas = res));
         data.on("login", res => require("./events/login").run(res, io, data, sqlite, bcrypt, sessions, utils.displayError));
         data.on("register", res => require("./events/register").run(res, io, data, utils.displayError, captchas, bcrypt, sqlite));
