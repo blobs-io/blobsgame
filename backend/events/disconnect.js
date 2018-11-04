@@ -13,7 +13,7 @@ disconnectEvent.run = (...args) => {
         Base.gamemodes.ffa.players.splice(Base.gamemodes.ffa.players.findIndex(v => v.id === data.id), 1);
     }
     if (sockets.find(val => val.socketid === data.id)) {
-        sockets.splice(sockets.findIndex(val => val.socketid === data.id), 1);
+        sockets[sockets.findIndex(val => val.socketid === data.id)].inactiveSince = Date.now();
     }
     return {
         sockets,
