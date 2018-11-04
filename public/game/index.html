@@ -19,14 +19,15 @@
 	const ctx = canvas.getContext("2d");
 	const host = "localhost:3000";
 	const socket = io.connect(host);
-	
-	canvas.width = window.innerWidth - 30;
-	canvas.height = window.innerHeight - 30;
-	
+	const sessionid = (window.location.search.match(/[\?\&]sid=[^\&]{12,20}/) || [""])[0];
 	let blobs = [],
 	    objects = {
 	    	walls: []
 	    };
+	
+	
+	canvas.width = window.innerWidth - 30;
+	canvas.height = window.innerHeight - 30;
 	
 	// Wall structure
 	class WallObj {
@@ -116,21 +117,18 @@
 	};
 	
 	
-	// Own blob
-	const ownBlob = new BlobObj();
-	while((ownBlob.br = parseInt(prompt("BR"))) === NaN || ownBlob.br > 9999 || ownBlob.br <= 0) {}
-	while((ownBlob.owner = prompt("Username")) === "" || ownBlob.owner.length > 12) {}
-	blobs.push(ownBlob);
-	
-	
 	// Display all blobs
 	for (const blob of blobs) {
 		blob.setBlob().then(() => blob.display(true, true));
 	}
 	
+	// Own blob
+	const ownBlob = new BlobObj();
+	ownBlob.ready = false;
+	ownBlob.setBlob().then(() => ownBlob.display(true, true));
 	
 	// Events (socket.io)
-	socket.emit("ffaPlayerCreate", ownBlob);
+	
 	
 	socket.on("ffaPlayerDelete", eventd => {
 		blobs.splice(blobs.findIndex(v => v.owner === eventd), 1);
@@ -138,10 +136,6 @@
 	socket.on("ffaLoginFailed", str => alert(str));
 	socket.on("ffaPlayerUpdate", async eventd => {
 		for (const player of eventd) {
-			if (player.owner === ownBlob.owner) {
-				/*ownBlob.x = player.x;
-				ownBlob.y = player.y;*/
-			}
 			if (player.owner !== ownBlob.owner) {
 				if (blobs.some(v => v.owner === player.owner)) {
 					blobs[blobs.findIndex(v => v.owner === player.owner)].x = player.x;
@@ -160,9 +154,16 @@
 	socket.on("ffaObjectsHeartbeat", eventd => {
 		for (let i = 0; i < eventd.walls.length; ++i) {
 			const wall = new WallObj(eventd.walls[i].x, eventd.walls[i].y);
-			//wall.setImage().then(() => wall.display());
 		}
 	});
+	socket.on("ffaHeartbeat", d => {
+		ownBlob.owner = d.username;
+		ownBlob.br = d.br;
+		ownBlob.ready = true;
+		blobs.push(ownBlob);
+	});
+	socket.on("ffaUnauthorized", () => document.location.href = "/login/");
+	socket.emit("ffaPlayerCreate", sessionid.substr(sessionid.indexOf("=") + 1));
 	
 	
 	// Events (Window/Document)
@@ -218,7 +219,7 @@
 	
 	// Coordinate updates
 	setInterval(() => {
-		//displayWalls();
+		if (ownBlob.ready === false) return;
 		if (ownBlob.x <= 23 && ownBlob.direction === 3) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard();
 		else if (ownBlob.y <= 23 && ownBlob.direction === 0) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard();
 		else if (ownBlob.y >= canvas.height - 35 && ownBlob.direction === 2) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard();
@@ -235,8 +236,8 @@
 	}, 1);
 	
 	socket.on("ffaPlayerNommed", eventd => {
-		blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].br -= eventd.result;
-		blobs[blobs.findIndex(v => v.owner === eventd.winner.owner)].br += eventd.result;
+		blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].br = (eventd.loser.br - eventd.result <= 0 ? 1 : eventd.loser.br - eventd.result);
+		blobs[blobs.findIndex(v => v.owner === eventd.winner.owner)].br = (eventd.winner.br + eventd.result > 9999 ? 9999 : winner.br + eventd.result);
 		if (eventd.loser.owner === ownBlob.owner) {
 			ownBlob.x = eventd.loser.x;
 			ownBlob.y = eventd.loser.y;
