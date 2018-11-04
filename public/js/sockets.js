@@ -49,6 +49,7 @@ class MainMenu extends MenuFunction {
      */
     run(data) {
         return new Promise(resolve => {
+            const sessionid = (window.location.search.match(/[\?\&]sessionid=[^\&]{12,20}/) || [""])[0];
             const elements = {
                 authDiv: document.createElement("div"),
                 brLabel: document.createElement("span"),
@@ -106,6 +107,9 @@ class MainMenu extends MenuFunction {
             elements.authDiv.appendChild(elements.mmBoxesMP);
             elements.mmBoxesMP.appendChild(elements.mpHeading);
             elements.mmBoxesMP.appendChild(elements.blobEvilIMG);
+            elements.mmBoxesMP.addEventListener("click", () => {
+				document.location.href = "/game?sid=" + (sessionid.substr(sessionid.indexOf("=") + 1));
+			});
             // Appending "blobs" elements
             elements.authDiv.appendChild(elements.mmBoxesBlobs);
             elements.mmBoxesBlobs.appendChild(elements.blobsHeading);
@@ -170,7 +174,7 @@ class SettingsMenu extends MenuFunction {
      */
     run(elements) {
         return new Promise(resolve => {
-            const settingElements = {
+			const settingElements = {
                 authDiv: document.createElement("div"),
                 backBtn: document.createElement("button"),
                 heading: document.createElement("h2"),
@@ -315,7 +319,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
         socket.on("appCreate", async function (data) {
             if (data.status != 200) {
                 console.error(JSON.stringify(data));
-                document.location.href = server + "/login/";
+                //document.location.href = server + "/login/";
             } else ready = true;
             const body = document.getElementsByTagName("body")[0]
             body.removeChild(document.getElementsByTagName("iframe")[0]);
