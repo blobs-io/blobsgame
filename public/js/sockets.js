@@ -319,7 +319,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
         socket.on("appCreate", async function (data) {
             if (data.status != 200) {
                 console.error(JSON.stringify(data));
-                //document.location.href = server + "/login/";
+                document.location.href = server + "/login/";
             } else ready = true;
             const body = document.getElementsByTagName("body")[0]
             body.removeChild(document.getElementsByTagName("iframe")[0]);
