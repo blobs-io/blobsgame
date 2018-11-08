@@ -88,7 +88,7 @@ io.on("connection", data => {
         data.on("ffaDirectionChange", eventd => {
             require("./events/ffaDirectionChange").run(eventd, data, io, Base);
         });
-        data.on("ffaNomKey", require("./events/ffaNomKey").run);
+        data.on("ffaNomKey", () => require("./events/ffaNomKey").run(data, io, Base, sqlite));
 
         // Other events
         data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", sockets.filter(v => v.inactiveSince === null).length));
