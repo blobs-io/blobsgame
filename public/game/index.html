@@ -22,7 +22,10 @@
 	const sessionid = (window.location.search.match(/[\?\&]sid=[^\&]{12,20}/) || [""])[0];
 	let blobs = [],
 	    objects = {
-	    	walls: []
+	    	walls: [],
+	    	images: {
+				blobnom: null
+			}
 	    };
 	
 	
@@ -64,6 +67,7 @@
 		static get blobkittenknife() { return "../assets/BlobKittenKnife.png"; }
 		static get blobpeek()        { return "../assets/blobpeek.png";        }
 		static get partyblob()       { return "../assets/partyblob.gif";       }
+		static get blobnom()		 { return "../assets/blobnom.png";		   }
 	};
 	
 	class BlobObj {
@@ -74,6 +78,7 @@
 			this.br = br;
 			this.img = new Image();
 			this._direction = 0;
+			this.lastnom = 0;
 		}
 		
 		get direction() { return this._direction; }
@@ -127,9 +132,14 @@
 	ownBlob.ready = false;
 	ownBlob.setBlob().then(() => ownBlob.display(true, true));
 	
+	// Initialize blob images
+	objects.images.blobnom = new Image();
+	objects.images.blobnom.src = BlobCode.blobnom;
+	objects.images.blobnom.onload = () => {
+		objects.images.blobnom._ready = true;
+	};
+	
 	// Events (socket.io)
-	
-	
 	socket.on("ffaPlayerDelete", eventd => {
 		blobs.splice(blobs.findIndex(v => v.owner === eventd), 1);
 	});
@@ -187,6 +197,7 @@
 			ownBlob.direction = 3;
 			break;
 			case 78:
+			ownBlob.lastnom = Date.now();
 			socket.emit("ffaNomKey");
 			break;
 			default:
@@ -218,15 +229,27 @@
 			wall.display();
 		}
 	}
+	function displayCooldown(context = ctx) {
+		context.beginPath();
+		context.strokeStyle = "white";
+		context.strokeRect(canvas.width - 100, (blobs.length * 20) + 60, 100, 25);
+		context.fillStyle = "white";
+		const nomReady = Date.now() - ownBlob.lastnom > 1500;
+		context.fillText(!nomReady ? `${((1500 - (Date.now() - ownBlob.lastnom)) / 1000).toFixed(0)}s` : "ready", nomReady ? canvas.width - 70 : canvas.width - 60, (blobs.length * 20) + 60 + 16);
+		if (objects.images.blobnom._ready) {
+			context.drawImage(objects.images.blobnom, canvas.width - 95, (blobs.length * 20) + 63, 20, 20);
+		}
+		context.stroke();
+	}
 	
 	
 	// Coordinate updates
 	setInterval(() => {
 		if (ownBlob.ready === false) return;
-		if (ownBlob.x <= 23 && ownBlob.direction === 3) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard();
-		else if (ownBlob.y <= 23 && ownBlob.direction === 0) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard();
-		else if (ownBlob.y >= canvas.height - 35 && ownBlob.direction === 2) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard();
-		else if (ownBlob.x >= canvas.width - 35 && ownBlob.direction === 1) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard();
+		if (ownBlob.x <= 23 && ownBlob.direction === 3) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard(), displayCooldown();
+		else if (ownBlob.y <= 23 && ownBlob.direction === 0) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard(), displayCooldown();
+		else if (ownBlob.y >= canvas.height - 35 && ownBlob.direction === 2) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard(), displayCooldown();
+		else if (ownBlob.x >= canvas.width - 35 && ownBlob.direction === 1) return clearCanvas(), BlobObj.display(blobs, true, true), displayLeaderboard(), displayCooldown();
 		
 		if (ownBlob.direction === 0) ownBlob.y -= 1.5;
 		else if (ownBlob.direction === 1) ownBlob.x += 1.5;
@@ -235,6 +258,7 @@
 		clearCanvas();
 		BlobObj.display(blobs, true, true);
 		displayLeaderboard();
+		displayCooldown();
 		socket.emit("ffaCoordinateChange", ownBlob);
 	}, 1);
 	
