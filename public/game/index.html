@@ -240,7 +240,7 @@
 	
 	socket.on("ffaPlayerNommed", eventd => {
 		blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].br = (eventd.loser.br - eventd.result <= 0 ? 1 : eventd.loser.br - eventd.result);
-		blobs[blobs.findIndex(v => v.owner === eventd.winner.owner)].br = (eventd.winner.br + eventd.result > 9999 ? 9999 : winner.br + eventd.result);
+		blobs[blobs.findIndex(v => v.owner === eventd.winner.owner)].br = (eventd.winner.br + eventd.result > 9999 ? 9999 : eventd.winner.br + eventd.result);
 		if (eventd.loser.owner === ownBlob.owner) {
 			ownBlob.x = eventd.loser.x;
 			ownBlob.y = eventd.loser.y;
