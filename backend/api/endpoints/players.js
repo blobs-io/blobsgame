@@ -1,5 +1,5 @@
 const { sqlite } = require("../../Base");
-//`username` TEXT, `password` TEXT, `br` INTEGER, `createdAt` TEXT, `role` INTEGER
+
 module.exports = class Players {
 	static async run(...data) {
 		const [req, res] = data;
