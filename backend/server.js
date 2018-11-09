@@ -18,8 +18,13 @@ const {
     existsSync,
     writeFileSync
 } = require("fs");
-// SQLite initalization                                                                      
 
+// API
+const APIController = require("./api/Controller");
+const api = new APIController(Base.express.app);
+api.init("get");
+
+// SQLite initalization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 sqlite.open("db.sqlite").then(async() => {
     // Create tables if they don't already exist                                                                                 
@@ -31,11 +36,6 @@ setInterval(() => {
     captchas = captchas.filter(val => (val.createdAt + 18e4) > Date.now());
     sockets = sockets.filter(val => val.inactiveSince === null || Date.now() < (val.inactiveSince + 3000));
 }, 1000);
-
-// FFA Game API
-app.get("/ffap", (req, res) => {
-    res.send(Base.gamemodes.ffa.players);
-});
 
 // Emit blob objects to all FFA players
 setInterval(() => {
