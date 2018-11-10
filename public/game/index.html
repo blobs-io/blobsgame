@@ -206,6 +206,9 @@
 	
 	document.addEventListener("keydown", eventd => {
 		switch (eventd.keyCode) {
+			case 13: // newline
+			ownBlob.direction = 4;
+			break;
 			case 87: // w
 			ownBlob.direction = 0;
 			break;
@@ -218,7 +221,7 @@
 			case 65: // a
 			ownBlob.direction = 3;
 			break;
-			case 78:
+			case 78: // n
 			ownBlob.lastnom = Date.now();
 			socket.emit("ffaNomKey");
 			break;
