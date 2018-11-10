@@ -1,6 +1,7 @@
 const server = "http://localhost:3000";
 const socket = io.connect(server);
 const message = "<div id=\"<type>-notif\"><message></div>";
+let buttonClicked = false;
 
 class MenuFunction {
     /**
@@ -266,6 +267,8 @@ if (/register(\/.*)?$/.test(window.location.href)) {
     });
 
     document.getElementById("register-btn").addEventListener("click", function () {
+		if (buttonClicked === true) return;
+		buttonClicked = true;
         socket.emit("register", {
             username: document.getElementById("user").value,
             password: document.getElementById("pass").value,
@@ -291,6 +294,8 @@ if (/register(\/.*)?$/.test(window.location.href)) {
     });
 } else if (/login(\/.*)?$/.test(window.location.href)) {
     document.getElementById("login-btn").addEventListener("click", function (data) {
+		if (buttonClicked === true) return;
+		buttonClicked = true;
         socket.emit("login", {
             username: document.getElementById("user").value,
             password: document.getElementById("pass").value
