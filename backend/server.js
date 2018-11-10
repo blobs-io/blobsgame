@@ -27,9 +27,10 @@ api.init("get");
 // SQLite initalization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 sqlite.open("db.sqlite").then(async() => {
-    // Create tables if they don't already exist                                                                                 
+    // Create tables if they don't already exist
     await sqlite.run("CREATE TABLE IF NOT EXISTS accounts (`username` TEXT, `password` TEXT, `br` INTEGER, `createdAt` TEXT, `role` INTEGER)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS sessionids (`username` TEXT, `sessionid` TEXT, `expires` TEXT)");
+    await sqlite.run("CREATE TABLE IF NOT EXISTS bans (`username` TEXT, `reason` TEXT, `bannedAt` TEXT, `expires` TEXT, `moderator` TEXT)");
 }).catch(console.log);
 
 setInterval(() => {
