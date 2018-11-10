@@ -26,8 +26,8 @@
 	    };
 	var scale = 1;
 	const mapSize = {
-		width: 500,
-		height: 500
+		width: 2000,
+		height: 2000
 	};
 	
 	
@@ -106,8 +106,8 @@
 				const canvasX = canvas.width / 2 - w;
 				const canvasY = canvas.height / 2 - h;
 				if (this.owner === ownBlob.owner) {
-					ctx.drawImage(this.img, canvasX, canvasY, w, h);
-					ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), canvasX, canvasY - 10);
+					ctx.drawImage(this.img, canvasX * scale, canvasY * scale, w * scale, h * scale);
+					ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), canvasX * scale, (canvasY * scale) - 10);
 				} else {
 					let blobCanvasX = 0, blobCanvasY = 0;
 					if (ownBlob.x >= this.x) {
@@ -122,13 +122,11 @@
 						blobCanvasY = (canvas.height / 2) + (this.y - ownBlob.y);
 					}
 					
-					ctx.drawImage(this.img, blobCanvasX, blobCanvasY, w, h);
-					
-					//ctx.drawImage(this.img, (this.x * scale) - (canvasX - canvas.width / 2), (this.y * scale) - (canvasY - canvas.height / 2), w * scale, h * scale);
+					ctx.drawImage(this.img, blobCanvasX * scale, blobCanvasY * scale, w * scale, h * scale);
 					if (du === true) {
 						ctx.font = (15 * scale).toString() + "px Cairo";
 						ctx.fillStyle = "white";
-						ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), blobCanvasX, blobCanvasY - 10);
+						ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), blobCanvasX * scale, (blobCanvasY * scale) - 10);
 					}
 				}
 			});
@@ -308,26 +306,26 @@
 		const diffYNeg = ownBlob.y - (canvas.height / 2);
 		if (diffXPos > mapSize.width) {
 			context.beginPath();
-			context.moveTo(canvas.width - (diffXPos - mapSize.width), diffYNeg < 0 ? -(diffYNeg + 35) : 0);
-			context.lineTo(canvas.width - (diffXPos - mapSize.width), diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height);
+			context.moveTo((canvas.width - (diffXPos - mapSize.width)) * scale, (diffYNeg < 0 ? -(diffYNeg + 35) : 0) * scale);
+			context.lineTo((canvas.width - (diffXPos - mapSize.width)) * scale, (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height) * scale);
 			context.stroke();
 		}
 		if (diffXNeg < 0) {
 			context.beginPath();
-			context.moveTo(-(diffXNeg + 35), diffYNeg < 0 ? -(diffYNeg + 35) : 0);
-			context.lineTo(-(diffXNeg + 35), diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height);
+			context.moveTo((-(diffXNeg + 35)) * scale, (diffYNeg < 0 ? -(diffYNeg + 35) : 0) * scale);
+			context.lineTo((-(diffXNeg + 35)) * scale, (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height) * scale);
 			context.stroke();
 		}
 		if (diffYPos > mapSize.height) {
 			context.beginPath();
-			context.moveTo(diffXNeg < 0 ? -(diffXNeg + 35) : 0, canvas.height - (diffYPos - mapSize.height));
-			context.lineTo(diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width, canvas.height - (diffYPos - mapSize.height));
+			context.moveTo((diffXNeg < 0 ? -(diffXNeg + 35) : 0) * scale, (canvas.height - (diffYPos - mapSize.height)) * scale);
+			context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width) * scale, (canvas.height - (diffYPos - mapSize.height)) * scale);
 			context.stroke();
 		}
 		if (diffYNeg < 0) {
 			context.beginPath();
-			context.moveTo(diffXNeg < 0 ? -(diffXNeg + 35) : 0, -(diffYNeg + 35));
-			context.lineTo(diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width, -(diffYNeg + 35));
+			context.moveTo((diffXNeg < 0 ? -(diffXNeg + 35) : 0) * scale, (-(diffYNeg + 35)) * scale);
+			context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width) * scale, (-(diffYNeg + 35)) * scale);
 			context.stroke();
 		}
 	}
