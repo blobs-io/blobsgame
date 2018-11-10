@@ -268,7 +268,6 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 
     document.getElementById("register-btn").addEventListener("click", function () {
 		if (buttonClicked === true) return;
-		buttonClicked = true;
         socket.emit("register", {
             username: document.getElementById("user").value,
             password: document.getElementById("pass").value,
@@ -286,6 +285,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             element.innerHTML = data.message;
             document.getElementById("auth").prepend(element);
         } else {
+			buttonClicked = true;
             if (document.getElementById("success-notif")) {
                 document.getElementById("auth").removeChild(document.getElementById("success-notif"));
             }
@@ -295,7 +295,6 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 } else if (/login(\/.*)?$/.test(window.location.href)) {
     document.getElementById("login-btn").addEventListener("click", function (data) {
 		if (buttonClicked === true) return;
-		buttonClicked = true;
         socket.emit("login", {
             username: document.getElementById("user").value,
             password: document.getElementById("pass").value
@@ -304,6 +303,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             if ([400, 403, 500].indexOf(data.status) > -1) {
                 document.getElementById("auth").innerHTML = message.replace("<type>", "failure").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
             } else {
+				buttonClicked = true;
                 document.getElementById("auth").innerHTML = message.replace("<type>", "success").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
                 if (typeof data.session_id !== "undefined") document.location.href = server + "/app?sessionid=" + data.session_id;
             }
