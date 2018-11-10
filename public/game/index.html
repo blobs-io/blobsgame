@@ -1,12 +1,9 @@
 <html>
 	<head>
+	<link href="https://fonts.googleapis.com/css?family=Cairo|K2D" rel="stylesheet">
 	<style>
 		body {
-			background-color: #2C2F33;
-		}
-		
-		canvas {
-			border: 2px solid #7289DA;
+			background-color: #222;
 		}
 	</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
@@ -28,6 +25,10 @@
 			}
 	    };
 	var scale = 1;
+	const mapSize = {
+		width: 500,
+		height: 500
+	};
 	
 	
 	canvas.width = window.innerWidth - 30;
@@ -102,11 +103,33 @@
 		display(du = false, dbr = false, w = 30, h = 30) {
 			return new Promise((a,b) => {
 				if (!this.img._ready) b("Image not loaded.");
-				ctx.drawImage(this.img, this.x * scale, this.y * scale, w * scale, h * scale);
-				if (du === true) {
-					ctx.font = (15 * scale).toString() + "px Arial";
-					ctx.fillStyle = "white";
-					ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), this.x * scale, (this.y * scale) - 10);
+				const canvasX = canvas.width / 2 - w;
+				const canvasY = canvas.height / 2 - h;
+				if (this.owner === ownBlob.owner) {
+					ctx.drawImage(this.img, canvasX, canvasY, w, h);
+					ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), canvasX, canvasY - 10);
+				} else {
+					let blobCanvasX = 0, blobCanvasY = 0;
+					if (ownBlob.x >= this.x) {
+						blobCanvasX = (canvas.width / 2) - (ownBlob.x - this.x);
+					} else if (ownBlob.x < this.x) {
+						blobCanvasX = (canvas.width / 2) + (this.x - ownBlob.x);
+					}
+					
+					if (ownBlob.y >= this.y) {
+						blobCanvasY = (canvas.height / 2) - (ownBlob.y - this.y);
+					} else if (ownBlob.y < this.y) {
+						blobCanvasY = (canvas.height / 2) + (this.y - ownBlob.y);
+					}
+					
+					ctx.drawImage(this.img, blobCanvasX, blobCanvasY, w, h);
+					
+					//ctx.drawImage(this.img, (this.x * scale) - (canvasX - canvas.width / 2), (this.y * scale) - (canvasY - canvas.height / 2), w * scale, h * scale);
+					if (du === true) {
+						ctx.font = (15 * scale).toString() + "px Cairo";
+						ctx.fillStyle = "white";
+						ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), blobCanvasX, blobCanvasY - 10);
+					}
 				}
 			});
 		}
@@ -230,24 +253,29 @@
 	// Utilities
 	function displayUI(excludes = []) {
 		if (!excludes.includes("clearCanvas")) clearCanvas();
+		if (!excludes.includes("drawBorder")) drawBorder();
 		if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
 		if (!excludes.includes("displayLeaderboard")) displayLeaderboard();
 		if (!excludes.includes("displayCooldown")) displayCooldown();
+		if (!excludes.includes("displayPlayerStats")) displayPlayerStats();
 	}
 	function clearCanvas(context = ctx) {
 		context.clearRect(0, 0, canvas.width, canvas.height);
 	}
 	function displayLeaderboard(context = ctx) {
+		context.strokeStyle = "white";
+		context.fillStyle = "white";
 		context.fillRect(canvas.width - 100, 0, 100, (blobs.length * 20) + 40);
 		context.fillStyle = "black";
-		context.font = "14px Arial";
+		context.font = "14px K2D";
 		context.fillText("Leaderboard", canvas.width - 90, 15);
 		context.rect(canvas.width - 100, 20, 100, .1);
-		const sortedblobs = blobs.sort((a,b) => b.br > a.br);
+		const sortedblobs = blobs.slice(0, 10).sort((a,b) => b.br > a.br);
+		context.font = "12px Cairo";
+		context.fillStyle = "black";
 		for(let i = 0; i < sortedblobs.length; ++i) {
-			context.font = "12px Arial";
-			context.fillStyle = "black";
-			context.fillText(`${sortedblobs[i].owner}  ${sortedblobs[i].br} BR`, canvas.width - 90, 22 + (12 * (i + 1)));
+			context.fillText(sortedblobs[i].owner.substr(0, 12), canvas.width - 90, 22 + (12 * (i + 1)));
+			context.fillText(sortedblobs[i].br + " BR", canvas.width - 40, 22 + (12 * (i + 1)));
 		}
 		context.stroke();
 	}
@@ -259,7 +287,6 @@
 	}
 	function displayCooldown(context = ctx) {
 		context.beginPath();
-		context.strokeStyle = "white";
 		context.strokeRect(canvas.width - 100, (blobs.length * 20) + 60, 100, 25);
 		context.fillStyle = "white";
 		const nomReady = Date.now() - ownBlob.lastnom > 1500;
@@ -269,15 +296,50 @@
 		}
 		context.stroke();
 	}
+	function displayPlayerStats(context = ctx) {
+		context.font = "15px Cairo";
+		context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 90, canvas.height - 20);
+		context.fillText(`BR: ${ownBlob.br}`, canvas.width - 90, canvas.height - 40);
+	}
+	function drawBorder(context = ctx) {
+		const diffXPos = ownBlob.x + (canvas.width / 2);
+		const diffXNeg = ownBlob.x - (canvas.width / 2);
+		const diffYPos = ownBlob.y + (canvas.height / 2);
+		const diffYNeg = ownBlob.y - (canvas.height / 2);
+		if (diffXPos > mapSize.width) {
+			context.beginPath();
+			context.moveTo(canvas.width - (diffXPos - mapSize.width), diffYNeg < 0 ? -(diffYNeg + 35) : 0);
+			context.lineTo(canvas.width - (diffXPos - mapSize.width), diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height);
+			context.stroke();
+		}
+		if (diffXNeg < 0) {
+			context.beginPath();
+			context.moveTo(-(diffXNeg + 35), diffYNeg < 0 ? -(diffYNeg + 35) : 0);
+			context.lineTo(-(diffXNeg + 35), diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height);
+			context.stroke();
+		}
+		if (diffYPos > mapSize.height) {
+			context.beginPath();
+			context.moveTo(diffXNeg < 0 ? -(diffXNeg + 35) : 0, canvas.height - (diffYPos - mapSize.height));
+			context.lineTo(diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width, canvas.height - (diffYPos - mapSize.height));
+			context.stroke();
+		}
+		if (diffYNeg < 0) {
+			context.beginPath();
+			context.moveTo(diffXNeg < 0 ? -(diffXNeg + 35) : 0, -(diffYNeg + 35));
+			context.lineTo(diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width, -(diffYNeg + 35));
+			context.stroke();
+		}
+	}
 	
 	
 	// Coordinate updates
 	setInterval(() => {
 		if (ownBlob.ready === false) return;
-		if (ownBlob.x <= 23 && ownBlob.direction === 3) return displayUI();
-		else if (ownBlob.y <= 23 && ownBlob.direction === 0) return displayUI();
-		else if (ownBlob.y >= canvas.height - 35 && ownBlob.direction === 2) return displayUI();
-		else if (ownBlob.x >= canvas.width - 35 && ownBlob.direction === 1) return displayUI();
+		if (ownBlob.x <= 1 && ownBlob.direction === 3) return displayUI();
+		else if (ownBlob.y <= 1 && ownBlob.direction === 0) return displayUI();
+		else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
+		else if (ownBlob.x >= mapSize.width && ownBlob.direction === 1) return displayUI();
 		
 		if (ownBlob.direction === 0) ownBlob.y -= 1.5;
 		else if (ownBlob.direction === 1) ownBlob.x += 1.5;
