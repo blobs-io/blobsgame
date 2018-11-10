@@ -106,8 +106,8 @@
 				const canvasX = canvas.width / 2 - w;
 				const canvasY = canvas.height / 2 - h;
 				if (this.owner === ownBlob.owner) {
-					ctx.drawImage(this.img, canvasX * scale, canvasY * scale, w * scale, h * scale);
-					ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), canvasX * scale, (canvasY * scale) - 10);
+					ctx.drawImage(this.img, canvasX, canvasY, w * scale, h * scale);
+					ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), canvasX, (canvasY) - 10);
 				} else {
 					let blobCanvasX = 0, blobCanvasY = 0;
 					if (ownBlob.x >= this.x) {
