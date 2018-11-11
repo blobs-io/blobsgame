@@ -293,6 +293,13 @@ if (/register(\/.*)?$/.test(window.location.href)) {
         }
     });
 } else if (/login(\/.*)?$/.test(window.location.href)) {
+	// Browser detection test
+	if (/(Android|webOS|iPad|iPod|Windows Phone|BlackBerry|iPhone)/.test(navigator.userAgent)) {
+		const noteElement = document.createElement("div");
+		noteElement.id = "failure-notif";
+		noteElement.innerHTML = "Mobile support for Blobs.io is currently experimental and may not work. <a href=\"https://github.com/blobs-io/blobs.io/issues/new/choose\">Open an issue</a> if you experience problems.";
+		document.body.insertBefore(noteElement, document.body.firstChild);
+	}
     document.getElementById("login-btn").addEventListener("click", function (data) {
 		if (buttonClicked === true) return;
         socket.emit("login", {
