@@ -81,11 +81,15 @@
 			this.img = new Image();
 			this._direction = 0;
 			this.lastnom = 0;
+			this.directionChangedAt = Date.now();
+			this.directionChangeCoordinates = { x, y };
 		}
 		
 		get direction() { return this._direction; }
 		
-		set direction(value) { 
+		set direction(value) {
+			this.directionChangedAt = Date.now();
+			this.directionChangeCoordinates = { x: this.x, y: this.y };
 			socket.emit("ffaDirectionChange", Object.assign(ownBlob, {_direction: value}));
 			return this._direction = value;
 		}
@@ -342,10 +346,10 @@
 		else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
 		else if (ownBlob.x >= mapSize.width && ownBlob.direction === 1) return displayUI();
 		
-		if (ownBlob.direction === 0) ownBlob.y -= 1.5;
-		else if (ownBlob.direction === 1) ownBlob.x += 1.5;
-		else if (ownBlob.direction === 2) ownBlob.y += 1.5;
-		else if (ownBlob.direction === 3) ownBlob.x -= 1.5;
+		if (ownBlob.direction === 0) ownBlob.y = ownBlob.directionChangeCoordinates.y - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
+		else if (ownBlob.direction === 1) ownBlob.x = ownBlob.directionChangeCoordinates.x + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
+		else if (ownBlob.direction === 2) ownBlob.y = ownBlob.directionChangeCoordinates.y + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
+		else if (ownBlob.direction === 3) ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
 		displayUI();
 		socket.emit("ffaCoordinateChange", ownBlob);
 	}, 1);
