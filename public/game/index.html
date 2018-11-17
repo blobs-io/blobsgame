@@ -1,6 +1,6 @@
 <html>
 	<head>
-	<link href="https://fonts.googleapis.com/css?family=Cairo|K2D" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Dosis:600" rel="stylesheet">
 	<style>
 		body {
 			background-color: #222;
@@ -128,7 +128,7 @@
 					
 					ctx.drawImage(this.img, blobCanvasX * scale, blobCanvasY * scale, w * scale, h * scale);
 					if (du === true) {
-						ctx.font = (15 * scale).toString() + "px Cairo";
+						ctx.font = (15 * scale).toString() + "px Dosis";
 						ctx.fillStyle = "white";
 						ctx.fillText(this.owner + (dbr === true ? `(${this.br})` : ""), blobCanvasX * scale, (blobCanvasY * scale) - 10);
 					}
@@ -272,11 +272,11 @@
 		context.fillStyle = "white";
 		context.fillRect(canvas.width - 100, 0, 100, (blobs.length * 20) + 40);
 		context.fillStyle = "black";
-		context.font = "14px K2D";
+		context.font = "14px Dosis";
 		context.fillText("Leaderboard", canvas.width - 90, 15);
 		context.rect(canvas.width - 100, 20, 100, .1);
 		const sortedblobs = blobs.slice(0, 10).sort((a,b) => b.br > a.br);
-		context.font = "12px Cairo";
+		context.font = "13px Dosis";
 		context.fillStyle = "black";
 		for(let i = 0; i < sortedblobs.length; ++i) {
 			context.fillText(sortedblobs[i].owner.substr(0, 12), canvas.width - 90, 22 + (12 * (i + 1)));
@@ -302,7 +302,7 @@
 		context.stroke();
 	}
 	function displayPlayerStats(context = ctx) {
-		context.font = "15px Cairo";
+		context.font = "15px Dosis";
 		context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 90, canvas.height - 20);
 		context.fillText(`BR: ${ownBlob.br}`, canvas.width - 90, canvas.height - 40);
 	}
