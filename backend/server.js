@@ -72,6 +72,7 @@ io.on("connection", data => {
                     socketid: data.id,
                     username: session.username || "?",
                     br: await require("./utils/getBRFromPlayer")(session.username, sqlite),
+                    role: await require("./utils/getDataFromPlayer")(session.username, sqlite).role,
                     inactiveSince: null
                 });
             } catch (e) {
