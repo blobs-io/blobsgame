@@ -99,7 +99,13 @@ class BlobObj {
             if (!this.img._ready) b("Image not loaded.");
             const canvasX = canvas.width / 2 - w;
             const canvasY = canvas.height / 2 - h;
+            
             if (this.owner === ownBlob.owner) {
+				if (this.role === 1) {
+					ctx.fillStyle = "red";
+					ctx.fillText("(A)", canvasX - 20, canvasY - 10);
+					ctx.fillStyle = "white";
+				}
                 ctx.drawImage(this.img, canvasX, canvasY, w * scale, h * scale);
                 ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), canvasX, (canvasY) - 10);
             } else {
@@ -116,6 +122,12 @@ class BlobObj {
                 } else if (ownBlob.y < this.y) {
                     blobCanvasY = (canvas.height / 2) + (this.y - ownBlob.y);
                 }
+                
+				if (this.role === 1) {
+					ctx.fillStyle = "red";
+					ctx.fillText("(A)", (blobCanvasX * scale) - 20, (blobCanvasY * scale) - 10);
+					ctx.fillStyle = "white";
+				}
 
                 ctx.drawImage(this.img, blobCanvasX * scale, blobCanvasY * scale, w * scale, h * scale);
                 if (du === true) {

@@ -11,6 +11,7 @@ ffaCoordinateChangeEvent.run = async (...args) => {
         let prev = Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === eventd.owner)];
         eventd.lastnom = prev.lastnom;
         eventd._directionChange = prev._directionChange;
+        eventd.role = prev.role;
     } catch (e) {}
     Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === eventd.owner)] = eventd;
 }

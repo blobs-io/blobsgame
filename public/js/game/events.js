@@ -29,6 +29,7 @@ socket.on("ffaHeartbeat", d => {
     ownBlob.owner = d.username;
     ownBlob.br = d.br;
     ownBlob.ready = true;
+    ownBlob.role = d.role;
     blobs.push(ownBlob);
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");

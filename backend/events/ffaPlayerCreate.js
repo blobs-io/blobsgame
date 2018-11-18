@@ -14,12 +14,13 @@ ffaPlayerCreateEvent.run = async (...args) => {
     nblob.lastnom = Date.now();
     nblob._directionChange = Date.now();
     nblob.role = socket.role;
-
+    
     Base.gamemodes.ffa.players.push(nblob);
     io.to(data).emit("ffaObjectsHeartbeat", Base.gamemodes.ffa.objects);
     io.to(data.id).emit("ffaHeartbeat", {
 		username: socket.username,
-		br: socket.br
+		br: socket.br,
+		role: socket.role
 	});
 };
 
