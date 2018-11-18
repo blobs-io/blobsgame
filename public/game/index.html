@@ -226,6 +226,7 @@
 			ownBlob.direction = 3;
 			break;
 			case 78: // n
+			if (Date.now() - ownBlob.lastnom <= 1500) return;
 			ownBlob.lastnom = Date.now();
 			socket.emit("ffaNomKey");
 			break;
