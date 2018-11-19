@@ -99,15 +99,17 @@ class BlobObj {
             if (!this.img._ready) b("Image not loaded.");
             const canvasX = canvas.width / 2 - w;
             const canvasY = canvas.height / 2 - h;
+            const tier = getTier(this.br || 0);
             
             if (this.owner === ownBlob.owner) {
 				if (this.role === 1) {
 					ctx.fillStyle = "red";
-					ctx.fillText("(A)", canvasX - 20, canvasY - 10);
-					ctx.fillStyle = "white";
+					ctx.fillText("(A)", canvasX - 25, canvasY - 10);
 				}
+				ctx.fillStyle = "#" + tier.colorCode;
                 ctx.drawImage(this.img, canvasX, canvasY, w * scale, h * scale);
                 ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), canvasX, (canvasY) - 10);
+                ctx.fillStyle = "white";
             } else {
                 let blobCanvasX = 0,
                     blobCanvasY = 0;
@@ -125,15 +127,15 @@ class BlobObj {
                 
 				if (this.role === 1) {
 					ctx.fillStyle = "red";
-					ctx.fillText("(A)", (blobCanvasX * scale) - 20, (blobCanvasY * scale) - 10);
-					ctx.fillStyle = "white";
+					ctx.fillText("(A)", (blobCanvasX * scale) - 25, (blobCanvasY * scale) - 10);
 				}
-
+				ctx.fillStyle = "#" + tier.colorCode;
+				
                 ctx.drawImage(this.img, blobCanvasX * scale, blobCanvasY * scale, w * scale, h * scale);
                 if (du === true) {
                     ctx.font = (15 * scale).toString() + "px Dosis";
-                    ctx.fillStyle = "white";
                     ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), blobCanvasX * scale, (blobCanvasY * scale) - 10);
+                    ctx.fillStyle = "white";
                 }
             }
         });

@@ -25,7 +25,7 @@ function displayLeaderboard(context = ctx) {
     context.fillStyle = "black";
     for (let i = 0; i < sortedblobs.length; ++i) {
         context.fillText(sortedblobs[i].owner.substr(0, 12), canvas.width - 125, 22 + (12 * (i + 1)));
-        context.fillText(sortedblobs[i].br + " BR", canvas.width - 40, 22 + (12 * (i + 1)));
+        context.fillText(sortedblobs[i].br + " BR", canvas.width - 60, 22 + (12 * (i + 1)));
     }
     context.stroke();
 }
@@ -83,4 +83,25 @@ function drawBorder(context = ctx) {
         context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width) * scale, (-(diffYNeg + 35)) * scale);
         context.stroke();
     }
+}
+
+function getTier(br) {
+	let result = {};
+	if (br >= 0 && br < 1500) {
+		result.tier = "bronze";
+		result.colorCode = "b57156";
+	} else if (br >= 1500 && br < 5000) {
+		result.tier = "silver";
+		result.colorCode = "dbdbdb";
+	} else if (br >= 5000 && br < 8000) {
+		result.tier = "gold";
+		result.colorCode = "D7AF00";
+	} else if (br >= 8000 && br < 9500) {
+		result.tier = "diamond";
+		result.colorCode = "16f7ef";
+	} else if (br >= 9500 && br < 10000) {
+		result.tier = "master";
+		result.colorCode = "16f77f";
+	}
+	return result;
 }
