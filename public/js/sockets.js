@@ -50,6 +50,7 @@ class MainMenu extends MenuFunction {
      */
     run(data) {
         return new Promise(resolve => {
+			const tier = getTier(data.br || 0);
             const sessionid = (window.location.search.match(/[\?\&]sessionid=[^\&]{12,20}/) || [""])[0];
             const elements = {
                 authDiv: document.createElement("div"),
@@ -76,7 +77,7 @@ class MainMenu extends MenuFunction {
 
             elements.authDiv.id = "auth";
             elements.brLabel.className = "mm-br-label";
-            elements.brLabel.innerHTML = `<span id="br">${data.br}</span> BR`;
+            elements.brLabel.innerHTML = `<span id="br">${data.br}</span> BR (<span style="color: #${tier.colorCode}">${tier.tier}</span>)`;
             elements.logoutBtn.className = "mm-logout-btn";
             elements.logoutBtn.innerHTML = "Log-out";
             elements.greeting.innerHTML = `Welcome back, <span id="username">${data.username}</span>.`;
