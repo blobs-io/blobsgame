@@ -70,7 +70,7 @@ document.addEventListener("keydown", eventd => {
 });
 
 const mouseScrollEvent = (...eventd) => {
-    const [event] = eventd;
+    let [event] = eventd;
     if (typeof event === "undefined") event = window.event;
     var deltaValue = 0;
     if (event.wheelDelta) {
