@@ -124,6 +124,9 @@ class BlobObj {
                 } else if (ownBlob.y < this.y) {
                     blobCanvasY = (canvas.height / 2) + (this.y - ownBlob.y);
                 }
+
+                blobCanvasY -= h;
+                blobCanvasX -= w;
                 
 				if (this.role === 1) {
 					ctx.fillStyle = "red";
