@@ -3,7 +3,7 @@ class loginEvent {};
  * Runs the login Event
  * 
  * @param {Array} args Method arguments
- * @returns {undefined}
+ * @returns {Promise<any>}
  */
 loginEvent.run = (...args) => {
     return new Promise(async (resolve, reject) => {
