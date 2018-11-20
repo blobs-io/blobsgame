@@ -33,10 +33,6 @@ appCreateEvent.run = (...args) => {
                             br: playerBR,
                             expiresAt: session.expires
                         });
-                        sessions.deleteSession(sqlite, {
-                            type: "session",
-                            value: sessionid
-                        }).catch(reject);
                         resolve(true);
                     }).catch(reject);
                 } else {
