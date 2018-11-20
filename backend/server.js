@@ -61,7 +61,7 @@ io.on("connection", data => {
         });
         data.on("appCreate", async _ => {
             try {
-                require("./events/appCreate").run(_, utils.displayError, sessions, io, data, sqlite, sockets)
+                await require("./events/appCreate").run(_, utils.displayError, sessions, io, data, sqlite, sockets);
                 const session = await sessions.getSession(sqlite, {
 					type: "session",
 					value: _
@@ -75,6 +75,10 @@ io.on("connection", data => {
                     role: (await require("./utils/getDataFromPlayer")(session.username, sqlite)).role,
                     inactiveSince: null
                 });
+                sessions.deleteSession(sqlite, {
+                    type: "session",
+                    value: _
+                }).catch(()=>{});
             } catch (e) {
                 console.log(e);
             }
