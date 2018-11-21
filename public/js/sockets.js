@@ -301,6 +301,9 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 		noteElement.innerHTML = "Mobile support for Blobs.io is currently experimental and may not work. <a href=\"https://github.com/blobs-io/blobs.io/issues/new/choose\">Open an issue</a> if you experience problems.";
 		document.body.insertBefore(noteElement, document.body.firstChild);
 	}
+	document.getElementById("guest-btn").addEventListener("click", function(data) {
+	    document.location.href = "/app?guest=true";
+    });
     document.getElementById("login-btn").addEventListener("click", function (data) {
 		if (buttonClicked === true) return;
         socket.emit("login", {
