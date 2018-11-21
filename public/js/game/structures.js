@@ -23,7 +23,7 @@ class WallObj {
             ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
         });
     }
-};
+}
 
 // Blob structure
 class BlobCode {
@@ -48,10 +48,11 @@ class BlobCode {
     static get blobnom() {
         return "../assets/blobnom.png";
     }
-};
+}
 
 class BlobObj {
     constructor(br, owner, x = window.innerWidth / 2, y = window.innerHeight / 2) {
+        this.guest = false;
         this.x = x;
         this.y = y;
         this.owner = owner;
@@ -153,4 +154,4 @@ class BlobObj {
             }
         }
     }
-};
+}
