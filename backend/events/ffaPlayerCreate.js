@@ -2,8 +2,21 @@ class ffaPlayerCreateEvent {};
 
 ffaPlayerCreateEvent.run = async (...args) => {
     const [blob, io, Base, data, sockets] = args;
-    const socket = sockets.find(v => v.sessionid === blob);
-    if (!socket) return io.to(data.id).emit("ffaUnauthorized");
+    let socket = sockets.find(v => v.sessionid === blob);
+    if (!socket) {
+        let guestID = Math.floor((Math.random() * 999) + 1).toString();
+        while(sockets.some(v => v.username === `Guest${guestID}`)) {
+            guestID = Math.floor((Math.random() * 999) + 1).toString();
+        }
+        socket = {
+            username: "Guest" + guestID,
+            br: 0,
+            role: -1,
+            guest: true
+        };
+    } else socket.guest = false;
+
+
     const nblob = {};
     nblob.x = Math.floor(Math.random() * 600);
     nblob.y = Math.floor(Math.random() * 600);
@@ -14,7 +27,7 @@ ffaPlayerCreateEvent.run = async (...args) => {
     nblob.lastnom = Date.now();
     nblob._directionChange = Date.now();
     nblob.role = socket.role;
-    
+    nblob.guest = socket.guest;
     Base.gamemodes.ffa.players.push(nblob);
     io.to(data).emit("ffaObjectsHeartbeat", Base.gamemodes.ffa.objects);
     io.to(data.id).emit("ffaHeartbeat", {
