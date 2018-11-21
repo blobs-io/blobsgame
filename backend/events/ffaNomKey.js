@@ -13,6 +13,7 @@ ffaNomKey.run = async(data, io, Base, sqlite) => {
         if (eventd.owner !== blobobj.owner) {
             if (eventd.x < (blobobj.x + 30) && eventd.x > (blobobj.x - 30)) {
                 if (eventd.y < (blobobj.y + 30) && eventd.y > (blobobj.y - 30)) {
+                    if (eventd.guest === true || blobobj.guest === true) return;
 					if (Date.now() - eventd.lastnom < 1500) return; // Nom cooldown (1.5 seconds)
                     // If blob is nommed
                     Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.id === data.id)].lastnom = Date.now();
