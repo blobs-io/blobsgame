@@ -302,7 +302,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 		document.body.insertBefore(noteElement, document.body.firstChild);
 	}
 	document.getElementById("guest-btn").addEventListener("click", function(data) {
-	    document.location.href = "/app?guest=true";
+	    document.location.href = "/game?guest=true";
     });
     document.getElementById("login-btn").addEventListener("click", function (data) {
 		if (buttonClicked === true) return;
