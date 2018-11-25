@@ -28,14 +28,31 @@ api.init("get");
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 sqlite.open("db.sqlite").then(async() => {
     // Create tables if they don't already exist
-    await sqlite.run("CREATE TABLE IF NOT EXISTS accounts (`username` TEXT, `password` TEXT, `br` INTEGER, `createdAt` TEXT, `role` INTEGER)");
+    await sqlite.run("CREATE TABLE IF NOT EXISTS recentPromotions (`user` TEXT, `newTier` TEXT, `drop` INTEGER, `promotedAt` TEXT)");
+    await sqlite.run("CREATE TABLE IF NOT EXISTS news (`headline` TEXT, `content` TEXT, `createdAt` TEXT)");
+    await sqlite.run("CREATE TABLE IF NOT EXISTS accounts (`username` TEXT, `password` TEXT, `br` INTEGER, `createdAt` TEXT, `role` INTEGER, `blobcoins` INTEGER, `lastDailyUsage` TEXT, `distance` INTEGER, blobs `TEXT`, `activeBlob` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS sessionids (`username` TEXT, `sessionid` TEXT, `expires` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS bans (`username` TEXT, `reason` TEXT, `bannedAt` TEXT, `expires` TEXT, `moderator` TEXT)");
 }).catch(console.log);
 
-setInterval(() => {
+setInterval(async () => {
     captchas = captchas.filter(val => (val.createdAt + 18e4) > Date.now());
     sockets = sockets.filter(val => val.inactiveSince === null || Date.now() < (val.inactiveSince + 3000));
+    io.sockets.emit("appHeartbeat", {
+		online: sockets.map(v => { return {
+			location: "Lobby",
+			br: v.br,
+			username: v.username,
+			lastDaily: v.lastDaily,
+			role: v.role
+		}}).concat(Base.gamemodes.ffa.players.map(v => { return {
+			location: "FFA",
+			username: v.owner,
+			br: v.br,
+			role: 0
+		}})),
+		promotions: await sqlite.all("SELECT * FROM recentPromotions ORDER BY promotedAt DESC LIMIT 10")
+    });
 }, 1000);
 
 // Emit blob objects to all FFA players
@@ -67,12 +84,14 @@ io.on("connection", data => {
 					value: _
 				});
 				if (!session) return;
+				const dbData = await require("./utils/getDataFromPlayer")(session.username, sqlite);
                 sockets.push({
                     sessionid: _,
                     socketid: data.id,
                     username: session.username || "?",
                     br: await require("./utils/getBRFromPlayer")(session.username, sqlite),
-                    role: (await require("./utils/getDataFromPlayer")(session.username, sqlite)).role,
+                    role: dbData.role,
+                    lastDaily: dbData.lastDailyUsage,
                     inactiveSince: null
                 });
                 sessions.deleteSession(sqlite, {
@@ -102,5 +121,7 @@ io.on("connection", data => {
         data.on("login", res => require("./events/login").run(res, io, data, sqlite, bcrypt, sessions, utils.displayError));
         data.on("register", res => require("./events/register").run(res, io, data, utils.displayError, captchas, bcrypt, sqlite));
         data.on("sessionDelete", sessionid => require("./events/sessionDelete").run(sessionid, sessions, sqlite, io, data));
+        data.on("receiveDailyBonus", () => require("./events/receiveDailyBonus").run(data, io, sockets, sqlite));
+        data.on("switchBlob", blob => require("./events/switchBlob").run(data, io, sockets, sqlite, blob));
     } catch (e) {}
 });
