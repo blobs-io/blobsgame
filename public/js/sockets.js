@@ -3,261 +3,6 @@ const socket = io.connect(server);
 const message = "<div id=\"<type>-notif\"><message></div>";
 let buttonClicked = false;
 
-class MenuFunction {
-    /**
-     * Shows HTMLElements for a specific menu (must be overwritten by child)
-     * 
-     * @abstract
-     */
-    run() {
-        throw new ReferenceError("run function must be called from child class");
-    }
-
-    /**
-     * Hides HTMLElements for a specific menu (must be overwritten by child)
-     * 
-     * @abstract
-     */
-    hide() {
-        throw new ReferenceError("hide function must be called from child class");
-    }
-};
-
-class MainMenu extends MenuFunction {
-    /**
-     * The contructor for MainMenu class
-     * 
-     * @param {object=} elements An object with HTMLElements
-     */
-    constructor(elements) {
-        super();
-        if(typeof elements !== "undefined") this._elements = elements;
-    }
-
-    get elements() {
-        return this._elements;
-    }
-    
-    set elements(value) {
-        return this._elements = value;
-    }
-
-    /**
-     * Shows all HTMLElements for the main menu
-     * 
-     * @param {object} data The result of appCreate event (emitted by websocket)
-     * @returns {Promise<object>} An object with HTMLElements
-     */
-    run(data) {
-        return new Promise(resolve => {
-			const tier = getTier(data.br || 0);
-            const sessionid = (window.location.search.match(/[\?\&]sessionid=[^\&]{12,20}/) || [""])[0];
-            const elements = {
-                authDiv: document.createElement("div"),
-                brLabel: document.createElement("span"),
-                logoutBtn: document.createElement("span"),
-                greeting: document.createElement("h2"),
-                // Singleplayer Box
-                mmBoxesSP: document.createElement("div"),
-                spHeading: document.createElement("h3"),
-                blobKittenKnifeIMG: document.createElement("img"),
-                // Multiplayer box
-                mmBoxesMP: document.createElement("div"),
-                mpHeading: document.createElement("h3"),
-                blobEvilIMG: document.createElement("img"),
-                // Blobs box
-                mmBoxesBlobs: document.createElement("div"),
-                blobsHeading: document.createElement("h3"),
-                blobEyesIMG: document.createElement("img"),
-                // Settings box
-                mmBoxesSTG: document.createElement("div"),
-                stgHeading: document.createElement("h3"),
-                blobPeekIMG: document.createElement("img")
-            };
-
-            elements.authDiv.id = "auth";
-            elements.brLabel.className = "mm-br-label";
-            elements.brLabel.innerHTML = `<span id="br">${data.br}</span> BR (<span style="color: #${tier.colorCode}">${tier.tier}</span>)`;
-            elements.logoutBtn.className = "mm-logout-btn";
-            elements.logoutBtn.innerHTML = "Log-out";
-            elements.greeting.innerHTML = `Welcome back, <span id="username">${data.username}</span>.`;
-            elements.mmBoxesSP.className = "mm-box mm-sp-box";
-            elements.spHeading.innerHTML = "Singleplayer";
-            elements.blobKittenKnifeIMG.src = "../assets/BlobKittenKnife.png";
-            elements.blobKittenKnifeIMG.id = "blob";
-            elements.mmBoxesMP.className = "mm-box mm-mp-box";
-            elements.mpHeading.innerHTML = "Multiplayer";
-            elements.blobEvilIMG.src = "../assets/blobevil.png";
-            elements.blobEvilIMG.id = "blob";
-            elements.mmBoxesBlobs.className = "mm-box mm-blobs-box"
-            elements.blobsHeading.innerHTML = "Blobs";
-            elements.blobEyesIMG.src = "../assets/blobeyes.png";
-            elements.blobEyesIMG.id = "blob";
-            elements.mmBoxesSTG.className = "mm-box mm-stg-box";
-            elements.stgHeading.innerHTML = "Settings";
-            elements.blobPeekIMG.src = "../assets/blobpeek.png";
-            elements.blobPeekIMG.id = "blob";
-            document.body.appendChild(elements.authDiv);
-            elements.authDiv.appendChild(elements.brLabel);
-            elements.authDiv.appendChild(elements.logoutBtn);
-            elements.authDiv.appendChild(elements.greeting);
-            // Appending singleplayer elements
-            elements.authDiv.appendChild(elements.mmBoxesSP);
-            elements.mmBoxesSP.appendChild(elements.spHeading);
-            elements.mmBoxesSP.appendChild(elements.blobKittenKnifeIMG);
-            // Appending multiplayer elements
-            elements.authDiv.appendChild(elements.mmBoxesMP);
-            elements.mmBoxesMP.appendChild(elements.mpHeading);
-            elements.mmBoxesMP.appendChild(elements.blobEvilIMG);
-            elements.mmBoxesMP.addEventListener("click", () => {
-				document.location.href = "/game?sid=" + (sessionid.substr(sessionid.indexOf("=") + 1));
-			});
-            // Appending "blobs" elements
-            elements.authDiv.appendChild(elements.mmBoxesBlobs);
-            elements.mmBoxesBlobs.appendChild(elements.blobsHeading);
-            elements.mmBoxesBlobs.appendChild(elements.blobEyesIMG);
-            // Appending "settings" elements
-            elements.authDiv.appendChild(elements.mmBoxesSTG);
-            elements.mmBoxesSTG.appendChild(elements.stgHeading);
-            elements.mmBoxesSTG.appendChild(elements.blobPeekIMG);
-            resolve(elements);
-        });
-    }
-
-    /**
-     * Hides HTMLElements.authDiv || this.elements.authDiv
-     * 
-     * @param {object=} HTMLElements An object with HTMLElements, only required when this.elements is undefined
-     * @returns {Promise<string>} The new display style ("none")
-     */
-    hide(HTMLElements) {
-        return new Promise(resolve => {
-            resolve(((this.elements || { authDiv: undefined }).authDiv || HTMLElements).authDiv.style.display = "none");
-        });
-    }
-
-    /**
-     * Displays HTMLElements.authDiv || this.elements.authDiv (auth element needs to exist!)
-     * 
-     * @param {object=} HTMLElements An object with HTMLElements, only required when this.elements is undefined
-     * @returns {Promise<string>} The new display style ("block")
-     */
-    show(HTMLElements) {
-        return new Promise(resolve => {
-            resolve(((this.elements || { authDiv: undefined }).authDiv || HTMLElements).authDiv.style.display = "block");
-        });
-    }
-}
-
-class SettingsMenu extends MenuFunction {
-    /**
-    * The contructor for SettingsMenu class
-    * 
-    * @param {object=} elements An object with HTMLElements
-    */
-    constructor() {
-        super();
-        if(typeof elements !== "undefined") this._elements = elements;
-    }
-
-    get elements() {
-        return this._elements;
-    }
-    
-    set elements(value) {
-        return this._elements = value;
-    }
-
-    /**
-     * Shows all HTMLElements for the main menu
-     * 
-     * @param {object} elements An object of HTMLElements (returned by MainMenu#run)
-     * @returns {Promise<object>} An object with HTMLElements
-     */
-    run(elements) {
-        return new Promise(resolve => {
-			const settingElements = {
-                authDiv: document.createElement("div"),
-                backBtn: document.createElement("button"),
-                heading: document.createElement("h2"),
-                deleteBtn: document.createElement("button"),
-                resetBtn: document.createElement("button"),
-                hrDiv: document.createElement("div"),
-                warningDiv: document.createElement("div"),
-                passwordFields: [
-                    document.createElement("input"),
-                    document.createElement("input")
-                ],
-                brTags: [
-                    document.createElement("br"),
-                    document.createElement("br")
-                ],
-                changePwBtn: document.createElement("button")
-            };
-            settingElements.authDiv.id = "auth-small";
-            settingElements.authDiv.align = "center";
-            settingElements.backBtn.className = "back-btn";
-            settingElements.backBtn.innerHTML = "⇐ Back to menu";
-            settingElements.heading.className = "heading";
-            settingElements.heading.innerHTML = "Settings";
-            settingElements.deleteBtn.className = "delete-btn red-btn";
-            settingElements.deleteBtn.innerHTML = "Delete Account";
-            settingElements.resetBtn.className = "reset-btn red-btn";
-            settingElements.resetBtn.innerHTML = "Reset Progress";
-            settingElements.hrDiv.id = "hr";
-            settingElements.warningDiv.className = "warning";
-            settingElements.warningDiv.innerHTML = "<b>Warning!</b> Make sure not to make a typo when changing your password. There is no way to request a new password as you did not provide an e-mail!";
-            settingElements.passwordFields[0].type = "password";
-            settingElements.passwordFields[0].placeholder = "Old password";
-            settingElements.passwordFields[0].id = "old-pw";
-            settingElements.passwordFields[1].type = "password";
-            settingElements.passwordFields[1].placeholder = "New password";
-            settingElements.passwordFields[1].id = "new-pw";
-            settingElements.changePwBtn.className = "change-pw-btn";
-            settingElements.changePwBtn.innerHTML = "Change password";
-
-
-            settingElements.authDiv.appendChild(settingElements.backBtn);
-            settingElements.authDiv.appendChild(settingElements.heading);
-            settingElements.authDiv.appendChild(settingElements.deleteBtn);
-            settingElements.authDiv.appendChild(settingElements.resetBtn);
-            settingElements.authDiv.appendChild(settingElements.hrDiv);
-            settingElements.authDiv.appendChild(settingElements.warningDiv);
-            settingElements.authDiv.appendChild(settingElements.passwordFields[0]);
-            settingElements.authDiv.appendChild(settingElements.passwordFields[1]);
-            settingElements.brTags.map(val => settingElements.authDiv.appendChild(val));
-            settingElements.authDiv.appendChild(settingElements.changePwBtn);
-            document.body.appendChild(settingElements.authDiv);
-            resolve(settingElements);
-        });
-    }
-
-    /**
-     * Hides HTMLElements.authDiv || this.elements.authDiv
-     * 
-     * @param {object=} HTMLElements An object with HTMLElements, only required when this.elements is undefined
-     * @returns {Promise<string>} The new display style ("none")
-     */
-    hide(HTMLElements) {
-        return new Promise(resolve => {
-            resolve(((this.elements || { authDiv: undefined }).authDiv || HTMLElements).authDiv.style.display = "none");
-        });
-    }
-
-    /**
-     * Displays HTMLElements.authDiv || this.elements.authDiv (auth element needs to exist!)
-     * 
-     * @param {object=} HTMLElements An object with HTMLElements, only required when this.elements is undefined
-     * @returns {Promise<string>} The new display style ("block")
-     */
-    show(HTMLElements) {
-        return new Promise(resolve => {
-            resolve(((this.elements || { authDiv: undefined }).authDiv || HTMLElements).authDiv.style.display = "block");
-        });
-    }
-};
-
-
 if (/register(\/.*)?$/.test(window.location.href)) {
     socket.emit("getCaptcha");
     socket.on("captcha", function (data) {
@@ -328,6 +73,11 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 		document.getElementById("auth").appendChild(userCountElement);
 	});
 } else if (/app(\/.*)?/.test(window.location.href)) {
+    const socket = io.connect("localhost:3000");
+    const blobs = {
+		current: undefined,
+		all: undefined
+	};
     var ready = false;
     const sessionid = (window.location.search.match(/[\?\&]sessionid=[^\&]{12,20}/) || []);
     if (sessionid.length > 0) {
@@ -335,27 +85,168 @@ if (/register(\/.*)?$/.test(window.location.href)) {
         socket.on("appCreate", async function (data) {
             if (data.status != 200) {
                 console.error(JSON.stringify(data));
-                return document.location.href = server + "/login/";
+                return document.location.href = "/login/";
             } else ready = true;
-            const body = document.getElementsByTagName("body")[0]
-            body.removeChild(document.getElementsByTagName("iframe")[0]);
-            const mainMenu = new MainMenu();
-            const elements = await mainMenu.run(data);
-            elements.mmBoxesSTG.addEventListener("click", async () => {
-                await mainMenu.hide(elements);
-                const settingsMenu = new SettingsMenu();
-                const settingElements = await settingsMenu.run(elements);
-                settingElements.backBtn.addEventListener("click", async () => {
-                    await settingsMenu.hide(settingElements);
-                    await mainMenu.show(elements);
-                });
-            });
-            elements.logoutBtn.addEventListener("click", () => {
-                socket.emit("sessionDelete", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
-            });
-            socket.on("sessionDelete", () => document.location.href = "/login/");
-        });
-    } else {
-        document.location.href = server + "/login/";
-    }
+            // Stats
+            const tier = getTier(data.br || 0);
+            document.getElementById("br-label").innerHTML = `${data.br} BR (<span style="color: #${tier.colorCode}">${tier.tier}</span>)`;
+            document.getElementById("blobcoins-label").innerHTML = `Blobcoins: ${data.coins}`;
+            document.getElementById("distance-label").innerHTML = `Distance travelled: ${data.distance}K pixels`;
+            // Blob list
+            blobs.current = data.activeBlob;
+            const activeBlobElements = {
+				div: document.createElement("div"),
+				img: document.createElement("img"),
+				button: document.createElement("button"),
+				br: document.createElement("br")
+			};
+			activeBlobElements.div.className = "bloblist-entry " + blobs.current;
+			activeBlobElements.img.src = "../assets/" + blobs.current + ".png";
+			activeBlobElements.img.className = "blobimg";
+			activeBlobElements.img.width = 100;
+			activeBlobElements.img.height = 100;
+			activeBlobElements.button.className = "success-alert";
+			activeBlobElements.button.innerHTML = "Selected";
+			activeBlobElements.button.id = "blobowo-btn";
+			document.getElementById("bloblist").appendChild(activeBlobElements.div);
+			activeBlobElements.div.appendChild(activeBlobElements.img);
+			activeBlobElements.div.appendChild(activeBlobElements.br);
+			activeBlobElements.div.appendChild(activeBlobElements.button);
+			activeBlobElements.button.addEventListener("click", () => {
+				socket.emit("switchBlob", blobs.current);
+			});
+			
+            for(const blob of data.userBlobs) {
+				if (blob !== blobs.current) {
+					const blobElements = {
+						div: document.createElement("div"),
+						img: document.createElement("img"),
+						button: document.createElement("button"),
+						br: document.createElement("br")
+					};
+					blobElements.div.className = "bloblist-entry " + blob;
+					blobElements.img.src = "../assets/" + blob + ".png";
+					blobElements.img.className = "blobimg";
+					blobElements.img.width = 100;
+					blobElements.img.height = 100;
+					blobElements.button.className = "pick-blob";
+					blobElements.button.id = blob + "-btn";
+					blobElements.button.innerHTML = "Select";
+					document.getElementById("bloblist").appendChild(blobElements.div);
+					blobElements.div.appendChild(blobElements.img);
+					blobElements.div.appendChild(blobElements.br);
+					blobElements.div.appendChild(blobElements.button);
+					blobElements.button.addEventListener("click", () => {
+						socket.emit("switchBlob", blob);
+					});
+				}
+			};
+			
+			// Online user list
+			if (data.online.length > 0) {
+				document.getElementById("online-list").removeChild(document.getElementById("no-online-users"));
+			}
+			function showOnlineUserList(users) {
+				document.getElementById("online-list").innerHTML = "<p class=\"div-heading\">Online users</p>";
+				for (const onlineUser of users.sort((a,b) => a.br < b.br)) {
+					const userTier = getTier(onlineUser.br || 0);
+					const onlineUserElements = {
+						span: document.createElement("span"),
+						br: document.createElement("br")
+					};
+					onlineUserElements.span.className = "online-user";
+					onlineUserElements.span.innerHTML = `<span style="color: #${userTier.colorCode}">${onlineUser.username}</span> (${onlineUser.br} BR) @${onlineUser.location}`;
+					document.getElementById("online-list").appendChild(onlineUserElements.span);
+					document.getElementById("online-list").appendChild(onlineUserElements.br);
+				}
+			}
+			showOnlineUserList(data.online.concat([{username: data.username, br: data.br, location: "Lobby"}]));
+			
+			
+			// News
+			if (data.news.length > 0) {
+				document.getElementById("news").removeChild(document.getElementById("no-news"));
+			}
+			
+			for (const news of data.news) {
+				const newsElement = {
+					div: document.createElement("div"),
+					heading: document.createElement("h3"),
+					content: document.createElement("p")
+				};
+				newsElement.div.className = "news-entry";
+				newsElement.heading.className = "news-heading";
+				newsElement.heading.innerHTML = news.headline;
+				newsElement.content.className = "news-content";
+				newsElement.content.innerHTML = news.content;
+				document.getElementById("news").appendChild(newsElement.div);
+				document.getElementById("news").appendChild(newsElement.heading);
+				document.getElementById("news").appendChild(newsElement.content);
+					
+			}
+			
+			if (data.promotions.length > 0) {
+				document.getElementById("promotions").removeChild(document.getElementById("no-promotions"));
+			}
+			// Recent promotions
+			for (const promotion of data.promotions) {
+				const dropped = promotion.drop === 1;
+				const promotionElement = document.createElement("div");
+				promotionElement.className = "user-promotion";
+				promotionElement.innerHTML = `<span style="color: ${dropped ? "red" : "green"}">${dropped ? "▼" : "▲"}</span> ${promotion.user} (<span style="color: #${getTierByName(promotion.newTier).colorCode}">${promotion.newTier}</span>)`;
+				document.getElementById("promotions").appendChild(promotionElement);
+				
+			}
+			
+			// Button events
+			document.getElementById("play-btn").addEventListener("click", () => {
+				document.location.href = "/game?sid=" + sessionid[0].substr(sessionid[0].indexOf("=") + 1);
+			});
+			
+			document.getElementById("logout-btn").addEventListener("click", () => {
+				socket.emit("sessionDelete", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
+			});
+			
+			document.getElementsByClassName("daily-bonus")[0].addEventListener("click", () => {
+				socket.emit("receiveDailyBonus");
+			});
+			
+			function alertCallback(data) {
+				const alertElement = document.createElement("div");
+				switch(data.type) {
+					case "error":
+						alertElement.id = "error-notification";
+						alertElement.innerHTML = `<i class="material-icons" style="font-size:16px">announcement</i> ${data.message}`;
+					break;
+					case "success":
+						alertElement.id = "success-notification";
+						alertElement.innerHTML = `<i class="material-icons" style="font-size:16px">check</i> ${data.message}`;
+					break;
+				}
+				document.body.prepend(alertElement);
+				setTimeout(() => {
+					document.body.removeChild(alertElement);
+				}, 3500);
+			}
+			
+			socket.on("alert", alertCallback);
+			socket.on("sessionDelete", () => document.location.href = "/login/");
+			socket.on("dailyBonus", () => {
+				document.getElementById("blobcoins-label").innerHTML = `Blobcoins: ${data.coins += 20}`;
+			});
+			socket.on("blobChange", newBlob => {
+				console.log((blobs.current || data.activeBlob));
+				document.getElementById(newBlob + "-btn").className = "success-alert";
+				document.getElementById(newBlob + "-btn").innerHTML = "Selected";
+				document.getElementById((blobs.current || data.activeBlob) + "-btn").className = "pick-blob";
+				document.getElementById((blobs.current || data.activeBlob) + "-btn").innerHTML = "Select";
+			});
+			socket.on("appHeartbeat", data => showOnlineUserList(data.online));
+		});
+    } else document.location.href = "/login/";
+    
+    
+    
+    
+    
 }
