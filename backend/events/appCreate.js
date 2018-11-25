@@ -1,3 +1,4 @@
+const { gamemodes } = require("../Base");
 class appCreateEvent {};
 /**
  * Runs the appCreate Event
@@ -26,11 +27,31 @@ appCreateEvent.run = (...args) => {
                     }).catch(console.log);
                 }
                 if(session) {
-                    require("../utils/getBRFromPlayer")(session.username, sqlite).then(playerBR => {
+					// online: sockets.map(v => Object.assign(v, {inactiveSince: undefined, sessionid: undefined, socketid: undefined, location: "Lobby"})).concat(gamemodes.ffa.players.map(v=> { return {username: v.owner, br: v.br, location: "FFA"}}))
+                    require("../utils/getDataFromPlayer")(session.username, sqlite).then(async playerData => {
                         io.to(data.id).emit("appCreate", {
                             status: 200,
                             username: session.username,
-                            br: playerBR,
+                            br: playerData.br,
+                            online: sockets.map(v => { return {
+								location: "Lobby",
+								br: v.br,
+								username: v.username,
+								lastDaily: v.lastDaily,
+								role: v.role
+							}}).concat(gamemodes.ffa.players.map(v => { return {
+								location: "FFA",
+								username: v.owner,
+								br: v.br,
+								role: 0
+							}})),
+                            coins: playerData.blobcoins,
+                            distance: playerData.distance,
+                            lastDaily: playerData.lastDailyUsage,
+                            userBlobs: playerData.blobs.split(","),
+                            activeBlob: playerData.activeBlob,
+                            news: await sqlite.all("SELECT headline, content FROM news ORDER BY createdAt DESC LIMIT 5"),
+                            promotions: await sqlite.all("SELECT * FROM recentPromotions ORDER BY promotedAt DESC LIMIT 10"),
                             expiresAt: session.expires
                         });
                         resolve(true);

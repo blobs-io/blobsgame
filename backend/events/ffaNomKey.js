@@ -37,6 +37,7 @@ ffaNomKey.run = async(data, io, Base, sqlite) => {
                         await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(loser.br - result <= 0 ? 1 : loser.br - result), loser.owner]));
                         await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(winner.br + result > 9999 ? 9999 : winner.br + result), winner.owner]));
                         
+                        
                         io.sockets.emit("ffaPlayerNommed", {
                             winner,
                             loser,
