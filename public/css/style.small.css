@@ -37,23 +37,18 @@ canvas {
 	margin: 0;
 }
 
-.mm-box {
+#news {
+	display: none;
+}
+
+#online-list {
 	width: 100%;
-	float: unset;
-	margin-left: 0;
-	margin-top: 15px;
-	border: none;
 }
 
-.mm-stg-box, .mm-blobs-box {
-	margin-top: 0;
+#promotions {
+	display: none;
 }
 
-.mm-sp-box {
-	border-top: 1px solid #BFBFBF;
-}
-
-#blob {
-	width: 40px;
-	height: 70px;
+#bloblist {
+	width: 100%;
 }
