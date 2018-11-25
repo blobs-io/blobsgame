@@ -1,38 +1,292 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>blobs.io – menu</title>
-		<link rel="stylesheet" href="../css/style.css">
-		<link rel="stylesheet" href="../css/main-menu.css"> <!-- Stylesheet for main menu, override normal stylesheet (don't put this below the style.css stylesheet-->
-		<link rel="stylesheet" type="text/css" media="only screen and (max-width: 1025px)" href="../css/style.small.css" />
-		<meta name="description" content="Be the best blob!">
-		<meta name="author" content="y21">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta property="og:image" content="https://cdn.discordapp.com/emojis/458326620076507136.png" />
-		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
-		<link rel="apple-touch-icon" sizes="57x57" href="../assets/favicons/apple-icon-57x57.png">
-		<link rel="apple-touch-icon" sizes="60x60" href="../assets/favicons/apple-icon-60x60.png">
-		<link rel="apple-touch-icon" sizes="72x72" href="../assets/favicons/apple-icon-72x72.png">
-		<link rel="apple-touch-icon" sizes="76x76" href="../assets/favicons/apple-icon-76x76.png">
-		<link rel="apple-touch-icon" sizes="114x114" href="../assets/favicons/apple-icon-114x114.png">
-		<link rel="apple-touch-icon" sizes="120x120" href="../assets/favicons/apple-icon-120x120.png">
-		<link rel="apple-touch-icon" sizes="144x144" href="../assets/favicons/apple-icon-144x144.png">
-		<link rel="apple-touch-icon" sizes="152x152" href="../assets/favicons/apple-icon-152x152.png">
-		<link rel="apple-touch-icon" sizes="180x180" href="../assets/favicons/apple-icon-180x180.png">
-		<link rel="icon" type="image/png" sizes="192x192"  href="../assets/favicons/android-icon-192x192.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicons/favicon-32x32.png">
-		<link rel="icon" type="image/png" sizes="96x96" href="../assets/favicons/favicon-96x96.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicons/favicon-16x16.png">
-		<link rel="manifest" href="../assets/favicons/manifest.json">
-		<meta name="msapplication-TileColor" content="#ffffff">
-		<meta name="msapplication-TileImage" content="../assets/favicons/ms-icon-144x144.png">
-		<meta name="theme-color" content="#ffffff">
-	</head>
-	<body>
-		<iframe src="loading.html" id="loading"></iframe>
-	</body>
-  <script src="../js/sockets.js"></script>
-  <script src="../js/game/functions.js"></script>
+<head>
+    <meta charset="utf-8" />
+    <title>blobs.io – menu</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/main-menu.css"> <!-- Stylesheet for main menu, override normal stylesheet (don't put this below the style.css stylesheet-->
+    <link rel="stylesheet" type="text/css" media="only screen and (max-width: 1025px)" href="../css/style.small.css" />
+    <meta name="description" content="Be the best blob!">
+    <meta name="author" content="y21">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:image" content="https://cdn.discordapp.com/emojis/458326620076507136.png" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Chakra+Petch:600|Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="../assets/favicons/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../assets/favicons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../assets/favicons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../assets/favicons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../assets/favicons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../assets/favicons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../assets/favicons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../assets/favicons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/favicons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../assets/favicons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../assets/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicons/favicon-16x16.png">
+    <link rel="manifest" href="../assets/favicons/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="../assets/favicons/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <style>
+        body {
+            padding: 3px;
+        }
+        #stats {
+            font-family: "Chakra Petch", Arial;
+            font-size: 14px;
+            display: inline;
+            float: left;
+        }
+        .daily-bonus {
+            width: 140px;
+            margin: 0px !important;
+        }
+        .daily-bonus:hover {
+            animation: 0.4s fade-btn-15-width-150 forwards;
+        }
+        #news {
+            width: 250px;
+            padding-left: 15px;
+            padding-bottom: 3px;
+            font-family: "Chakra Petch", Arial;
+            overflow-y: scroll;
+            position: fixed;
+            height: 50%;
+            right: 5px;
+        }
+        .blurple-scrollbar::-webkit-scrollbar {
+            width: 12px;
+        }
+        .blurple-scrollbar::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        .blurple-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #7289DA;
+            border-radius: 3px;
+            width: 3px;
+        }
+        .news-heading {
+            font-size: 15px;
+        }
+        .news-content {
+            font-size: 13px;
+        }
+        .div-heading {
+            text-transform: uppercase;
+            color: #7289DA;
+            font-family: "Open Sans", Arial;
+            text-align: center;
+            font-size: 15px;
+        }
+        #promotions {
+            width: 250px;
+            padding-left: 15px;
+            padding-bottom: 3px;
+            font-family: "Chakra Petch", Arial;
+            overflow-y: scroll;
+            position: fixed;
+            height: 50%;
+            right: 5px;
+            top: 51%;
+        }
+        .user-promotion {
+            font-size: 14px;
+        }
+        #bloblist {
+            clear: both;
+            padding-left: 15px;
+            padding-bottom: 3px;
+            font-family: "Chakra Petch", Arial;
+            overflow-x: scroll;
+            width: 80%;
+            height: 250px;
+            display: block;
+        }
+        #online-list {
+            clear: both;
+            padding-left: 15px;
+            padding-bottom: 3px;
+            font-family: "Chakra Petch", Arial;
+            width: 80%;
+            height: 250px;
+            display: block;
+            font-size: 13px;
+            overflow-y: scroll;
+        }
+        .material-icons {
+            font-family: "Material Icons";
+            cursor: default;
+        }
+        #footer {
+            position: fixed;
+            bottom: 8px;
+            width: 100%;
+        }
+        #play-btn {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 5px;
+            width: 160px;
+        }
+        button {
+            padding: 7px 0px 7px 0px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid #7289DA;
+            outline: none;
+            color: #7289DA;
+            font-family: "Chakra Petch", Arial;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 13px;
+        }
+        #play-btn:hover {
+            animation: 0.4s fade-btn-15-width-180 forwards;
+        }
+        .float-left {
+            float: left;
+        }
+        .margin-1 {
+            margin-left: 5px;
+        }
+        .fade-red:hover {
+            animation: 0.4s fade-red forwards;
+        }
+        .fade-grey:hover {
+            animation: 0.4s fade-grey forwards;
+        }
+        @keyframes fade-red {
+            from {
+                color: white;
+            }
+            to {
+                color: #c0392b;
+            }
+        }
+        @keyframes fade-grey {
+            from {
+                color: white;
+            }
+            to {
+                color: #bdc3c7;
+            }
+        }
+        @keyframes fade-btn-15-width-180 {
+            from {
+                font-size: 13px;
+            }
+            to {
+                font-size: 15px;
+                width: 180px;
+            }
+        }
+        @keyframes fade-btn-15-width-150 {
+            from {
+                font-size: 13px;
+            }
+            to {
+                font-size: 15px;
+                width: 150px;
+            }
+        }
+        @keyframes fade-btn-15-width-100 {
+            from {
+                font-size: 13px;
+            }
+            to {
+                font-size: 15px;
+                width: 100px;
+            }
+        }
+        .bloblist-entry {
+            display: inline;
+            float: left;
+            margin-left: 25px;
+        }
+        .pick-blob {
+            width: 80px;
+        }
+        .pick-blob:hover {
+            animation: 0.4s fade-btn-15-width-100 forwards;
+        }
+        .success-alert {
+            border-bottom: 1px solid #2ecc71;
+            color: #2ecc71;
+        }
+        #success-notification {
+			position: absolute;
+			left: 0;
+			right: 0;
+			padding: 15px;
+			border: 2px solid #2ecc71;
+			color: #2ecc71;
+			margin-left: auto;
+			margin-right: auto;
+			width: 30%;
+			text-align: center;
+		}
+		#error-notification {
+			position: absolute;
+			left: 0;
+			right: 0;
+			padding: 15px;
+			border: 2px solid #e74c3c;
+			color: #e74c3c;
+			margin-left: auto;
+			margin-right: auto;
+			width: 30%;
+			text-align: center;
+		}
+		.online-user {
+			margin-left: 25px;
+			font-size: 15px;
+		}
+    </style>
+</head>
+<body>
+	<!--<div id="success-notification">
+		<i class="material-icons" style="font-size: 16px">check</i> Something happened.
+	</div>-->
+    <div id="stats">
+        <span id="br-label">0 BR (<span style="color: #b57156">bronze</span>)</span><br />
+        <span id="blobcoins-label">Blobcoins: 0</span> <br />
+        <span id="distance-label">Distance travelled: 0 pixels</span>
+        <button class="daily-bonus">
+            Receive daily bonus
+        </button>
+    </div>
+    <div id="news" class="blurple-scrollbar">
+		<p class="div-heading">News</p>
+        <i id="no-news">No news available.</i>
+    </div>
+    <div id="promotions" class="blurple-scrollbar">
+        <p class="div-heading">Recent Promotions</p>
+        <i id="no-promotions">No recent promotions.</i>
+    </div><br />
+    <div id="bloblist" class="blurple-scrollbar">
+        <p class="div-heading">Your blobs</p>
+    </div>
+
+    <div id="online-list" class="blurple-scrollbar">
+        <p class="div-heading">Online users</p>
+        <i id="no-online-users">Nobody is online.</i>
+    </div>
+
+
+
+    <div id="footer">
+        <i class="material-icons float-left margin-1 fade-red" id="logout-btn">power_settings_new</i>
+        <i class="material-icons float-left margin-1 fade-grey">settings</i>
+        <button id="play-btn" align="center">
+            Play
+        </button>
+    </div>
+</body>
+<script src="../js/game/functions.js"></script>
+<script src="../js/sockets.js"></script>
 </html>
