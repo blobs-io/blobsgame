@@ -103,10 +103,6 @@ class BlobObj {
             const tier = getTier(this.br || 0);
             
             if (this.owner === ownBlob.owner) {
-				if (this.role === 1) {
-					ctx.fillStyle = "red";
-					ctx.fillText("(A)", canvasX - 25, canvasY - 10);
-				}
 				ctx.fillStyle = "#" + tier.colorCode;
                 ctx.font = (15 * scale).toString() + "px Dosis";
                 ctx.drawImage(this.img, canvasX, canvasY, w * scale, h * scale);
