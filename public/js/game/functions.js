@@ -59,49 +59,49 @@ function drawBorder(context = ctx) {
     const diffXNeg = ownBlob.x - (canvas.width / 2);
     const diffYPos = ownBlob.y + (canvas.height / 2);
     const diffYNeg = ownBlob.y - (canvas.height / 2);
-    if (diffXPos > mapSize.width) {
+    if (diffXPos > mapSize.width) { // right border
         context.beginPath();
-        context.moveTo((canvas.width - (diffXPos - mapSize.width)) + (30 * scale), (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
-        context.lineTo((canvas.width - (diffXPos - mapSize.width)) + (30 * scale), (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height)  + (30 * scale));
+        context.moveTo((canvas.width - (diffXPos - mapSize.width)), (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
+        context.lineTo((canvas.width - (diffXPos - mapSize.width)), (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
         context.stroke();
     }
-    if (diffXNeg < 0) {
+    if (diffXNeg < 0) { // left border
         context.beginPath();
-        context.moveTo((-(diffXNeg + 35)) + (30 * scale), (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
-        context.lineTo((-(diffXNeg + 35)) + (30 * scale), (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height) + (30 * scale));
+        context.moveTo((-(diffXNeg + 35)), (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
+        context.lineTo((-(diffXNeg + 35)), (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
         context.stroke();
     }
-    if (diffYPos > mapSize.height) {
+    if (diffYPos > mapSize.height) { // bottom border
         context.beginPath();
-        context.moveTo((diffXNeg < 0 ? -(diffXNeg + 35) : 0) + (30 * scale), (canvas.height - (diffYPos - mapSize.height)));
-        context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width) + (30 * scale), (canvas.height - (diffYPos - mapSize.height)));
+        context.moveTo((diffXNeg < 0 ? -(diffXNeg + 35) : 0), (canvas.height - (diffYPos - mapSize.height)));
+        context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), (canvas.height - (diffYPos - mapSize.height)));
         context.stroke();
     }
-    if (diffYNeg < 0) {
+    if (diffYNeg < 0) { // top border
         context.beginPath();
-        context.moveTo((diffXNeg < 0 ? -(diffXNeg + 35) : 0) + (30 * scale), (-(diffYNeg + 35)));
-        context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width) + (30 * scale), (-(diffYNeg + 35)));
+        context.moveTo((diffXNeg < 0 ? -(diffXNeg + 35) : 0), (-(diffYNeg + 35)));
+        context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), (-(diffYNeg + 35)));
         context.stroke();
     }
 }
 
 function getTier(br) {
-	let result = {};
-	if (br >= 0 && br < 1500) {
-		result.tier = "bronze";
-		result.colorCode = "b57156";
-	} else if (br >= 1500 && br < 5000) {
-		result.tier = "silver";
-		result.colorCode = "dbdbdb";
-	} else if (br >= 5000 && br < 8000) {
-		result.tier = "gold";
-		result.colorCode = "D7AF00";
-	} else if (br >= 8000 && br < 9500) {
-		result.tier = "diamond";
-		result.colorCode = "16f7ef";
-	} else if (br >= 9500 && br < 10000) {
-		result.tier = "master";
-		result.colorCode = "16f77f";
-	}
-	return result;
+    let result = {};
+    if (br >= 0 && br < 1500) {
+        result.tier = "bronze";
+        result.colorCode = "b57156";
+    } else if (br >= 1500 && br < 5000) {
+        result.tier = "silver";
+        result.colorCode = "dbdbdb";
+    } else if (br >= 5000 && br < 8000) {
+        result.tier = "gold";
+        result.colorCode = "D7AF00";
+    } else if (br >= 8000 && br < 9500) {
+        result.tier = "diamond";
+        result.colorCode = "16f7ef";
+    } else if (br >= 9500 && br < 10000) {
+        result.tier = "master";
+        result.colorCode = "16f77f";
+    }
+    return result;
 }
