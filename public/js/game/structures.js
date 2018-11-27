@@ -108,6 +108,7 @@ class BlobObj {
 					ctx.fillText("(A)", canvasX - 25, canvasY - 10);
 				}
 				ctx.fillStyle = "#" + tier.colorCode;
+                ctx.font = (15 * scale).toString() + "px Dosis";
                 ctx.drawImage(this.img, canvasX, canvasY, w * scale, h * scale);
                 ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), canvasX, (canvasY) - 10);
                 ctx.fillStyle = "white";
@@ -135,10 +136,10 @@ class BlobObj {
 				}
 				ctx.fillStyle = "#" + tier.colorCode;
 				
-                ctx.drawImage(this.img, blobCanvasX * scale, blobCanvasY * scale, w * scale, h * scale);
+                ctx.drawImage(this.img, blobCanvasX, blobCanvasY, w * scale, h * scale);
                 if (du === true) {
                     ctx.font = (15 * scale).toString() + "px Dosis";
-                    ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), blobCanvasX * scale, (blobCanvasY * scale) - 10);
+                    ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), blobCanvasX, (blobCanvasY) - 10);
                     ctx.fillStyle = "white";
                 }
             }
