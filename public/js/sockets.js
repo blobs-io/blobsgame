@@ -151,11 +151,17 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 				for (const onlineUser of users.sort((a,b) => a.br < b.br)) {
 					const userTier = getTier(onlineUser.br || 0);
 					const onlineUserElements = {
+						img: document.createElement("img"),
 						span: document.createElement("span"),
 						br: document.createElement("br")
 					};
+					onlineUserElements.img.src = "../assets/emblems/" + userTier.emblemFile;
+					onlineUserElements.img.width = 20;
+					onlineUserElements.img.height = 20;
+					onlineUserElements.img.style.verticalAlign = "middle";
 					onlineUserElements.span.className = "online-user";
 					onlineUserElements.span.innerHTML = `<span style="color: #${userTier.colorCode}">${onlineUser.username}</span> (${onlineUser.br} BR) @${onlineUser.location}`;
+					document.getElementById("online-list").appendChild(onlineUserElements.img);
 					document.getElementById("online-list").appendChild(onlineUserElements.span);
 					document.getElementById("online-list").appendChild(onlineUserElements.br);
 				}
@@ -210,7 +216,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 			document.getElementsByClassName("daily-bonus")[0].addEventListener("click", () => {
 				socket.emit("receiveDailyBonus");
 			});
-			
+
 			function alertCallback(data) {
 				const alertElement = document.createElement("div");
 				switch(data.type) {
