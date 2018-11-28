@@ -109,7 +109,7 @@ class BlobObj {
                 ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), canvasX, (canvasY) - 10);
                 ctx.fillStyle = "white";
                 if (emblems[tier.tier].complete) {
-                    ctx.drawImage(emblems[tier.tier], canvasX - 30, canvasY - 25, 20, 20);
+                    ctx.drawImage(emblems[tier.tier], canvasX - (15 + 15 * scale), canvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
                 }
             } else {
                 let blobCanvasX = 0,
@@ -130,7 +130,7 @@ class BlobObj {
                 blobCanvasX -= w;
                 
 				if (emblems[tier.tier].complete) {
-				    ctx.drawImage(emblems[tier.tier], blobCanvasX - 30, blobCanvasY - 30, 20, 20);
+				    ctx.drawImage(emblems[tier.tier], blobCanvasX - 30, blobCanvasY - 30, 20 * scale, 20 * scale);
                 }
 
 				ctx.fillStyle = "#" + tier.colorCode;
