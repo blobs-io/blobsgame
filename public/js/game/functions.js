@@ -90,18 +90,23 @@ function getTier(br) {
     if (br >= 0 && br < 1500) {
         result.tier = "bronze";
         result.colorCode = "b57156";
+        result.emblemFile = "emblem_bronze.png";
     } else if (br >= 1500 && br < 5000) {
         result.tier = "silver";
         result.colorCode = "dbdbdb";
+        result.emblemFile = "emblem_silver.png";
     } else if (br >= 5000 && br < 8000) {
         result.tier = "gold";
         result.colorCode = "D7AF00";
+        result.emblemFile = "emblem_gold.png";
     } else if (br >= 8000 && br < 9500) {
         result.tier = "diamond";
         result.colorCode = "16f7ef";
+        result.emblemFile = "emblem_diamond.png";
     } else if (br >= 9500 && br < 10000) {
         result.tier = "master";
         result.colorCode = "16f77f";
+        result.emblemFile = "emblem_master.png";
     }
     return result;
 }
