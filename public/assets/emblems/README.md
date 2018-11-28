@@ -1,1 +1,1 @@
-Thanks to KaiserByte for making these emblems!
+Thanks to [KaiserByte](https://twitter.com/BT_Evelon) for making these emblems!
