@@ -108,6 +108,9 @@ class BlobObj {
                 ctx.drawImage(this.img, canvasX, canvasY, w * scale, h * scale);
                 ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), canvasX, (canvasY) - 10);
                 ctx.fillStyle = "white";
+                if (emblems[tier.tier].complete) {
+                    ctx.drawImage(emblems[tier.tier], canvasX - 30, canvasY - 25, 20, 20);
+                }
             } else {
                 let blobCanvasX = 0,
                     blobCanvasY = 0;
@@ -126,10 +129,10 @@ class BlobObj {
                 blobCanvasY -= h;
                 blobCanvasX -= w;
                 
-				if (this.role === 1) {
-					ctx.fillStyle = "red";
-					ctx.fillText("(A)", (blobCanvasX * scale) - 25, (blobCanvasY * scale) - 10);
-				}
+				if (emblems[tier.tier].complete) {
+				    ctx.drawImage(emblems[tier.tier], blobCanvasX - 30, blobCanvasY - 30, 20, 20);
+                }
+
 				ctx.fillStyle = "#" + tier.colorCode;
 				
                 ctx.drawImage(this.img, blobCanvasX, blobCanvasY, w * scale, h * scale);
