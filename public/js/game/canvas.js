@@ -12,8 +12,8 @@ objects = {
 };
 var scale = 1;
 const mapSize = {
-	width: 1000,
-	height: 1000
+	width: 2000,
+	height: 2000
 };
 const emblems = {
     bronze: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_bronze.png"; return image; })(),
