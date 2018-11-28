@@ -210,6 +210,7 @@ button {
     text-align: center;
 }
 .online-user {
-    margin-left: 25px;
+    margin-left: 5px;
     font-size: 15px;
+    vertical-align: middle;
 }
