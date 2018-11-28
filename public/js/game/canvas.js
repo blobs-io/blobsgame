@@ -12,8 +12,17 @@ objects = {
 };
 var scale = 1;
 const mapSize = {
-	width: 2000,
-	height: 2000
+	width: 1000,
+	height: 1000
+};
+const emblems = {
+    bronze: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_bronze.png"; return image; })(),
+    silver: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_silver.png"; return image; })(),
+    gold: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_gold.png"; return image; })(),
+    diamond: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_diamond.png"; return image; })(),
+    master: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_master.png"; return image; })(),
+    guest: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_guest-or-unknown.png"; return image; })(),
+    admin: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_admin.png"; return image; })(),
 };
 	
 	
