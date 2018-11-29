@@ -5,10 +5,74 @@
 		body {
 			background-color: #222;
 		}
+		canvas {
+			z-index: 1;
+		}
+		#leaderboard {
+			z-index: 2;
+			background-color: white;
+			color: black;
+			position: absolute;
+			right: 5px;
+			width: 180px;
+			height: 240px;
+			font-family: "Dosis", Arial;
+			text-align: center;
+			border-radius: 3px;
+			opacity: 0.8;
+		}
+		.leaderboard-entry {
+			display: block;
+		}
+		h3 {
+			display: inline;
+			font-size: 25px;
+			margin-bottom: 15px;
+		}
+		.user-entry {
+			float: left;
+			margin-left: 10px;
+		}
+		.user-br {
+			float: right;
+			margin-right: 10px;
+		}
+		#nom-cooldown {
+			z-index: 2;
+			background-color: white;
+			color: black;
+			position: absolute;
+			top: 260px;
+			right: 5px;
+			width: 165px;
+			height: 30px;
+			font-family: "Dosis", Arial;
+			padding-left: 15px;
+			border-radius: 3px;
+			opacity: 0.8;
+			text-align: center;
+		}
+		#nom-image {
+			padding-top: 5px;
+			vertical-align: center;
+			float: left;
+		}
+		#cooldown-timer {
+			margin-left: 15px;
+			margin-top: 5px;
+			display: block;
+			width: 70px;
+			float: left;
+			vertical-align: center;
+		}
 	</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
 	</head>
 <body>
+	<div id="leaderboard"></div>
+	<div id="nom-cooldown">
+		<img src="../assets/blobnom.png" width="20" height="20" id="nom-image" />
+	</div>
 	<canvas width=600 height=600 />
 </body>
 <script src="../js/game/structures.js"></script>
