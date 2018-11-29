@@ -31,6 +31,7 @@ socket.on("ffaObjectsHeartbeat", eventd => {
     }
 });
 socket.on("ffaHeartbeat", d => {
+    if (d.role == -1 && !/[\?\&]guest=true/.test(window.location.search)) return document.location.href = "/login/";
     ownBlob.owner = d.username;
     ownBlob.br = d.br;
     ownBlob.ready = true;
