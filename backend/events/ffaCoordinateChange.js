@@ -1,7 +1,4 @@
 class ffaCoordinateChangeEvent {};
-const {
-    execSync
-} = require("child_process");
 
 ffaCoordinateChangeEvent.run = async (...args) => {
     const [eventd, data, io, Base, sqlite] = args;
@@ -12,8 +9,12 @@ ffaCoordinateChangeEvent.run = async (...args) => {
         eventd.lastnom = prev.lastnom;
         eventd._directionChange = prev._directionChange;
         eventd.role = prev.role;
+        if (eventd.x < 0) eventd.x = 0;
+        if (eventd.y < 0) eventd.y = 0;
+        if (eventd.x > 2000) eventd.x = 2000;
+        if (eventd.y > 2000) eventd.y = 2000;
     } catch (e) {}
     Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === eventd.owner)] = eventd;
-}
+};
 
 module.exports = ffaCoordinateChangeEvent;
