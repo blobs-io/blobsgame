@@ -12,22 +12,23 @@ function clearCanvas(context = ctx) {
     context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function displayLeaderboard(context = ctx) {
-    context.strokeStyle = "white";
-    context.fillStyle = "white";
-    context.fillRect(canvas.width - 135, 0, 130, (blobs.length * 20) + 40);
-    context.fillStyle = "black";
-    context.font = "14px Dosis";
-    context.fillText("Leaderboard", canvas.width - 100, 15);
-    context.rect(canvas.width - 135, 20, 100, .1);
+function displayLeaderboard() {
+    document.getElementById("leaderboard").innerHTML = "<h3>Leaderboard</h3>";
     const sortedblobs = blobs.slice(0, 10).sort((a, b) => b.br > a.br);
-    context.font = "13px Dosis";
-    context.fillStyle = "black";
     for (let i = 0; i < sortedblobs.length; ++i) {
-        context.fillText(sortedblobs[i].owner.substr(0, 12), canvas.width - 125, 22 + (12 * (i + 1)));
-        context.fillText(sortedblobs[i].br + " BR", canvas.width - 60, 22 + (12 * (i + 1)));
+        const tier = getTier(sortedblobs[i].br || 0);
+        const leaderboardEntry = document.createElement("div");
+        const usernameEntry = document.createElement("span");
+        const brLabel = document.createElement("span");
+        leaderboardEntry.className = "leaderboard-entry";
+        usernameEntry.className = "user-entry";
+        usernameEntry.innerHTML = (i + 1) + ". " + sortedblobs[i].owner.substr(0, 12);
+        brLabel.className = "user-br";
+        brLabel.innerHTML = sortedblobs[i].br + " BR";
+        document.getElementById("leaderboard").appendChild(leaderboardEntry);
+        document.getElementById("leaderboard").appendChild(usernameEntry);
+        document.getElementById("leaderboard").appendChild(brLabel);
     }
-    context.stroke();
 }
 // not yet
 function displayWalls() {
@@ -37,15 +38,15 @@ function displayWalls() {
 }
 
 function displayCooldown(context = ctx) {
-    context.beginPath();
-    context.strokeRect(canvas.width - 135, (blobs.length * 20) + 60, 135, 25);
-    context.fillStyle = "white";
-    const nomReady = Date.now() - ownBlob.lastnom > 1500;
-    context.fillText(!nomReady ? `${((1500 - (Date.now() - ownBlob.lastnom)) / 1000).toFixed(0)}s` : "ready", nomReady ? canvas.width - 100 : canvas.width - 90, (blobs.length * 20) + 60 + 16);
-    if (objects.images.blobnom._ready) {
-        context.drawImage(objects.images.blobnom, canvas.width - 130, (blobs.length * 20) + 63, 20, 20);
+    if (document.getElementById("cooldown-timer") != null) {
+        document.getElementById("nom-cooldown").removeChild(document.getElementById("cooldown-timer"));
     }
-    context.stroke();
+
+    const timerElement = document.createElement("span");
+    const nomReady = Date.now() - ownBlob.lastnom > 1500;
+    timerElement.id = "cooldown-timer";
+    timerElement.innerHTML = !nomReady ? `${((1500 - (Date.now() - ownBlob.lastnom)) / 1000).toFixed(1)}s` : "Ready";
+    document.getElementById("nom-cooldown").appendChild(timerElement);
 }
 
 function displayPlayerStats(context = ctx) {
@@ -55,6 +56,7 @@ function displayPlayerStats(context = ctx) {
 }
 
 function drawBorder(context = ctx) {
+    context.strokeStyle = "white";
     const diffXPos = ownBlob.x + (canvas.width / 2);
     const diffXNeg = ownBlob.x - (canvas.width / 2);
     const diffYPos = ownBlob.y + (canvas.height / 2);
