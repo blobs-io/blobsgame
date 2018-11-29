@@ -17,7 +17,7 @@ socket.on("ffaPlayerUpdate", async eventd => {
                 blobs.push(n);
             }
         } else {
-            if (Math.abs(player.x - ownBlob.x) > 5 || Math.abs(player.y - ownBlob.y) > 5) {
+            if (Math.abs(player.x - ownBlob.x) > 20 || Math.abs(player.y - ownBlob.y) > 20) {
                 ownBlob.x = player.x;
                 ownBlob.y = player.y;
             }
