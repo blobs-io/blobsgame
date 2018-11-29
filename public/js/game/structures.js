@@ -130,7 +130,7 @@ class BlobObj {
                 blobCanvasX -= w;
                 
 				if (emblems[tier.tier].complete) {
-				    ctx.drawImage(emblems[tier.tier], blobCanvasX - 30, blobCanvasY - 30, 20 * scale, 20 * scale);
+				    ctx.drawImage(emblems[tier.tier], blobCanvasX - (15 + 15 * scale), blobCanvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
                 }
 
 				ctx.fillStyle = "#" + tier.colorCode;
