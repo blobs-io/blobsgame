@@ -73,7 +73,6 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 		document.getElementById("auth").appendChild(userCountElement);
 	});
 } else if (/app(\/.*)?/.test(window.location.href)) {
-    const socket = io.connect("localhost:3000");
     const blobs = {
 		current: undefined,
 		all: undefined
