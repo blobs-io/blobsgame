@@ -43,6 +43,30 @@ socket.emit("ffaPlayerCreate", sessionid.substr(sessionid.indexOf("=") + 1));
 
 
 // Events (Window/Document)
+for(const btnid of ["btnup", "btndown", "btnleft", "btnright", "nom-btn-mobile"]) {
+	document.getElementById(btnid).addEventListener("click", () => {
+		switch(btnid) {
+			case "btnup":
+            ownBlob.direction = 0;
+			break;
+			case "btndown":
+            ownBlob.direction = 2;
+			break;
+			case "btnleft":
+			ownBlob.direction = 3
+			break;
+			case "btnright":
+			ownBlob.direction = 1;
+			break;
+			case "nom-btn-mobile":
+            if (Date.now() - ownBlob.lastnom <= 1500) return;
+            ownBlob.lastnom = Date.now();
+            socket.emit("ffaNomKey");
+			break;
+		}
+	});
+}
+
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth - 30;
     canvas.height = window.innerHeight - 30;
