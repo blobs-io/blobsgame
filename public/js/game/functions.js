@@ -30,12 +30,6 @@ function displayLeaderboard() {
         document.getElementById("leaderboard").appendChild(brLabel);
     }
 }
-// not yet
-function displayWalls() {
-    for (const wall of objects.walls) {
-        wall.display();
-    }
-}
 
 function displayCooldown(context = ctx) {
     if (document.getElementById("cooldown-timer") != null) {
