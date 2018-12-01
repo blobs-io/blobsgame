@@ -1,9 +1,10 @@
 <html>
 	<head>
-    <link href="https://fonts.googleapis.com/css?family=Dosis:600" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Dosis:600" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
 		body {
-			background-color: #222;
+			background-color: #111;
 		}
 		canvas {
 			z-index: 1;
@@ -65,14 +66,43 @@
 			float: left;
 			vertical-align: center;
 		}
+		#dpad-controls {
+			display: none;
+			position: fixed;
+			bottom: 5px;
+			left: 5px;
+			width: 225px;
+			height: 225px;
+			z-index: 2;
+		}
+		.btnmid {
+			display: block;
+			margin-left: 75;
+		}
+		.btnright {
+			float: right;
+		}
+		#nom-btn-mobile {
+			position: fixed;
+			right: 25px;
+			bottom: 100px;
+		}
 	</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+	<link rel="stylesheet" type="text/css" media="only screen and (max-width: 1025px)" href="../css/game.small.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
 	</head>
 <body>
 	<div id="leaderboard"></div>
 	<div id="nom-cooldown">
 		<img src="../assets/blobnom.png" width="20" height="20" id="nom-image" />
 	</div>
+	<div id="dpad-controls">
+		<img src="../assets/mobile_buttons/mobile_up.png" id="btnup" width="75" height="75" class="dpad-btn btnmid" />
+		<img src="../assets/mobile_buttons/mobile_left.png" id="btnleft" width="75" height="75" class="dpad-btn" />
+		<img src="../assets/mobile_buttons/mobile_right.png" id="btnright" width="75" height="75" class="dpad-btn btnright" />
+		<img src="../assets/mobile_buttons/mobile_down.png" id="btndown" width="75" height="75" class="dpad-btn btnmid" />
+	</div>
+	<img src="../assets/mobile_buttons/mobile_nom.png" width="75" height="75" id="nom-btn-mobile">
 	<canvas width=600 height=600 />
 </body>
 <script src="../js/game/structures.js"></script>
