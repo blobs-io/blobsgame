@@ -15,6 +15,12 @@ const mapSize = {
 	width: 2000,
 	height: 2000
 };
+const border = {
+	left: { x: 0, y: 0 },
+	right: { x: 0, y: 0},
+	bottom: { x: 0, y: 0 },
+	top: { x: 0, y: 0 }
+};
 const emblems = {
     bronze: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_bronze.png"; return image; })(),
     silver: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_silver.png"; return image; })(),
