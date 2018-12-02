@@ -1,5 +1,11 @@
+html {
+    background-image: url("../assets/brickwall.png");
+}
 body {
-    padding: 3px;
+    margin: 25px;
+    border: 1px solid white;
+    border-radius: 3px;
+    padding: 10px;
 }
 #stats {
     font-family: "Chakra Petch", Arial;
@@ -88,9 +94,7 @@ body {
     cursor: default;
 }
 #footer {
-    position: fixed;
-    bottom: 8px;
-    width: 100%;
+    position: relative;
 }
 #play-btn {
     position: absolute;
