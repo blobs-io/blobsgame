@@ -1,4 +1,4 @@
-const server = "http://localhost:3000";
+const server = document.location.href.match(/https?:\/\/[^\/]+/)[0];
 const socket = io.connect(server);
 const message = "<div id=\"<type>-notif\"><message></div>";
 let buttonClicked = false;
