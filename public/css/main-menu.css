@@ -6,6 +6,7 @@ body {
     border: 1px solid white;
     border-radius: 3px;
     padding: 10px;
+    box-shadow: 10px 10px 2px #2C2F33;
 }
 #stats {
     font-family: "Chakra Petch", Arial;
