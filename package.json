@@ -3,12 +3,14 @@
   "version": "0.0.1",
   "description": "The blobs.io game",
   "main": "backend/server.js",
+  "scripts": {
+    "start": "node ."
+  },
   "dependencies": {
     "express": "^4.16.3",
     "sqlite": "*",
     "socket.io": "*",
     "bcrypt": "*",
-    "snekfetch": "*"
   },
   "engines": {
     "node": "8.x"
