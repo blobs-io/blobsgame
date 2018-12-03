@@ -122,7 +122,7 @@ function request(url, method, headers) {
         xhr.open(method, url, true);
         xhr.onload = () => {
             if (xhr.readyState === 4) {
-                if (xhr.statusCode === 200) a(xhr);
+                if (xhr.status === 200) a(xhr);
                 else b(xhr);
             }
         };
