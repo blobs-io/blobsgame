@@ -114,15 +114,15 @@ function getTier(br) {
 function request(url, method, headers) {
     return new Promise((a,b) => {
         const xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
         if (typeof headers === "object" && headers !== null) { // because typeof null === 'object'
             for (const header of Object.entries(headers)) {
                 xhr.setRequestHeader(header[0], header[1]);
             }
         }
-        xhr.open(method, url, true);
         xhr.onload = () => {
             if (xhr.readyState === 4) {
-                if (xhr.status === 200) a(xhr);
+                if (xhr.status === 200 && xhr.getResponseHeader("status") === "200") a(xhr);
                 else b(xhr);
             }
         };
