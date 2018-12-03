@@ -24,9 +24,10 @@ const border = {
 const emblems = {
     bronze: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_bronze.png"; return image; })(),
     silver: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_silver.png"; return image; })(),
+    platinum: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_platinum.png"; return image; })(),
     gold: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_gold.png"; return image; })(),
     diamond: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_diamond.png"; return image; })(),
-    master: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_master.png"; return image; })(),
+    painite: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_painite.png"; return image; })(),
     guest: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_guest-or-unknown.png"; return image; })(),
     admin: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_admin.png"; return image; })(),
 };
