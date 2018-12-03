@@ -110,3 +110,22 @@ function getTier(br) {
     }
     return result;
 }
+
+function request(url, method, headers) {
+    return new Promise((a,b) => {
+        const xhr = new XMLHttpRequest();
+        if (typeof headers === "object" && headers !== null) { // because typeof null === 'object'
+            for (const header of Object.entries(headers)) {
+                xhr.setRequestHeader(header[0], header[1]);
+            }
+        }
+        xhr.open(method, url, true);
+        xhr.onload = () => {
+            if (xhr.readyState === 4) {
+                if (xhr.statusCode === 200) a(xhr);
+                else b(xhr);
+            }
+        };
+        xhr.send(null);
+    });
+}
