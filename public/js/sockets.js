@@ -86,6 +86,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
                 console.error(JSON.stringify(data));
                 return document.location.href = "/login/";
             } else ready = true;
+            if (data.role === 1) document.getElementById("query-btn").style.display = "inline";
             // Stats
             const tier = getTier(data.br || 0);
             document.getElementById("br-label").innerHTML = `${data.br} BR (<span style="color: #${tier.colorCode}">${tier.tier}</span>)`;
@@ -216,6 +217,18 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 				socket.emit("receiveDailyBonus");
 			});
 
+			document.getElementById("query-btn").addEventListener("click", () => {
+				const query = prompt("Insert SQL statement");
+				const headers = { sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1), query };
+				request("/api/executeSQL/run", "GET", headers).then(xml => {
+					alert("SQL query successfully executed.");
+				}).catch(xml => {
+					const response = JSON.parse(xml.responseText);
+					if (xml.getResponseHeader("status") === "500") return alert(response.message + "\n" + response.error);
+                    alert("There was an error while executing the query: \n" + response.message);
+                });
+			});
+
 			function alertCallback(data) {
 				const alertElement = document.createElement("div");
 				switch(data.type) {
@@ -249,9 +262,4 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 			socket.on("appHeartbeat", data => showOnlineUserList(data.online));
 		});
     } else document.location.href = "/login/";
-    
-    
-    
-    
-    
 }
