@@ -8,10 +8,8 @@ const {
     sessions,
     utils
 } = Base;
-let {
-    captchas,
-    sockets
-} = Base;
+let sockets = Base.sockets;
+let captchas = Base.captchas;
 const express = Base.express.express;
 const app = Base.express.app;
 const {
@@ -37,9 +35,9 @@ sqlite.open("db.sqlite").then(async() => {
 
 setInterval(async () => {
     captchas = captchas.filter(val => (val.createdAt + 18e4) > Date.now());
-    sockets = sockets.filter(val => val.inactiveSince === null || Date.now() < (val.inactiveSince + 3000));
+    Base.sockets = Base.sockets.filter(val => val.inactiveSince === null || Date.now() < (val.inactiveSince + 3000));
     io.sockets.emit("appHeartbeat", {
-		online: sockets.map(v => { return {
+		online: Base.sockets.map(v => { return {
 			location: "Lobby",
 			br: v.br,
 			username: v.username,
@@ -72,8 +70,8 @@ for (let i = 0; i < 500; ++i) {
 io.on("connection", data => {
     try {
         data.on("disconnect", () => {
-            const r = require("./events/disconnect").run(sockets, data, Base, io);
-            sockets = r.sockets;
+            const r = require("./events/disconnect").run(data, Base, io);
+            Base.sockets = r.sockets;
             Base.gamemodes.ffa.players = r.players;
         });
         data.on("appCreate", async _ => {
@@ -85,7 +83,7 @@ io.on("connection", data => {
 				});
 				if (!session) return;
 				const dbData = await require("./utils/getDataFromPlayer")(session.username, sqlite);
-                sockets.push({
+                Base.sockets.push({
                     sessionid: _,
                     socketid: data.id,
                     username: session.username || "?",
@@ -105,7 +103,7 @@ io.on("connection", data => {
 
         // FFA Events
         data.on("ffaPlayerCreate", blob => {
-            require("./events/ffaPlayerCreate").run(blob, io, Base, data, sockets);
+            require("./events/ffaPlayerCreate").run(blob, io, Base, data, Base.sockets);
         });
         data.on("ffaCoordinateChange", eventd => {
             require("./events/ffaCoordinateChange").run(eventd, data, io, Base, sqlite);
@@ -116,12 +114,12 @@ io.on("connection", data => {
         data.on("ffaNomKey", () => require("./events/ffaNomKey").run(data, io, Base, sqlite));
 
         // Other events
-        data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", sockets.filter(v => v.inactiveSince === null).length));
+        data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", Base.sockets.filter(v => v.inactiveSince === null).length));
         data.on("getCaptcha", () => require("./events/getCaptcha").run(sessions, io, data, captchas).then(res => captchas = res));
         data.on("login", res => require("./events/login").run(res, io, data, sqlite, bcrypt, sessions, utils.displayError));
         data.on("register", res => require("./events/register").run(res, io, data, utils.displayError, captchas, bcrypt, sqlite));
         data.on("sessionDelete", sessionid => require("./events/sessionDelete").run(sessionid, sessions, sqlite, io, data));
-        data.on("receiveDailyBonus", () => require("./events/receiveDailyBonus").run(data, io, sockets, sqlite));
-        data.on("switchBlob", blob => require("./events/switchBlob").run(data, io, sockets, sqlite, blob));
+        data.on("receiveDailyBonus", () => require("./events/receiveDailyBonus").run(data, io, Base.sockets, sqlite));
+        data.on("switchBlob", blob => require("./events/switchBlob").run(data, io, Base.sockets, sqlite, blob));
     } catch (e) {}
 });
