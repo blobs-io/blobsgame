@@ -27,12 +27,12 @@ appCreateEvent.run = (...args) => {
                     }).catch(console.log);
                 }
                 if(session) {
-					// online: sockets.map(v => Object.assign(v, {inactiveSince: undefined, sessionid: undefined, socketid: undefined, location: "Lobby"})).concat(gamemodes.ffa.players.map(v=> { return {username: v.owner, br: v.br, location: "FFA"}}))
-                    require("../utils/getDataFromPlayer")(session.username, sqlite).then(async playerData => {
+					 require("../utils/getDataFromPlayer")(session.username, sqlite).then(async playerData => {
                         io.to(data.id).emit("appCreate", {
                             status: 200,
                             username: session.username,
                             br: playerData.br,
+                            role: playerData.role,
                             online: sockets.map(v => { return {
 								location: "Lobby",
 								br: v.br,

@@ -13,7 +13,7 @@ module.exports = class APIController {
 	
 	init(httpm) {
 		for(const endpoint of this.routes) {
-			this.app[httpm](this.route + endpoint.path, endpoint.run);
+			this.app[httpm](this.route + endpoint.path, (...data) => endpoint.run(...data));
 		}
 	}
 };
