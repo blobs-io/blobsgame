@@ -132,6 +132,9 @@ button {
 .fade-grey:hover {
     animation: 0.4s fade-grey forwards;
 }
+.fade-orange:hover {
+    animation: 0.4s fade-orange forwards;
+}
 @keyframes fade-red {
     from {
         color: white;
@@ -146,6 +149,14 @@ button {
     }
     to {
         color: #bdc3c7;
+    }
+}
+@keyframes fade-orange {
+    from {
+        color: white;
+    }
+    to {
+        color: #f39c12;
     }
 }
 @keyframes fade-btn-15-width-180 {
