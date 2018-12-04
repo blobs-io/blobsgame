@@ -3,9 +3,9 @@ const Base = require("../../Base");
 module.exports = class executeSQL {
     static async run(...data) {
         const [req, res] = data;
+        res.set("Content-Type", "application/json")
         if (typeof req.headers.sessionid !== "string" || typeof req.headers.query !== "string") {
             res.set("status", 400);
-            res.set("Content-Type", "application/json");
             res.send({
                 message: "Either sessionid or query header is not a string."
             });
@@ -14,7 +14,6 @@ module.exports = class executeSQL {
         const requester = Base.sockets.find(v => v.sessionid === req.headers.sessionid);
         if (typeof requester === "undefined") {
             res.set("status", 400);
-            res.set("Content-Type", "application/json");
             res.send({
                 message: "Invalid sessionid was provided."
             });
@@ -22,7 +21,6 @@ module.exports = class executeSQL {
         }
         if(requester.role !== 1) {
             res.set("status", 403);
-            res.set("Content-Type", "application/json");
             res.send({
                 message: "You are not allowed to execute SQL queries."
             });
@@ -33,7 +31,6 @@ module.exports = class executeSQL {
             result = await Base.sqlite[req.params.method](req.headers.query);
         } catch(e) {
             res.set("status", 500);
-            res.set("Content-Type", "application/json");
             res.send({
                 message: "An error occured on the server. Perhaps there's a syntax error in your query?",
                 error: e.toString()
@@ -41,7 +38,6 @@ module.exports = class executeSQL {
             return;
         }
         res.set("status", 200);
-        res.set("Content-Type", "application/json");
         res.send({result});
     }
 
