@@ -3,6 +3,7 @@ const ctx = canvas.getContext("2d");
 const host = document.location.href.match(/https?:\/\/[^\/]+/)[0];
 const socket = io.connect(host);
 const sessionid = (window.location.search.match(/[\?\&]sid=[^\&]{12,20}/) || [""])[0];
+let lastLeaderboardUpdate = Date.now();
 let blobs = [],
 objects = {
     walls: [],
@@ -39,6 +40,7 @@ canvas.height = window.innerHeight - 30;
 // Coordinate updates
 setInterval(() => {
     if (ownBlob.ready === false) return;
+    if (Date.now() - lastLeaderboardUpdate > 1500) displayLeaderboard();
     if (ownBlob.x <= 1 && ownBlob.direction === 3) return displayUI();
     else if (ownBlob.y <= 1 && ownBlob.direction === 0) return displayUI();
     else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
@@ -53,6 +55,7 @@ setInterval(() => {
 }, 1);
 
 socket.on("ffaPlayerNommed", eventd => {
+    displayLeaderboard();
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].br = eventd.loser.br;
     blobs[blobs.findIndex(v => v.owner === eventd.winner.owner)].br = eventd.winner.br;
     if (eventd.loser.owner === ownBlob.owner) {
