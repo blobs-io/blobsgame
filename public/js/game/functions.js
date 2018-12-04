@@ -20,6 +20,7 @@ function displayLeaderboard() {
         const leaderboardEntry = document.createElement("div");
         const usernameEntry = document.createElement("span");
         const brLabel = document.createElement("span");
+        const linebreak = document.createElement("br");
         leaderboardEntry.className = "leaderboard-entry";
         usernameEntry.className = "user-entry";
         usernameEntry.innerHTML = (i + 1) + ". " + sortedblobs[i].owner.substr(0, 12);
@@ -28,6 +29,7 @@ function displayLeaderboard() {
         document.getElementById("leaderboard").appendChild(leaderboardEntry);
         document.getElementById("leaderboard").appendChild(usernameEntry);
         document.getElementById("leaderboard").appendChild(brLabel);
+        document.getElementById("leaderboard").appendChild(linebreak);
     }
 }
 
