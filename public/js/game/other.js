@@ -17,3 +17,4 @@ objects.images.blobnom.src = BlobCode.blobnom;
 objects.images.blobnom.onload = () => {
     objects.images.blobnom._ready = true;
 };
+displayLeaderboard();
