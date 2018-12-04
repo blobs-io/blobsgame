@@ -3,7 +3,6 @@ function displayUI(excludes = []) {
     if (!excludes.includes("clearCanvas")) clearCanvas();
     if (!excludes.includes("drawBorder")) drawBorder();
     if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
-    if (!excludes.includes("displayLeaderboard")) displayLeaderboard();
     if (!excludes.includes("displayCooldown")) displayCooldown();
     if (!excludes.includes("displayPlayerStats")) displayPlayerStats();
 }
