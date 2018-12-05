@@ -5,7 +5,7 @@ module.exports = class executeSQL {
     static async run(...data) {
         const [req, res] = data;
         res.set("Content-Type", "application/json");
-        if (typeof req.query.code !== "string") {
+        if (typeof req.headers.code === "undefined") {
             if (typeof req.headers.sessionid === "undefined") {
                 res.set("status", 400);
                 res.send({
@@ -21,8 +21,25 @@ module.exports = class executeSQL {
                 });
                 return;
             }
+
+            if (req.query.request === "true") {
+                const prepared = await Base.sqlite.prepare("SELECT code FROM verifications WHERE user=?");
+                const query = await prepared.get([ requester.username ]);
+                if (typeof query === "undefined") {
+                    query.set("status", 400);
+                    res.send({
+                        message: "User did not request a verification code"
+                    });
+                    return;
+                }
+
+                res.set("status", 200);
+                res.send({
+                    code: query.code
+                });
+                return;
+            }
             const prepared = await Base.sqlite.prepare("SELECT * FROM verifications WHERE user=?");
-            // noinspection JSAnnotator
             if (typeof (await prepared.get([requester.username])) !== "undefined") { // forgive me for writing such code
                 res.set("status", 403);
                 res.send({
@@ -42,8 +59,25 @@ module.exports = class executeSQL {
                     code: verificationCode
                 });
             }
+        } else if (typeof req.headers.code === "string") {
+            const prepare = await Base.sqlite.prepare("SELECT user FROM verifications WHERE code=?");
+            const result = await prepare.get([ req.headers.code ]);
+            if (typeof result === "undefined") {
+                res.set("status", 400);
+                res.send({
+                    message: "code was not found"
+                });
+                return;
+            }
+            res.set("status", 200);
+            res.send({
+                user: result.user
+            });
         } else {
-
+            res.set("status", 400);
+            res.send({
+                message: "code header is not a string"
+            });
         }
     }
 
