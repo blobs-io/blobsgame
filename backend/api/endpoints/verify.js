@@ -69,6 +69,7 @@ module.exports = class executeSQL {
                 });
                 return;
             }
+            await Base.sqlite.prepare("DELETE FROM verifications WHERE code=?").then(prepared => prepared.run([ req.headers.code ]));
             res.set("status", 200);
             res.send({
                 user: result.user
