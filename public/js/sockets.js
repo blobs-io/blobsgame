@@ -220,13 +220,28 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 			document.getElementById("query-btn").addEventListener("click", () => {
 				const query = prompt("Insert SQL statement");
 				const headers = { sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1), query };
-				request("/api/executeSQL/run", "GET", headers).then(xml => {
+				request("/api/executeSQL/run", "GET", headers).then(() => {
 					alert("SQL query successfully executed.");
 				}).catch(xml => {
 					const response = JSON.parse(xml.responseText);
 					if (xml.getResponseHeader("status") === "500") return alert(response.message + "\n" + response.error);
                     alert("There was an error while executing the query: \n" + response.message);
                 });
+			});
+
+			document.getElementById("verify-btn").addEventListener("click", () => {
+				request("/api/verify", "GET", { sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1) }).then(xhr => {
+					const response = JSON.parse(xhr.responseText);
+					alert("Verification code: " + response.code);
+				}).catch(xhr => {
+					request("/api/verify?request=true", "GET", { sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1) }).then(xhr2 => {
+						const response = JSON.parse(xhr2.responseText);
+						alert("Old verification code: " + response.code);
+					}).catch(xhr2 => {
+						const response = JSON.parse(xhr2.responseText);
+						alert("Couldn't retrieve verification code: " + response.message);
+					});
+				});
 			});
 
 			function alertCallback(data) {
