@@ -117,6 +117,18 @@ a:visited {
 	color: #7f8c8d;
 }
 
+#wsinfo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: calc(100% - 40px);
+	font-family: "Consolas";
+	color: white;
+	background-color: black;
+	padding: 10px 20px 10px 20px;
+	z-index: 3;
+}
+
 /* Cute stuff */
 
 #peek {

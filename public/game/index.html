@@ -77,7 +77,7 @@
 		}
 		.btnmid {
 			display: block;
-			margin-left: 75;
+			margin-left: 75px;
 		}
 		.btnright {
 			float: right;
@@ -86,6 +86,17 @@
 			position: fixed;
 			right: 25px;
 			bottom: 100px;
+		}
+		#wsinfo {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: calc(100% - 40px);
+			font-family: "Consolas";
+			color: white;
+			background-color: black;
+			padding: 10px 20px 10px 20px;
+			z-index: 3;
 		}
 	</style>
 	<link rel="stylesheet" type="text/css" media="only screen and (max-width: 1025px)" href="../css/game.small.css" />
@@ -105,6 +116,7 @@
 	<img src="../assets/mobile_buttons/mobile_nom.png" width="75" height="75" id="nom-btn-mobile">
 	<canvas width=600 height=600 />
 </body>
+<script src="../js/sockets.js"></script>
 <script src="../js/game/structures.js"></script>
 <script src="../js/game/canvas.js"></script>
 <script src="../js/game/events.js"></script>

@@ -3,6 +3,26 @@ const socket = io.connect(server);
 const message = "<div id=\"<type>-notif\"><message></div>";
 let buttonClicked = false;
 
+// WS Info label
+(() => {
+	const wsinfodiv = document.createElement("div");
+	wsinfodiv.id = "wsinfo";
+	wsinfodiv.innerHTML = "Connecting to server ...";
+	document.body.prepend(wsinfodiv);
+
+    socket.on("connect", () => {
+        document.body.removeChild(document.getElementById("wsinfo"));
+    });
+})();
+
+socket.on("disconnect", () => {
+    const wsinfodiv = document.createElement("div");
+    wsinfodiv.id = "wsinfo";
+    wsinfodiv.innerHTML = "Connection lost.";
+    wsinfodiv.style.color = "red";
+    document.body.prepend(wsinfodiv);
+});
+
 if (/register(\/.*)?$/.test(window.location.href)) {
     socket.emit("getCaptcha");
     socket.on("captcha", function (data) {
