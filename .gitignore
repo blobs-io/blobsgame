@@ -4,3 +4,4 @@ db.sqlite
 package-lock\.json
 
 backend/server\.js
+backend/Base\.js
