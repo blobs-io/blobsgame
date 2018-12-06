@@ -1,3 +1,4 @@
+const { appendFileSync } = require("fs");
 const Base = require("../../Base");
 
 module.exports = class executeSQL {
@@ -37,7 +38,8 @@ module.exports = class executeSQL {
             });
             return;
         }
-        res.set("status", 200);
+	appendFileSync(`logs.txt`, `[${new Date().toLocaleString()}] ${requester.username} executed: ${req.headers.query}`);
+	res.set("status", 200);
         res.send({result});
     }
 
