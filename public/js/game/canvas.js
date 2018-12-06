@@ -1,7 +1,5 @@
 const canvas = document.getElementsByTagName("canvas")[0];
 const ctx = canvas.getContext("2d");
-const host = document.location.href.match(/https?:\/\/[^\/]+/)[0];
-const socket = io.connect(host);
 const sessionid = (window.location.search.match(/[\?\&]sid=[^\&]{12,20}/) || [""])[0];
 let lastLeaderboardUpdate = Date.now();
 let blobs = [],
