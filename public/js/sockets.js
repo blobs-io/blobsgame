@@ -15,6 +15,14 @@ let buttonClicked = false;
     });
 })();
 
+socket.on("disconnect", () => {
+    const wsinfodiv = document.createElement("div");
+    wsinfodiv.id = "wsinfo";
+    wsinfodiv.innerHTML = "Connection lost.";
+    wsinfodiv.style.color = "red";
+    document.body.prepend(wsinfodiv);
+});
+
 if (/register(\/.*)?$/.test(window.location.href)) {
     socket.emit("getCaptcha");
     socket.on("captcha", function (data) {
