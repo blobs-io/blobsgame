@@ -23,6 +23,7 @@ ffaNomKey.run = async(data, io, Base, sqlite) => {
                     let winner = !won ? blobobj : Base.gamemodes.ffa.players.find(v => v.owner === eventd.owner);
                     let loser = won ? blobobj : Base.gamemodes.ffa.players.find(v => v.owner === eventd.owner);
 
+                    if (eventd.br === blobobj.br) eventd.br -= 1;
                     if (parseInt(blobobj.br) !== NaN) {
                         let result = parseInt(execSync(Base.algorith.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
                         if (result === 0) ++result;
