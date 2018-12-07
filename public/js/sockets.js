@@ -40,6 +40,10 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             captcha: document.getElementById("captcha-input").value
         });
     });
+	
+	document.getElementById("guest-btn").addEventListener("click", function(data) {
+	    document.location.href = "/game?guest=true";
+    });
 
     socket.on("register", function (data) {
         const element = document.createElement("div");
