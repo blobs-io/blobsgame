@@ -7,4 +7,3 @@ mv blobs.io/* ./
 rm -rf blobs.io
 pkill node
 echo '--- Old data has been overwritten. ---';
-echo '--- Make sure to change the host in frontend JavaScript files! ---';
