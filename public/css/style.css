@@ -45,6 +45,32 @@ input[type=submit] {
 	height: 40px;
 }
 
+#login-btn, #register-btn {
+	transition: background-color 0.3s, background 0.5s;
+}
+
+#login-btn:hover, #register-btn:hover {
+	background-color: #2c6acc;
+	background: #2a87d3 radial-gradient(circle, transparent 1%, #2a87d3 3%) center / 5000%;
+}
+
+#login-btn:active, #register-btn:active {
+	background-color: #6eb9f7;
+	background-size: 100%;
+	transition: background 0s;
+}
+
+#guest-btn:hover {
+	transition: background 0.5s;
+	background: #2ecc71 radial-gradient(circle, transparent 1%, #2ecc71 3%) center / 5000%;
+}
+
+#guest-btn:active {
+	background-color: #2ecc71;
+	background-size: 100%;
+	transition: background 0s;
+}
+
 .reg-label {
 	margin-top: 7px;
 	font-size: 14px;
