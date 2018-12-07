@@ -25,13 +25,14 @@ body {
 	font-size: 15px;
 }
 #news {
+    margin-right: 25px;
     width: 250px;
     padding-left: 15px;
     padding-bottom: 3px;
     font-family: "Chakra Petch", Arial;
     overflow-y: scroll;
     position: fixed;
-    height: 50%;
+    height: 35%;
     right: 5px;
 }
 .blurple-scrollbar::-webkit-scrollbar {
@@ -59,15 +60,17 @@ body {
     font-size: 15px;
 }
 #promotions {
+    margin-right: 25px;
+    margin-top: 25px;
     width: 250px;
     padding-left: 15px;
     padding-bottom: 3px;
     font-family: "Chakra Petch", Arial;
     overflow-y: scroll;
     position: fixed;
-    height: 50%;
+    height: 35%;
     right: 5px;
-    top: 51%;
+    top: 40%;
 }
 .user-promotion {
     font-size: 14px;
