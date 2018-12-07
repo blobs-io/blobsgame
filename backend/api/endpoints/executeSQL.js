@@ -38,7 +38,7 @@ module.exports = class executeSQL {
             });
             return;
         }
-	appendFileSync(`logs.txt`, `[${new Date().toLocaleString()}] ${requester.username} executed: ${req.headers.query}`);
+	appendFileSync("logs.txt", `[${new Date().toLocaleString()}] ${requester.username} executed: ${req.headers.query}\n`);
 	res.set("status", 200);
         res.send({result});
     }
