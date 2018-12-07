@@ -16,10 +16,12 @@ body {
 }
 .daily-bonus {
     width: 140px;
+	transition: width 0.4s, font-size 0.4s;
     margin: 0px !important;
 }
 .daily-bonus:hover {
-    animation: 0.4s fade-btn-15-width-150 forwards;
+	width: 150px;
+	font-size: 15px;
 }
 #news {
     width: 250px;
@@ -103,6 +105,7 @@ body {
     right: 0;
     bottom: 5px;
     width: 160px;
+	transition: width 0.4s, font-size 0.4s;
 }
 button {
     padding: 7px 0px 7px 0px;
@@ -118,7 +121,8 @@ button {
     font-size: 13px;
 }
 #play-btn:hover {
-    animation: 0.4s fade-btn-15-width-180 forwards;
+    width: 180px;
+	font-size: 15px;
 }
 .float-left {
     float: left;
