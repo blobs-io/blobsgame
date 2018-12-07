@@ -16,12 +16,7 @@ socket.on("ffaPlayerUpdate", async eventd => {
                 n.display(true, true);
                 blobs.push(n);
             }
-        } else {
-            if (Math.abs(player.x - ownBlob.x) > 20 || Math.abs(player.y - ownBlob.y) > 20) {
-                ownBlob.x = player.x;
-                ownBlob.y = player.y;
-            }
-        }
+        } 
     }
     blobs = blobs.filter(v => blobs.filter(vv => vv.owner === v.owner).length < 2);
 });
