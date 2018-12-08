@@ -107,3 +107,37 @@ h3 {
 	padding: 10px 20px 10px 20px;
 	z-index: 3;
 }
+
+#nom-hist {
+	color: white;
+	font-size: 13px;
+	z-index: 2;
+	position: absolute;
+	top: 15px;
+	left: -225px;
+	font-family: "Consolas", Arial;
+	width: 225px;
+	animation: .4s nom-fade-in forwards;
+}
+
+#nom-hist:default {
+	left: 25px;
+}
+
+.nom-user {
+	color: green;
+}
+
+.target-user {
+	color: red;
+}
+
+.new-br {
+	float: right;
+}
+
+@keyframes nom-fade-in {
+	to {
+		left: 25px;
+	}
+}
