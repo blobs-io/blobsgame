@@ -1,4 +1,5 @@
 (() => {
+	if (/(Android|webOS|iPad|iPod|Windows Phone|BlackBerry|iPhone)/.test(navigator.userAgent)) return;
 	const pCanvas = document.getElementById("particles");
 	const pctx = pCanvas.getContext("2d");
 	// CSS
