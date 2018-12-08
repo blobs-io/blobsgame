@@ -112,6 +112,17 @@ function getTier(br) {
     return result;
 }
 
+function getTierByName(name) {
+	switch (name) {
+		case "bronze": return getTier(1000); break;
+		case "silver": return getTier(2000); break;
+		case "platinum": return getTier(3500); break;
+		case "gold": return getTier(5500); break;
+		case "diamond": return getTier(8500); break;
+		case "painite": return getTier(9999); break;
+	}
+}
+
 function request(url, method, headers) {
     return new Promise((a,b) => {
         const xhr = new XMLHttpRequest();
