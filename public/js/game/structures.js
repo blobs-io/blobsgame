@@ -101,7 +101,7 @@ class BlobObj {
             const canvasX = canvas.width / 2 - w;
             const canvasY = canvas.height / 2 - h;
             const tier = getTier(this.br || 0);
-            
+            if (typeof this.owner === "undefined") return;
             if (this.owner === ownBlob.owner) {
 				ctx.fillStyle = "#" + tier.colorCode;
                 ctx.font = (15 * scale).toString() + "px Dosis";
