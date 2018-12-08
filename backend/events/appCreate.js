@@ -9,6 +9,13 @@ class appCreateEvent {};
 appCreateEvent.run = (...args) => {
     const [sessionid, displayError, sessions, io, data, sqlite, sockets] = args;
     return new Promise((resolve, reject) => {
+		sqlite.all("SELECT promotedAt FROM recentPromotions ORDER BY promotedAt ASC").then(res => {
+			for (const promotion of res) {
+				if (Date.now() - parseInt(promotion.promotedAt) >= 86400000) {
+					sqlite.run(`DELETE FROM recentPromotions WHERE promotedAt="${promotion.promotedAt}"`);
+				}
+			}
+		});
         if (!sessionid) return displayError("No session ID provided.", data, "appCreate", 400, io);
         sessions.getSession(sqlite, {
             type: "session",
