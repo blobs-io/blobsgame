@@ -26,7 +26,7 @@ socket.on("disconnect", () => {
 if (/register(\/.*)?$/.test(window.location.href)) {
     socket.emit("getCaptcha");
     socket.on("captcha", function (data) {
-        const ctx = document.getElementsByTagName("canvas")[0].getContext("2d");
+        const ctx = document.getElementById("captcha-canvas").getContext("2d");
         ctx.font = "20px Arial";
         ctx.fillStyle = "white";
         ctx.fillText(data.captcha, data.position.x, data.position.y);
