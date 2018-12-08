@@ -141,3 +141,12 @@ h3 {
 		left: 25px;
 	}
 }
+
+#fps-meter {
+	font-family: "Calibri";
+	color: white;
+	display: block;
+	position: fixed;
+	bottom: 5px; 
+	left: 8px;
+}
