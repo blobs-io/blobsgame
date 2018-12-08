@@ -7,10 +7,10 @@ If you plan to host this on your own you need to compile the basic BR algorithm 
 __A:__ Blobs.io is a work-in-progress multiplayer game that involves blob characters (you may know these from Android) that “nom” players in order to gain blob rating, which shows how skilled you are at the game.
 
 ### Where can I play this game?
-__A:__ As stated above, this game is still a WIP and may not work yet. For now (as of 11/03/2018) it doesn't work at all and is not playable. Its interface (login, registration and main menu) does exist and can be accessed through the internet by anybody [here](https://blobs-io.glitch.me) and all other pages should work well, means that you can register and login without any problems.
+__A:__ As stated above, this game is still a WIP and may not work yet. Its interface (login, registration and main menu) does exist and can be accessed through the internet by anybody [here](https://blobs-io.glitch.me) and all other pages should work well, means that you can register and login without any problems. The game should work fine, too, but there is not much yet.
 
 ### Any ETA when this game is ready?
-__A:__ No, we do not know when this game is playable.
+__A:__ The game is playable, but it's lacking features. We are working on it to get it done as soon as possible. We do not know when this game is ready, but you can expect the first version to be ready in 2019.
 
 ### Can I donate for this project?
 __A:__ No, there is no way to donate for now. Thank you for caring.
