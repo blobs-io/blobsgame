@@ -60,4 +60,32 @@ socket.on("ffaPlayerNommed", eventd => {
         ownBlob.x = eventd.loser.x;
         ownBlob.y = eventd.loser.y;
     }
+	const nomHistoryDiv = document.getElementById("nom-hist");
+	const nomEntryDiv = document.createElement("div");
+	nomEntryDiv.className = "nom-hist-entry";
+	const nomUser = document.createElement("span");
+	const targetUser = document.createElement("span");
+	nomUser.className = "nom-user nom-entry";
+	nomUser.innerHTML = `${eventd.winner.owner} (+${eventd.result})`;
+	const newBRLabel = document.createElement("span");
+	const newBRLabelLoser = document.createElement("span");
+	newBRLabel.className = "new-br";
+	newBRLabel.innerHTML = eventd.winner.br + " BR";
+	const linebreakWinner = document.createElement("br");
+	targetUser.className = "target-user nom-entry";
+	targetUser.innerHTML = `${eventd.loser.owner} (-${eventd.result})`;
+	newBRLabelLoser.className = "new-br";
+	newBRLabelLoser.innerHTML = eventd.loser.br + " BR";
+	const linebreakLoser = document.createElement("br");
+	nomHistoryDiv.appendChild(nomEntryDiv);
+	nomEntryDiv.appendChild(nomUser);
+	nomEntryDiv.appendChild(newBRLabel);
+	nomEntryDiv.appendChild(linebreakWinner);
+	nomEntryDiv.appendChild(targetUser);
+	nomEntryDiv.appendChild(newBRLabelLoser);
+	nomEntryDiv.appendChild(linebreakLoser);
+	
+	setTimeout(() => {
+		nomHistoryDiv.removeChild(nomEntryDiv);
+	}, 3500);
 });
