@@ -36,7 +36,12 @@ canvas.width = window.innerWidth - 30;
 canvas.height = window.innerHeight - 30;
 
 // Coordinate updates
+let lastIteration = Date.now();
 setInterval(() => {
+	// FPS meter
+	if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
+	lastIteration = Date.now();
+	// Blob coordinates
     if (ownBlob.ready === false) return;
     if (Date.now() - lastLeaderboardUpdate > 1500) displayLeaderboard();
     if (ownBlob.x <= 1 && ownBlob.direction === 3) return displayUI();
