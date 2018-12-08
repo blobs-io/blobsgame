@@ -218,12 +218,17 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 			if (data.promotions.length > 0) {
 				document.getElementById("promotions").removeChild(document.getElementById("no-promotions"));
 			}
+			
+			function formatTimeDist(ms) {
+				return Math.floor(ms / 360000);
+			}
+			
 			// Recent promotions
 			for (const promotion of data.promotions) {
 				const dropped = promotion.drop === 1;
-				const promotionElement = document.createElement("div");
+				const promotionElement = document.createElement("p");
 				promotionElement.className = "user-promotion";
-				promotionElement.innerHTML = `<span style="color: ${dropped ? "red" : "green"}">${dropped ? "▼" : "▲"}</span> ${promotion.user} (<span style="color: #${getTierByName(promotion.newTier).colorCode}">${promotion.newTier}</span>)`;
+				promotionElement.innerHTML = `<span class="${dropped ? "rankdown" : "rankup"}" style="margin-right: 15px;">${dropped ? "▼" : "▲"}</span> <span style="color:#${getTierByName(promotion.newTier).colorCode}">${promotion.user}</span> <span class="promotedat">(${formatTimeDist(Date.now() - parseInt(promotion.promotedAt))} hours ago)</span>`;
 				document.getElementById("promotions").appendChild(promotionElement);
 				
 			}
