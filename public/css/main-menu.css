@@ -47,10 +47,11 @@ body {
     width: 3px;
 }
 .news-heading {
-    font-size: 15px;
+    font-size: 18px;
+    text-decoration: underline;
 }
 .news-content {
-    font-size: 13px;
+    font-size: 12px;
 }
 .div-heading {
     text-transform: uppercase;
