@@ -34,17 +34,47 @@ function getTier(br) {
 }
 
 function promotedTo(oldbr, newbr) {
-	if (oldbr >= 1500 && newbr < 1500) return { drop: true, newTier: "bronze" };
-	if (oldbr < 1500 && newbr >= 1500) return { drop: false, newTier: "silver" };
-	if (oldbr >= 3000 && newbr < 3000) return { drop: true, newTier: "silver" };
-	if (oldbr < 3000 && newbr >= 3000) return { drop: false, newTier: "platinum" };
-	if (oldbr >= 5000 && newbr < 5000) return { drop: true, newTier: "platinum" };
-	if (oldbr < 5000 && newbr >= 5000) return { drop: false, newTier: "gold" };
-	if (oldbr >= 8000 && newbr < 8000) return { drop: true, newTier: "gold" };
-	if (oldbr < 8000 && newbr >= 8000) return { drop: false, newTier: "diamond" };
-	if (oldbr >= 9500 && newbr < 9500) return { drop: true, newTier: "diamond" };
-	if (oldbr < 9500 && newbr >= 9500) return { drop: false, newTier: "painite" };
-	return undefined;
+    if (oldbr >= 1500 && newbr < 1500) return {
+        drop: true,
+        newTier: "bronze"
+    };
+    if (oldbr < 1500 && newbr >= 1500) return {
+        drop: false,
+        newTier: "silver"
+    };
+    if (oldbr >= 3000 && newbr < 3000) return {
+        drop: true,
+        newTier: "silver"
+    };
+    if (oldbr < 3000 && newbr >= 3000) return {
+        drop: false,
+        newTier: "platinum"
+    };
+    if (oldbr >= 5000 && newbr < 5000) return {
+        drop: true,
+        newTier: "platinum"
+    };
+    if (oldbr < 5000 && newbr >= 5000) return {
+        drop: false,
+        newTier: "gold"
+    };
+    if (oldbr >= 8000 && newbr < 8000) return {
+        drop: true,
+        newTier: "gold"
+    };
+    if (oldbr < 8000 && newbr >= 8000) return {
+        drop: false,
+        newTier: "diamond"
+    };
+    if (oldbr >= 9500 && newbr < 9500) return {
+        drop: true,
+        newTier: "diamond"
+    };
+    if (oldbr < 9500 && newbr >= 9500) return {
+        drop: false,
+        newTier: "painite"
+    };
+    return undefined;
 }
 
 ffaNomKey.run = async (data, io, Base, sqlite) => {
@@ -79,22 +109,26 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
 
                         await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(loser.br - result <= 0 ? 1 : loser.br - result), loser.owner]));
                         await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(winner.br + result > 9999 ? 9999 : winner.br + result), winner.owner]));
-						
-						const dropRes = {
-							winner: promotedTo(winner.br - result, winner.br) || {drop: undefined},
-							loser: promotedTo(loser.br + result, loser.br) || {drop: undefined}
-						};
-						if (typeof dropRes.winner.drop !== "undefined") {
-							sqlite.prepare("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)").then(prepared => {
-								prepared.run([ winner.owner, dropRes.winner.newTier, dropRes.winner.drop, Date.now()]);
-							});
-						} else if (typeof dropRes.loser.drop !== "undefined") {
-							sqlite.prepare("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)").then(prepared => {
-								prepared.run([ loser.owner, dropRes.loser.newTier, dropRes.loser.drop, Date.now()]);
-							});
-						}
-						
-						
+
+                        const dropRes = {
+                            winner: promotedTo(winner.br - result, winner.br) || {
+                                drop: undefined
+                            },
+                            loser: promotedTo(loser.br + result, loser.br) || {
+                                drop: undefined
+                            }
+                        };
+                        if (typeof dropRes.winner.drop !== "undefined") {
+                            sqlite.prepare("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)").then(prepared => {
+                                prepared.run([winner.owner, dropRes.winner.newTier, dropRes.winner.drop, Date.now()]);
+                            });
+                        } else if (typeof dropRes.loser.drop !== "undefined") {
+                            sqlite.prepare("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)").then(prepared => {
+                                prepared.run([loser.owner, dropRes.loser.newTier, dropRes.loser.drop, Date.now()]);
+                            });
+                        }
+
+
                         io.sockets.emit("ffaPlayerNommed", {
                             winner,
                             loser,

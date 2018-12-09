@@ -13,6 +13,8 @@ ffaCoordinateChangeEvent.run = async (...args) => {
         if (eventd.y < 0) eventd.y = 0;
         if (eventd.x > 2000) eventd.x = 2000;
         if (eventd.y > 2000) eventd.y = 2000;
+        prev.distance += (Math.abs(prev.x - eventd.x) + Math.abs(prev.y - eventd.y));
+        eventd.distance = prev.distance;
     } catch (e) {}
     Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === eventd.owner)] = eventd;
 };

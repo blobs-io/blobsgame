@@ -28,6 +28,7 @@ ffaPlayerCreateEvent.run = async (...args) => {
     nblob._directionChange = Date.now();
     nblob.role = socket.role;
     nblob.guest = socket.guest;
+    nblob.distance = 0;
     Base.gamemodes.ffa.players.push(nblob);
     io.to(data).emit("ffaObjectsHeartbeat", Base.gamemodes.ffa.objects);
     io.to(data.id).emit("ffaHeartbeat", {
