@@ -225,7 +225,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             }
 
             function formatTimeDist(ms) {
-                return Math.floor(ms / 360000);
+                return Math.floor(ms / (1000 * 60 * 60));
             }
 
             // Recent promotions
