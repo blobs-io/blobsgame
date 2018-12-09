@@ -115,7 +115,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             const tier = getTier(data.br || 0);
             document.getElementById("br-label").innerHTML = `${data.br} BR (<span style="color: #${tier.colorCode}">${tier.tier}</span>)`;
             document.getElementById("blobcoins-label").innerHTML = `Blobcoins: ${data.coins}`;
-            document.getElementById("distance-label").innerHTML = `Distance travelled: ${data.distance}K pixels`;
+            document.getElementById("distance-label").innerHTML = `Distance travelled: ${data.distance.toFixed(2)}K pixels`;
             // Blob list
             blobs.current = data.activeBlob;
             const activeBlobElements = {
