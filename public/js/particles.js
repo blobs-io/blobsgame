@@ -1,5 +1,7 @@
 (() => {
-	if (/(Android|webOS|iPad|iPod|Windows Phone|BlackBerry|iPhone)/.test(navigator.userAgent)) return;
+	if (/(Android|webOS|iPad|iPod|Windows Phone|BlackBerry|iPhone)/.test(navigator.userAgent)) {
+		return document.body.removeChild(document.getElementById("particles"));
+	}
 	const pCanvas = document.getElementById("particles");
 	const pctx = pCanvas.getContext("2d");
 	// CSS
