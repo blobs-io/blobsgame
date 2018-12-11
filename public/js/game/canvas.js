@@ -45,9 +45,10 @@ setInterval(() => {
     if (ownBlob.ready === false) return;
     if (Date.now() - lastTick > 1500) {
     	displayLeaderboard();
+    	const timestampBefore = Date.now();
 		request("/api/ping", "GET").then(res => {
 			const request = JSON.parse(res.responseText);
-			const diff = (Date.now() - request.arrived);
+			const diff = (Date.now() - timestampBefore);
 			document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
 		});
         lastTick = Date.now();
