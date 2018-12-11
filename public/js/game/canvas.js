@@ -15,10 +15,10 @@ const mapSize = {
 	height: 2000
 };
 const border = {
-	left: { x: 0, y: 0 },
-	right: { x: 0, y: 0},
-	bottom: { x: 0, y: 0 },
-	top: { x: 0, y: 0 }
+	left: { from: { x: 0, y: 0,}, to: { x: 0, y: 0 } },
+	right: { from: { x: 0, y: 0,}, to: { x: 0, y: 0 } },
+	top: { from: { x: 0, y: 0,}, to: { x: 0, y: 0 } },
+	bottom: { from: { x: 0, y: 0,}, to: { x: 0, y: 0 } }
 };
 const emblems = {
     bronze: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_bronze.png"; return image; })(),
