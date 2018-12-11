@@ -58,26 +58,26 @@ function drawBorder(context = ctx) {
     const diffYNeg = ownBlob.y - (canvas.height / 2);
     if (diffXPos > mapSize.width) { // right border
         context.beginPath();
-        context.moveTo((canvas.width - (diffXPos - mapSize.width)), (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
-        context.lineTo((canvas.width - (diffXPos - mapSize.width)), (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
+        context.moveTo(border.right.from.x = (canvas.width - (diffXPos - mapSize.width)), border.right.from.y = (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
+        context.lineTo(border.right.to.x = (canvas.width - (diffXPos - mapSize.width)), border.right.to.y = (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
         context.stroke();
     }
     if (diffXNeg < 0) { // left border
         context.beginPath();
-        context.moveTo((-(diffXNeg + 35)), (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
-        context.lineTo((-(diffXNeg + 35)), (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
+        context.moveTo(border.left.from.x = (-(diffXNeg + 35)), border.left.from.y = (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
+        context.lineTo(border.left.to.x = (-(diffXNeg + 35)), border.left.to.y = (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
         context.stroke();
     }
     if (diffYPos > mapSize.height) { // bottom border
         context.beginPath();
-        context.moveTo((diffXNeg < 0 ? -(diffXNeg + 35) : 0), (canvas.height - (diffYPos - mapSize.height)));
-        context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), (canvas.height - (diffYPos - mapSize.height)));
+        context.moveTo(border.bottom.from.x = (diffXNeg < 0 ? -(diffXNeg + 35) : 0), border.bottom.from.y = (canvas.height - (diffYPos - mapSize.height)));
+        context.lineTo(border.bottom.to.x = (diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), border.bottom.to.y = (canvas.height - (diffYPos - mapSize.height)));
         context.stroke();
     }
     if (diffYNeg < 0) { // top border
         context.beginPath();
-        context.moveTo((diffXNeg < 0 ? -(diffXNeg + 35) : 0), (-(diffYNeg + 35)));
-        context.lineTo((diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), (-(diffYNeg + 35)));
+        context.moveTo(border.top.from.x = (diffXNeg < 0 ? -(diffXNeg + 35) : 0), border.top.from.y = (-(diffYNeg + 35)));
+        context.lineTo(border.top.to.x = (diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), border.top.to.y = (-(diffYNeg + 35)));
         context.stroke();
     }
 }
