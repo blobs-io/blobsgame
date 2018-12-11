@@ -1,7 +1,7 @@
 const canvas = document.getElementsByTagName("canvas")[0];
 const ctx = canvas.getContext("2d");
 const sessionid = (window.location.search.match(/[\?\&]sid=[^\&]{12,20}/) || [""])[0];
-let lastLeaderboardUpdate = Date.now();
+let lastTick = Date.now();
 let blobs = [],
 objects = {
     walls: [],
@@ -43,7 +43,15 @@ setInterval(() => {
 	lastIteration = Date.now();
 	// Blob coordinates
     if (ownBlob.ready === false) return;
-    if (Date.now() - lastLeaderboardUpdate > 1500) displayLeaderboard();
+    if (Date.now() - lastTick > 1500) {
+    	displayLeaderboard();
+		request("/api/ping", "GET").then(res => {
+			const request = JSON.parse(res.responseText);
+			const diff = (Date.now() - request.arrived);
+			document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
+		});
+        lastTick = Date.now();
+    }
     if (ownBlob.x <= 1 && ownBlob.direction === 3) return displayUI();
     else if (ownBlob.y <= 1 && ownBlob.direction === 0) return displayUI();
     else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
