@@ -36,7 +36,7 @@ sqlite.open("db.sqlite").then(async() => {
 
 setInterval(async () => {
     captchas = captchas.filter(val => (val.createdAt + 18e4) > Date.now());
-    Base.sockets = Base.sockets.filter(val => val.inactiveSince === null || Date.now() < (val.inactiveSince + 3000));
+    Base.sockets = Base.sockets.filter(val => val.inactiveSince === null || Date.now() < (val.inactiveSince + 30000));
     io.sockets.emit("appHeartbeat", {
 		online: Base.sockets.map(v => { return {
 			location: "Lobby",
