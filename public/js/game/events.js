@@ -34,7 +34,6 @@ socket.on("ffaHeartbeat", d => {
     blobs.push(ownBlob);
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");
-socket.emit("ffaPlayerCreate", sessionid.substr(sessionid.indexOf("=") + 1));
 
 
 // Events (Window/Document)
