@@ -1,0 +1,77 @@
+html {
+    height: 100%;
+    width: 100%;
+}
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(110deg, #2C2F33, #0f0f0f);
+    font-family: "Calibri", Arial;
+    color: #766666;
+}
+.tier-image {
+    vertical-align: middle;
+}
+#loading-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    margin-top: 50px;
+    width: 75%;
+    height: 500px;
+    background-color: #292929;
+    border-radius: 2px;
+    opacity: 1;
+    z-index: 1;
+}
+.heading {
+    text-transform: uppercase;
+    font-family: "Raleway";
+    font-size: 20px;
+}
+#headline {
+    margin: 5px 5px 0px 5px;
+    padding: 0px 3px 0px 10px;
+    border-bottom: 1px solid #766666;
+}
+#loading-bar {
+    border: 1px solid #766666;
+    height: 30px;
+    line-height: 30px;
+    position: absolute;
+    bottom: 0;
+    width: calc(100% - 20px);
+    margin: 10px;
+}
+#bar-inside {
+    background-color: #766666;
+    height: 30px;
+    width: 0px;
+    transition: 0.3s width;
+}
+#tip {
+    float: right;
+    width: 300px;
+    margin: 5px 5px 0px 0px;
+}
+.centered {
+    text-align: center;
+}
+#players {
+    float: left;
+    width: 250px;
+    margin-left: 25px;
+    margin-top: 5px;
+}
+.player-name {
+    margin-left: 10px;
+    font-family: "Raleway";
+}
+.player {
+    display: block;
+}
