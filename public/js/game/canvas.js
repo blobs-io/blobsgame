@@ -30,8 +30,7 @@ const emblems = {
     guest: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_guest-or-unknown.png"; return image; })(),
     admin: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_admin.png"; return image; })(),
 };
-	
-	
+
 canvas.width = window.innerWidth - 30;
 canvas.height = window.innerHeight - 30;
 
