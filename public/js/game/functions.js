@@ -5,6 +5,7 @@ function displayUI(excludes = []) {
     if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
     if (!excludes.includes("displayCooldown")) displayCooldown();
     if (!excludes.includes("displayPlayerStats")) displayPlayerStats();
+    if (!excludes.includes("displayWalls")) displayWalls();
 }
 
 function clearCanvas(context = ctx) {
@@ -29,6 +30,26 @@ function displayLeaderboard() {
         document.getElementById("leaderboard").appendChild(usernameEntry);
         document.getElementById("leaderboard").appendChild(brLabel);
         document.getElementById("leaderboard").appendChild(linebreak);
+    }
+}
+
+function displayWalls(context = ctx) {
+    for (const wall of objects.walls) {
+        let canvasPosX = 0,
+        canvasPosY = 0;
+        if (ownBlob.x >= wall.x) {
+            canvasPosX = (canvas.width / 2) - (ownBlob.x - wall.x);
+        } else if (ownBlob.x < wall.x) {
+            canvasPosX = (canvas.width / 2) + (wall.x - ownBlob.x);
+        }
+        if (ownBlob.y >= wall.y) {
+            canvasPosY = (canvas.height / 2) - (ownBlob.y - wall.y);
+        } else if (ownBlob.y < wall.y) {
+            canvasPosY = (canvas.height / 2) + (wall.y - ownBlob.y);
+        }
+        canvasPosY -= 45;
+        canvasPosX -= 45;
+        context.drawImage(objects.images.brickwall, canvasPosX, canvasPosY, 45, 45);
     }
 }
 
