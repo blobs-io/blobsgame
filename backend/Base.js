@@ -25,6 +25,13 @@ Base.gamemodes = {
 	}
 };
 
+// Add objects
+for(let i = 0; i < 50; ++i) {
+	Base.gamemodes.ffa.objects.walls.push({
+		x: Math.floor(Math.random() * 2000),
+		y: Math.floor(Math.random() * 2000)
+	});
+}
 
 // Utilities
 require("./utils/utilManager")().then(utilities => {
