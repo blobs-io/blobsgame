@@ -60,14 +60,6 @@ setInterval(() => {
     io.sockets.emit("ffaPlayerUpdate", Base.gamemodes.ffa.players);
 }, 10);
 
-// Assign Walls to FFA Map
-for (let i = 0; i < 500; ++i) {
-    Base.gamemodes.ffa.objects.walls.push({
-        x: Math.floor(Math.random() * 1600) + 20,
-        y: Math.floor(Math.random() * 1600) + 20,
-    });
-}
-
 io.on("connection", data => {
     try {
         data.on("disconnect", () => {
