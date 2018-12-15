@@ -23,6 +23,7 @@ socket.on("ffaPlayerUpdate", async eventd => {
 socket.on("ffaObjectsHeartbeat", eventd => {
     for (let i = 0; i < eventd.walls.length; ++i) {
         const wall = new WallObj(eventd.walls[i].x, eventd.walls[i].y);
+        objects.walls.push(wall);
     }
 });
 socket.on("ffaHeartbeat", d => {
