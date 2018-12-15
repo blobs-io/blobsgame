@@ -60,7 +60,12 @@ setInterval(() => {
     if (ownBlob.direction === 0) ownBlob.y = ownBlob.directionChangeCoordinates.y - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
     else if (ownBlob.direction === 1) ownBlob.x = ownBlob.directionChangeCoordinates.x + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
     else if (ownBlob.direction === 2) ownBlob.y = ownBlob.directionChangeCoordinates.y + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
-    else if (ownBlob.direction === 3) ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
+	else if (ownBlob.direction === 3) ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
+	
+	if (ownBlob.x < 0) ownBlob.x = 0;
+	else if (ownBlob.x >= mapSize.width) ownBlob.x = mapSize.width;
+	if (ownBlob.y < 0) ownBlob.y = 0;
+	else if (ownBlob.y >= mapSize.height) ownBlob.y = mapSize.height;
     displayUI();
     socket.emit("ffaCoordinateChange", ownBlob);
 }, 1);
