@@ -26,6 +26,7 @@ api.init("get");
 const Logger = require("./Logger");
 const logger = new Logger();
 Base.express.app.use((req, res, next) => {
+    if (/\/(\?.+)?$/.test(req.originalUrl)) logger.requests.htmlOnly++;
     if (req.originalUrl.startsWith("/game/")) logger.requests.ffa++;
     logger.requests.total++;
     return next();
