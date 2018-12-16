@@ -8,6 +8,12 @@ Base.socket = require("socket.io");
 Base.server = Base.express.app.listen(process.env.PORT || 3000, () => {
     console.log("App started.");
 });
+Base.discordAuth = {
+	logWebhook: {
+		id: undefined,
+		token: undefined
+	}
+};
 Base.algorith = "./b {ownbr} {opponentbr} 1";
 Base.bcrypt = require("bcrypt");
 Base.sqlite = require("sqlite");
