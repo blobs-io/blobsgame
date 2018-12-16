@@ -1,7 +1,5 @@
 const Base = require("./Base");
 const {
-    socket,
-    server,
     bcrypt,
     sqlite,
     io,
@@ -10,8 +8,6 @@ const {
 } = Base;
 let sockets = Base.sockets;
 let captchas = Base.captchas;
-const express = Base.express.express;
-const app = Base.express.app;
 const {
     existsSync,
     writeFileSync
