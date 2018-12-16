@@ -2,7 +2,15 @@ const Base = require("./Base.js");
 
 module.exports = class Logger {
     constructor(requests = { total:0, ffa:0 }) {
-        this.requests = requests;
+        this._requests = requests;
+    }
+
+    get requests() {
+        return this._requests;
+    }
+
+    set requests(value) {
+        return this._requests = value;
     }
 
     async log() {
@@ -13,7 +21,7 @@ module.exports = class Logger {
             await Base.sqlite.run("INSERT INTO logs VALUES ('ffa', 0)");
         }
         await Base.sqlite.prepare("UPDATE logs SET amount=? WHERE name=?").then(v => v.run([ this.requests.total, "total" ]));
-        await Base.sqlite.prepare("UPDATE logs SET amount=? WHERE name=?").then(v => v.run([ this.requests.ffa, "ffa" ]));;
+        await Base.sqlite.prepare("UPDATE logs SET amount=? WHERE name=?").then(v => v.run([ this.requests.ffa, "ffa" ]));
         return this.requests;
     }
 };
