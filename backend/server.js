@@ -25,6 +25,11 @@ api.init("get");
 // Logger
 const Logger = require("./Logger");
 const logger = new Logger();
+Base.express.app.use((req, res, next) => {
+    if (req.originalUrl.startsWith("/game/")) logger.requests.ffa++;
+    logger.requests.total++;
+    return next();
+});
 
 // SQLite initalization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
