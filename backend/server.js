@@ -34,7 +34,7 @@ Base.express.app.use((req, res, next) => {
 Base.express.app.use(Base.express.express.static("public"));
 logger.setInterval(()=>{}, 15e3);
 
-// SQLite initalization
+// SQLite initialization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 sqlite.open("db.sqlite").then(async() => {
     // Create tables if they don't already exist
