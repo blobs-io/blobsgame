@@ -40,7 +40,7 @@ Base.express.app.use((req, res, next) => {
 Base.express.app.use(Base.express.express.static("public"));
 logger.setInterval(()=>{
     logger.postDiscord();
-}, 15e3);
+}, 60e3);
 
 // SQLite initialization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
