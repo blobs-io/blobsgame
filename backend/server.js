@@ -22,10 +22,21 @@ const APIController = require("./api/Controller");
 const api = new APIController(Base.express.app);
 api.init("get");
 
+// Logger
+const Logger = require("./Logger");
+const logger = new Logger();
+Base.express.app.use((req, res, next) => {
+    if (req.originalUrl.startsWith("/game/")) logger.requests.ffa++;
+    logger.requests.total++;
+    return next();
+});
+logger.setInterval(()=>{}, 15e3);
+
 // SQLite initalization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 sqlite.open("db.sqlite").then(async() => {
     // Create tables if they don't already exist
+    await sqlite.run("CREATE TABLE IF NOT EXISTS logs (`name` TEXT, `amount` INTEGER)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS verifications (`user` TEXT, `code` TEXT, `requestedAt` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS recentPromotions (`user` TEXT, `newTier` TEXT, `drop` INTEGER, `promotedAt` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS news (`headline` TEXT, `content` TEXT, `createdAt` TEXT)");
