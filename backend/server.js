@@ -30,6 +30,7 @@ Base.express.app.use((req, res, next) => {
     logger.requests.total++;
     return next();
 });
+Base.express.app.use(Base.express.express.static("public"));
 logger.setInterval(()=>{}, 15e3);
 
 // SQLite initalization
