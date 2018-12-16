@@ -30,6 +30,7 @@ Base.express.app.use((req, res, next) => {
     logger.requests.total++;
     return next();
 });
+logger.setInterval(()=>{}, 15e3);
 
 // SQLite initalization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
