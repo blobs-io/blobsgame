@@ -1,7 +1,9 @@
 # blobs.io
 The official repository for the blobs.io website<br/>
 **Note:** This game is still in development. It may not work yet. <br />
+### Selfhosting notes
 If you plan to host this on your own you need to compile the basic BR algorithm which can be found on the `rating-system` repository of this organization. Please do not create any issues regarding compiling and other problems with the rating system in general on this repository. Instead, please use the other one.
+Internally it will send a request to the Discord API to execute a webhook. The authorization details (token and ID) are stored in the file `backend/Base.js`. If you do not wish to post traffic to Discord, leave values `undefined`.
 
 ### What is this?
 __A:__ Blobs.io is a work-in-progress multiplayer game that involves blob characters (you may know these from Android) that “nom” players in order to gain blob rating, which shows how skilled you are at the game.
