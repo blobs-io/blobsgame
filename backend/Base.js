@@ -11,7 +11,6 @@ Base.server = Base.express.app.listen(process.env.PORT || 3000, () => {
 Base.algorith = "./b {ownbr} {opponentbr} 1";
 Base.bcrypt = require("bcrypt");
 Base.sqlite = require("sqlite");
-Base.express.app.use(Base.express.express.static("public"));
 Base.io = Base.socket(Base.server);
 Base.sessions = require("./SessionIDManager");
 Base.utils = { };
