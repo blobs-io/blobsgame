@@ -5,6 +5,10 @@ const formdata = require("form-data");
 module.exports = class Logger {
     constructor(discordAuth = {}, requests = { total:0, htmlOnly: 0, ffa:0 }) {
         this._requests = requests;
+        this.sessionRequests = {};
+        for (const property in requests) {
+            if (!this.sessionRequests.hasOwnProperty(property)) this.sessionRequests[property] = requests[property];
+        }
         this.discordAuth = discordAuth;
     }
 
@@ -26,7 +30,7 @@ module.exports = class Logger {
         if (this.discordAuth.id === undefined || this.discordAuth.token === undefined) return;
         const data = await Base.sqlite.all("SELECT * FROM logs");
         const form = new formdata();
-        form.append("content", `**Total requests:** ${data.find(v => v.name === "total").amount}\n**Total FFA requests:** ${data.find(v => v.name === "ffa").amount}\n**HTML-only requests: **${data.find(v => v.name === "htmlOnly").amount}`);
+        form.append("content", `Total requests: ${data.find(v => v.name === "total").amount}\nTotal FFA requests: ${data.find(v => v.name === "ffa").amount}\nHTML-only requests: ${data.find(v => v.name === "htmlOnly").amount}`);
         const request = await fetch(`https://discordapp.com/api/webhooks/${this.discordAuth.id}/${this.discordAuth.token}`, {
             method: "POST",
             body: form
