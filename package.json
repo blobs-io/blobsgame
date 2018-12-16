@@ -10,7 +10,8 @@
     "express": "^4.16.3",
     "sqlite": "*",
     "socket.io": "*",
-    "bcrypt": "*"
+    "bcrypt": "*",
+    "node-fetch": "*"
   },
   "engines": {
     "node": "8.x"
