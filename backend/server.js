@@ -22,6 +22,10 @@ const APIController = require("./api/Controller");
 const api = new APIController(Base.express.app);
 api.init("get");
 
+// Logger
+const Logger = require("./Logger");
+const logger = new Logger();
+
 // SQLite initalization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 sqlite.open("db.sqlite").then(async() => {
