@@ -25,9 +25,16 @@ const logger = new Logger({
     token: Base.discordAuth.logWebhook.token
 });
 Base.express.app.use((req, res, next) => {
-    if (/\/(\?.+)?$/.test(req.originalUrl)) logger.requests.htmlOnly++;
-    if (req.originalUrl.startsWith("/game/")) logger.requests.ffa++;
+    if (/\/(\?.+)?$/.test(req.originalUrl)) {
+        logger.requests.htmlOnly++;
+        logger.sessionRequests.htmlOnly++;
+    }
+    if (req.originalUrl.startsWith("/game/")) {
+        logger.requests.ffa++;
+        logger.sessionRequests.ffa++;
+    }
     logger.requests.total++;
+    logger.sessionRequests.total++;
     return next();
 });
 Base.express.app.use(Base.express.express.static("public"));
