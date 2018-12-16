@@ -23,6 +23,7 @@ module.exports = class Logger {
     }
 
     async postDiscord() {
+        if (this.discordAuth.id === undefined || this.discordAuth.token === undefined) return;
         const data = await Base.sqlite.all("SELECT * FROM logs");
         const form = new formdata();
         form.append("content", `**Total requests:** ${data.find(v => v.name === "total").amount}\n**Total FFA requests:** ${data.find(v => v.name === "ffa").amount}\n**HTML-only requests: **${data.find(v => v.name === "htmlOnly").amount}`);
