@@ -24,7 +24,10 @@ api.init("get");
 
 // Logger
 const Logger = require("./Logger");
-const logger = new Logger();
+const logger = new Logger({
+    id: Base.discordAuth.logWebhook.id,
+    token: Base.discordAuth.logWebhook.token
+});
 Base.express.app.use((req, res, next) => {
     if (/\/(\?.+)?$/.test(req.originalUrl)) logger.requests.htmlOnly++;
     if (req.originalUrl.startsWith("/game/")) logger.requests.ffa++;
@@ -32,7 +35,9 @@ Base.express.app.use((req, res, next) => {
     return next();
 });
 Base.express.app.use(Base.express.express.static("public"));
-logger.setInterval(()=>{}, 15e3);
+logger.setInterval(()=>{
+    logger.postDiscord();
+}, 15e3);
 
 // SQLite initialization
 if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
