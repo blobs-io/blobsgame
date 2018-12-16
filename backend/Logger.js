@@ -30,7 +30,7 @@ module.exports = class Logger {
         if (this.discordAuth.id === undefined || this.discordAuth.token === undefined) return;
         const data = await Base.sqlite.all("SELECT * FROM logs");
         const form = new formdata();
-        form.append("content", `Total requests: ${data.find(v => v.name === "total").amount}\nTotal FFA requests: ${data.find(v => v.name === "ffa").amount}\nHTML-only requests: ${data.find(v => v.name === "htmlOnly").amount}`);
+        form.append("content", `__${new Date().toLocaleString()}__\nTotal requests: ${data.find(v => v.name === "total").amount}\nTotal FFA requests: ${data.find(v => v.name === "ffa").amount}\nHTML-only requests: ${data.find(v => v.name === "htmlOnly").amount}\n\nTotal session requests: ${this.sessionRequests.total}\nTotal session FFA requests: ${this.sessionRequests.ffa}\nTotal HTML-only session requests: ${this.sessionRequests.htmlOnly}`);
         const request = await fetch(`https://discordapp.com/api/webhooks/${this.discordAuth.id}/${this.discordAuth.token}`, {
             method: "POST",
             body: form
