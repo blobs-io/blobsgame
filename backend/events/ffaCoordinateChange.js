@@ -5,7 +5,7 @@ ffaCoordinateChangeEvent.run = async (...args) => {
     eventd.id = data.id;
     if (parseInt(eventd.x) === NaN || parseInt(eventd.y) === NaN || parseInt(eventd.br) === NaN) return;
     try {
-        let prev = Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === eventd.owner)];
+        let prev = Base.rooms.find(v => v.id === "ffa").players[Base.gamemodes.ffa.players.findIndex(v => v.owner === eventd.owner)];
         eventd.lastnom = prev.lastnom;
         eventd._directionChange = prev._directionChange;
         eventd.role = prev.role;
@@ -16,7 +16,7 @@ ffaCoordinateChangeEvent.run = async (...args) => {
         prev.distance += (Math.abs(prev.x - eventd.x) + Math.abs(prev.y - eventd.y));
         eventd.distance = prev.distance;
     } catch (e) {}
-    Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === eventd.owner)] = eventd;
+    Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)] = eventd;
 };
 
 module.exports = ffaCoordinateChangeEvent;

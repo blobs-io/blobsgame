@@ -21,21 +21,24 @@ Base.io = Base.socket(Base.server);
 Base.sessions = require("./SessionIDManager");
 Base.utils = { };
 Base.captchas = Base.sockets = [ ];
-Base.gamemodes = {
-	ffa: {
+Base.rooms = [
+	{
+		id: "ffa",
 		players: [],
 		objects: {
 			walls: []
 		}
 	}
-};
+];
 
 // Add objects
 for(let i = 0; i < 50; ++i) {
-	Base.gamemodes.ffa.objects.walls.push({
-		x: Math.floor(Math.random() * 2000),
-		y: Math.floor(Math.random() * 2000)
-	});
+	for(const room of Base.rooms) {
+		room.objects.walls.push({
+			x: Math.floor(Math.random() * 2000),
+			y: Math.floor(Math.random() * 2000)
+		});
+	}
 }
 
 // Utilities
