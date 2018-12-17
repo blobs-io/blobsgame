@@ -40,21 +40,13 @@ module.exports = class Logger {
 
     async log(requests = this.requests) {
         const result = await Base.sqlite.all("SELECT * FROM logs");
-        if (!result.some(v => v.name === "total")) {
-            await Base.sqlite.run("INSERT INTO logs VALUES ('total', 0)");
-        }
-        if (!result.some(v => v.name === "ffa")) {
-            await Base.sqlite.run("INSERT INTO logs VALUES ('ffa', 0)");
-        }
-        if (!result.some(v => v.name === "htmlOnly")) {
-            await Base.sqlite.run("INSERT INTO logs VALUES ('htmlOnly', 0)");
-        }
-        await Base.sqlite.prepare("UPDATE logs SET amount = amount + ? WHERE name=?").then(v => v.run([ requests.total, "total" ]));
-        await Base.sqlite.prepare("UPDATE logs SET amount = amount + ? WHERE name=?").then(v => v.run([ requests.ffa, "ffa" ]));
-        await Base.sqlite.prepare("UPDATE logs SET amount = amount + ? WHERE name=?").then(v => v.run([ requests.htmlOnly, "htmlOnly" ]));
-        this.requests.total = 0;
-        this.requests.ffa = 0;
-        this.requests.htmlOnly = 0;
+        for (const key in this.requests) {
+			if (!result.some(v => v.name === key)) {
+				await Base.sqlite.prepare("INSERT INTO logs VALUES (?, 0)").then(v => v.run([key]));
+			}
+			await Base.sqlite.prepare("UPDATE logs SET amount = amount + ? WHERE name=?").then(v => v.run([ requests[key], key ]));
+			this.requests[key] = 0;
+		}
         return requests;
     }
 };
