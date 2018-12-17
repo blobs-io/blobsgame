@@ -53,8 +53,6 @@ class BlobCode {
 class BlobObj {
     constructor(br, owner, x = window.innerWidth / 2, y = window.innerHeight / 2) {
         this.guest = false;
-        this.x = x;
-        this.y = y;
         this.owner = owner;
         this.br = br;
         this.img = new Image();
@@ -66,19 +64,41 @@ class BlobObj {
             y
         };
     }
+    
+    get x() {
+		if (this.direction === 1) return this.directionChangeCoordinates.x + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
+		else if (this.direction === 3) return this.directionChangeCoordinates.x - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
+		else return this.directionChangeCoordinates.x;
+	}
+	
+	set x(value) {
+		return this._x = value;
+	}
+	
+	get y() {
+		if (this.direction === 0) return this.directionChangeCoordinates.y - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
+		else if (this.direction === 2) return this.directionChangeCoordinates.y + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
+		else return this.directionChangeCoordinates.y;
+	}
+	
+	set y(value) {
+		return this._x = value;
+	}
 
     get direction() {
         return this._direction;
     }
 
     set direction(value) {
+		const newX = this.x;
+		const newY = this.y;
         this.directionChangedAt = Date.now();
         this.directionChangeCoordinates = {
-            x: this.x,
-            y: this.y
+            x: newX,
+            y: newY
         };
         socket.emit("ffaDirectionChange", Object.assign(ownBlob, {
-            _direction: value
+			_direction: value
         }));
         return this._direction = value;
     }
