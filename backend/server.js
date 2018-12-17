@@ -86,7 +86,7 @@ io.on("connection", data => {
         data.on("disconnect", () => {
             const r = require("./events/disconnect").run(data, Base, io);
             Base.sockets = r.sockets;
-            Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].ffa.players = r.players;
+            Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players = r.players;
         });
         data.on("appCreate", async _ => {
             try {
