@@ -29,6 +29,15 @@ Base.gamemodes = {
 		}
 	}
 };
+Base.rooms = [
+	{
+		id: "FFA",
+		players: [],
+		objects: {
+			walls: []
+		}
+	}
+];
 
 // Add objects
 for(let i = 0; i < 50; ++i) {
