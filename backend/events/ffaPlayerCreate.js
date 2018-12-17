@@ -1,4 +1,5 @@
 class ffaPlayerCreateEvent {};
+const Player = require("../structures/Player");
 
 ffaPlayerCreateEvent.run = async (...args) => {
     const [blob, io, Base, data, sockets] = args;
@@ -15,27 +16,26 @@ ffaPlayerCreateEvent.run = async (...args) => {
             guest: true
         };
     } else socket.guest = false;
-
-
-    const nblob = {};
-    nblob.x = Math.floor(Math.random() * 600);
-    nblob.y = Math.floor(Math.random() * 600);
+    
+    
+    const nblob = new Player();
+    nblob.directionChangeCoordinates.x = Math.floor(Math.random() * 600);
+    nblob.directionChangeCoordinates.y = Math.floor(Math.random() * 600);
+    nblob.role = socket.role;
     nblob.owner = socket.username;
-    nblob.direction = 0;
     nblob.br = socket.br;
     nblob.id = data.id;
-    nblob.lastnom = Date.now();
-    nblob._directionChange = Date.now();
-    nblob.role = socket.role;
     nblob.guest = socket.guest;
-    nblob.distance = 0;
     Base.rooms.find(v => v.id === "ffa").players.push(nblob);
     io.to(data.id).emit("ffaObjectsHeartbeat", Base.rooms.find(v => v.id === "ffa").objects);
     io.to(data.id).emit("ffaHeartbeat", {
 		username: socket.username,
 		br: socket.br,
-		role: socket.role
+		role: socket.role,
+		x: nblob.directionChangeCoordinates.x,
+		y: nblob.directionChangeCoordinates.y
 	});
+	// TODO: emit event for all sockets (ffaUserJoin)
 };
 
 module.exports = ffaPlayerCreateEvent;
