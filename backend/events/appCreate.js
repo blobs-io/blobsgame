@@ -1,4 +1,4 @@
-const { gamemodes } = require("../Base");
+const { rooms } = require("../Base");
 class appCreateEvent {};
 /**
  * Runs the appCreate Event
@@ -46,7 +46,7 @@ appCreateEvent.run = (...args) => {
 								username: v.username,
 								lastDaily: v.lastDaily,
 								role: v.role
-							}}).concat(gamemodes.ffa.players.map(v => { return {
+							}}).concat(rooms.find(v => v.id === "ffa").players.map(v => { return {
 								location: "FFA",
 								username: v.owner,
 								br: v.br,
