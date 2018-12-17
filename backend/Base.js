@@ -23,7 +23,7 @@ Base.utils = { };
 Base.captchas = Base.sockets = [ ];
 Base.rooms = [
 	{
-		id: "FFA",
+		id: "ffa",
 		players: [],
 		objects: {
 			walls: []
