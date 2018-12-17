@@ -2,7 +2,7 @@ class ffaCoordinateChangeEvent {};
 
 ffaCoordinateChangeEvent.run = async (...args) => {
     const [eventd, data, io, Base, sqlite] = args;
-    eventd.id = data.id;
+    /*eventd.id = data.id;
     if (parseInt(eventd.x) === NaN || parseInt(eventd.y) === NaN || parseInt(eventd.br) === NaN) return;
     try {
         let prev = Base.rooms.find(v => v.id === "ffa").players[Base.gamemodes.ffa.players.findIndex(v => v.owner === eventd.owner)];
@@ -16,7 +16,7 @@ ffaCoordinateChangeEvent.run = async (...args) => {
         prev.distance += (Math.abs(prev.x - eventd.x) + Math.abs(prev.y - eventd.y));
         eventd.distance = prev.distance;
     } catch (e) {}
-    Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)] = eventd;
+    Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)] = eventd;*/
 };
 
 module.exports = ffaCoordinateChangeEvent;
