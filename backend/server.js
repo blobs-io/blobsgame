@@ -65,7 +65,7 @@ setInterval(async () => {
 			username: v.username,
 			lastDaily: v.lastDaily,
 			role: v.role
-		}}).concat(Base.gamemodes.ffa.players.map(v => { return {
+		}}).concat(Base.rooms.find(v => v.id === "ffa").players.map(v => { return {
 			location: "FFA",
 			username: v.owner,
 			br: v.br,
@@ -77,8 +77,8 @@ setInterval(async () => {
 
 // Emit blob objects to all FFA players
 setInterval(() => {
-	if (Base.gamemodes.ffa.players.length === 0) return;
-    io.sockets.emit("ffaPlayerUpdate", Base.gamemodes.ffa.players);
+	if (Base.rooms.find(v => v.id === "ffa").players.length === 0) return;
+    io.sockets.emit("ffaPlayerUpdate", Base.rooms.find(v => v.id === "ffa").players);
 }, 10);
 
 io.on("connection", data => {
@@ -86,7 +86,7 @@ io.on("connection", data => {
         data.on("disconnect", () => {
             const r = require("./events/disconnect").run(data, Base, io);
             Base.sockets = r.sockets;
-            Base.gamemodes.ffa.players = r.players;
+            Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].ffa.players = r.players;
         });
         data.on("appCreate", async _ => {
             try {
@@ -128,7 +128,7 @@ io.on("connection", data => {
         data.on("ffaNomKey", () => require("./events/ffaNomKey").run(data, io, Base, sqlite));
 
         // Other events
-	data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", Base.sockets.filter(v => v.inactiveSince === null).concat(Base.gamemodes.ffa.players).length));
+	data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", Base.sockets.filter(v => v.inactiveSince === null).concat(Base.rooms.find(v => v.id === "ffa").players).length));
         data.on("getCaptcha", () => require("./events/getCaptcha").run(sessions, io, data, captchas).then(res => captchas = res));
         data.on("login", res => require("./events/login").run(res, io, data, sqlite, bcrypt, sessions, utils.displayError));
         data.on("register", res => require("./events/register").run(res, io, data, utils.displayError, captchas, bcrypt, sqlite));
