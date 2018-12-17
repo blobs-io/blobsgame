@@ -29,12 +29,20 @@ socket.on("ffaObjectsHeartbeat", eventd => {
 socket.on("ffaHeartbeat", d => {
     if (d.role == -1 && !/[\?\&]guest=true/.test(window.location.search)) return document.location.href = "/login/";
     ownBlob.owner = d.username;
+    ownBlob.directionChangedAt = Date.now();
+    ownBlob.directionChangeCoordinates.x = d.x;
+    ownBlob.directionChangeCoordinates.y = d.y;
     ownBlob.br = d.br;
     ownBlob.ready = true;
     ownBlob.role = d.role;
     blobs.push(ownBlob);
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");
+socket.on("ffaDirectionChanged", d => {
+	if (d.owner === ownBlob.owner) return; // ignore own blob
+	const target = blobs[blobs.findIndex(v => v.owner === d.owner)];
+	if (typeof target === "undefined") return;
+});
 
 
 // Events (Window/Document)
