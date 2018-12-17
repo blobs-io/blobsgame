@@ -78,18 +78,18 @@ function promotedTo(oldbr, newbr) {
 }
 
 ffaNomKey.run = async (data, io, Base, sqlite) => {
-    const eventd = Base.gamemodes.ffa.players.find(v => v.id === data.id);
+    const eventd = Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.find(v => v.id === data.id);
     if (!eventd) return;
     if (parseInt(eventd.x) === NaN || parseInt(eventd.y) === NaN || parseInt(eventd.br) === NaN) return;
 
-    for (const blobobj of Base.gamemodes.ffa.players) {
+    for (const blobobj of Base.rooms.find(v => v.id === "ffa").players) {
         if (eventd.owner !== blobobj.owner) {
             if (eventd.x < (blobobj.x + 30) && eventd.x > (blobobj.x - 30)) {
                 if (eventd.y < (blobobj.y + 30) && eventd.y > (blobobj.y - 30)) {
                     if (eventd.guest === true || blobobj.guest === true) return;
                     if (Date.now() - eventd.lastnom < 1500) return; // Nom cooldown (1.5 seconds)
                     // If blob is nommed
-                    Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.id === data.id)].lastnom = Date.now();
+                    Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players[Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.findIndex(v => v.id === data.id)].lastnom = Date.now();
 
 
                     let winner = eventd;
@@ -99,13 +99,13 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                     if (parseInt(blobobj.br) !== NaN) {
                         let result = parseInt(execSync(Base.algorith.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
                         if (result === 0) ++result;
-                        Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === winner.owner)].br = (winner.br + result > 9999 ? 9999 : winner.br + result);
-                        Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === loser.owner)].x = Math.floor(Math.random() * 150) + 150;
-                        Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === loser.owner)].y = Math.floor(Math.random() * 150) + 150;
-                        Base.gamemodes.ffa.players[Base.gamemodes.ffa.players.findIndex(v => v.owner === loser.owner)].br = (loser.br - result <= 0 ? 1 : loser.br - result);
+                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === winner.owner)].br = (winner.br + result > 9999 ? 9999 : winner.br + result);
+                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].x = Math.floor(Math.random() * 150) + 150;
+                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].y = Math.floor(Math.random() * 150) + 150;
+                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].br = (loser.br - result <= 0 ? 1 : loser.br - result);
 
-                        loser.br = Base.gamemodes.ffa.players.find(v => v.owner === loser.owner).br;
-                        winner.br = Base.gamemodes.ffa.players.find(v => v.owner === winner.owner).br;
+                        loser.br = Base.rooms.find(v => v.id === "ffa").players.find(v => v.owner === loser.owner).br;
+                        winner.br = Base.rooms.find(v => v.id === "ffa").players.find(v => v.owner === winner.owner).br;
 
                         await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(loser.br - result <= 0 ? 1 : loser.br - result), loser.owner]));
                         await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(winner.br + result > 9999 ? 9999 : winner.br + result), winner.owner]));
