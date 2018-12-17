@@ -29,8 +29,8 @@ ffaPlayerCreateEvent.run = async (...args) => {
     nblob.role = socket.role;
     nblob.guest = socket.guest;
     nblob.distance = 0;
-    Base.gamemodes.ffa.players.push(nblob);
-    io.to(data.id).emit("ffaObjectsHeartbeat", Base.gamemodes.ffa.objects);
+    Base.rooms.find(v => v.id === "ffa").players.push(nblob);
+    io.to(data.id).emit("ffaObjectsHeartbeat", Base.rooms.find(v => v.id === "ffa").objects);
     io.to(data.id).emit("ffaHeartbeat", {
 		username: socket.username,
 		br: socket.br,
