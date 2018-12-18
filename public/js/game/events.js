@@ -22,7 +22,7 @@ socket.on("ffaHeartbeat", d => {
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");
 socket.on("ffaDirectionChanged", d => {
-	if (d.owner === ownBlob.owner) return; // ignore own blob
+	if (d.owner === ownBlob.owner) return;
 	const target = blobs[blobs.findIndex(v => v.owner === d.owner)];
 	if (typeof target === "undefined") return;
 	target.direction = d.direction;
