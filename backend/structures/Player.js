@@ -16,9 +16,12 @@ module.exports = class Player {
 	}
 	
 	get x() {
-		if (this.direction === 1) return this.directionChangeCoordinates.x + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
-		else if (this.direction === 3) return this.directionChangeCoordinates.x - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
-		else return this.directionChangeCoordinates.x;
+		let x = this.directionChangeCoordinates.x;
+		if (this.direction === 1) x = this.directionChangeCoordinates.x + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
+		else if (this.direction === 3) x = this.directionChangeCoordinates.x - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
+		if (x < 0) x = 0;
+		else if (x > 2000) x = 2000;
+		return x;
 	}
 	
 	set x(value) {
@@ -26,9 +29,12 @@ module.exports = class Player {
 	}
 	
 	get y() {
-		if (this.direction === 0) return this.directionChangeCoordinates.y - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
-		else if (this.direction === 2) return this.directionChangeCoordinates.y + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
-		else return this.directionChangeCoordinates.y;
+		let y = this.directionChangeCoordinates.y;
+		if (this.direction === 0) y = this.directionChangeCoordinates.y - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
+		else if (this.direction === 2) y = this.directionChangeCoordinates.y + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
+		if (y < 0) y = 0;
+		else if (y > 2000) y = 2000;
+		return y;
 	}
 	
 	set y(value) {
