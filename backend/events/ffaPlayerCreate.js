@@ -33,9 +33,10 @@ ffaPlayerCreateEvent.run = async (...args) => {
 		br: socket.br,
 		role: socket.role,
 		x: nblob.directionChangeCoordinates.x,
-		y: nblob.directionChangeCoordinates.y
+		y: nblob.directionChangeCoordinates.y,
+		users: Base.rooms.find(v => v.id === "ffa").players
 	});
-	io.sockets.emit("ffaUserJoin", Object.assign(nblob, {id:undefined, x: nblob.x, y: nblob.y}))
+	io.sockets.emit("ffaUserJoin", Object.assign(nblob, {x: nblob.x, y: nblob.y}))
 };
 
 module.exports = ffaPlayerCreateEvent;
