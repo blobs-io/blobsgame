@@ -82,6 +82,7 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
     if (!eventd) return;
     if (parseInt(eventd.x) === NaN || parseInt(eventd.y) === NaN || parseInt(eventd.br) === NaN) return;
 
+
     for (const blobobj of Base.rooms.find(v => v.id === "ffa").players) {
         if (eventd.owner !== blobobj.owner) {
             if (eventd.x < (blobobj.x + 30) && eventd.x > (blobobj.x - 30)) {
@@ -89,6 +90,7 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                     if (eventd.guest === true || blobobj.guest === true) return;
                     if (Date.now() - eventd.lastnom < 1500) return; // Nom cooldown (1.5 seconds)
                     // If blob is nommed
+                    
                     Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players[Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.findIndex(v => v.id === data.id)].lastnom = Date.now();
 
 
