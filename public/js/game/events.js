@@ -9,7 +9,7 @@ socket.on("ffaObjectsHeartbeat", eventd => {
         objects.walls.push(wall);
     }
 });
-socket.on("ffaHeartbeat", d => {
+socket.on("ffaHeartbeat", async d => {
     if (d.role == -1 && !/[\?\&]guest=true/.test(window.location.search)) return document.location.href = "/login/";
     ownBlob.owner = d.username;
     ownBlob.directionChangedAt = Date.now();
@@ -19,6 +19,19 @@ socket.on("ffaHeartbeat", d => {
     ownBlob.ready = true;
     ownBlob.role = d.role;
     blobs.push(ownBlob);
+    for (const blob of d.users) {
+		if (blob.owner !== ownBlob.owner) {
+			const n = new BlobObj(blob.br, blob.owner);
+			n.directionChangeCoordinates = {
+				x: blob._x,
+				y: blob._y
+			};
+			n.directionChangedAt = blob.directionChangedAt;
+			await n.setBlob();
+			n.display(true, true);
+			blobs.push(n);
+		}
+	}
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");
 socket.on("ffaDirectionChanged", d => {
@@ -30,7 +43,6 @@ socket.on("ffaDirectionChanged", d => {
 socket.on("ffaUserJoin", async d => {
 	if (d.owner === ownBlob.owner) return;
 	const n = new BlobObj(d.br, d.owner);
-	console.log(d);
 	n.directionChangeCoordinates = {
 		x: d._x,
 		y: d._y
