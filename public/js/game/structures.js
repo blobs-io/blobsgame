@@ -97,9 +97,6 @@ class BlobObj {
             x: newX,
             y: newY
         };
-        socket.emit("ffaDirectionChange", Object.assign(ownBlob, {
-			_direction: value
-        }));
         return this._direction = value;
     }
 
