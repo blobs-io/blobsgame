@@ -43,7 +43,7 @@ setInterval(() => {
 	lastIteration = Date.now();
 	// Blob coordinates
     if (ownBlob.ready === false) return;
-    if (Date.now() - lastTick > 3000) {
+    if (Date.now() - lastTick > 1500) {
     	displayLeaderboard();
     	const timestampBefore = Date.now();
 		request("/api/ping", "GET").then(res => {
