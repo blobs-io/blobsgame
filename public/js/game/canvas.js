@@ -43,13 +43,21 @@ setInterval(() => {
 	lastIteration = Date.now();
 	// Blob coordinates
     if (ownBlob.ready === false) return;
-    if (Date.now() - lastTick > 1500) {
+    if (Date.now() - lastTick > 3000) {
     	displayLeaderboard();
     	const timestampBefore = Date.now();
 		request("/api/ping", "GET").then(res => {
 			const request = JSON.parse(res.responseText);
 			const diff = (Date.now() - timestampBefore);
 			document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
+		});
+		request("/api/ffa/players", "GET").then(res => {
+			const request = JSON.parse(res.responseText);
+			for (const blob of request) {
+				const target = blobs[blobs.findIndex(v => v.owner === blob.owner)];
+				target.directionChangeCoordinates = blob.directionChangeCoordinates;
+				target.directionChangedAt = blob.directionChangedAt;
+			}
 		});
         lastTick = Date.now();
     }
