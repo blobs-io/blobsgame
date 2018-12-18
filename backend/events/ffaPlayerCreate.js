@@ -35,7 +35,7 @@ ffaPlayerCreateEvent.run = async (...args) => {
 		x: nblob.directionChangeCoordinates.x,
 		y: nblob.directionChangeCoordinates.y
 	});
-	// TODO: emit event for all sockets (ffaUserJoin)
+	io.sockets.emit("ffaUserJoin", Object.assign(nblob, {id:undefined, x: nblob.x, y: nblob.y}))
 };
 
 module.exports = ffaPlayerCreateEvent;
