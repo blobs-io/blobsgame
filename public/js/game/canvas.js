@@ -12,8 +12,8 @@ objects = {
 };
 var scale = 1;
 const mapSize = {
-	width: 1,
-	height: 1
+	width: 2000,
+	height: 2000
 };
 const border = {
 	left: { from: { x: 0, y: 0,}, to: { x: 0, y: 0 } },
@@ -51,34 +51,31 @@ setInterval(() => {
 			const diff = (Date.now() - timestampBefore);
 			document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
 		});
+		request("/api/ffa/players", "GET").then(res => {
+			const request = JSON.parse(res.responseText);
+			for (const blob of request) {
+				const target = blobs[blobs.findIndex(v => v.owner === blob.owner)];
+				target.directionChangeCoordinates = blob.directionChangeCoordinates;
+				target.directionChangedAt = blob.directionChangedAt;
+			}
+		});
         lastTick = Date.now();
     }
     if (ownBlob.x <= 1 && ownBlob.direction === 3) return displayUI();
     else if (ownBlob.y <= 1 && ownBlob.direction === 0) return displayUI();
     else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
     else if (ownBlob.x >= mapSize.width && ownBlob.direction === 1) return displayUI();
-
-	if (ownBlob.x < 0) ownBlob.x = 0;
-	else if (ownBlob.x >= mapSize.width) ownBlob.x = mapSize.width;
-	if (ownBlob.y < 0) ownBlob.y = 0;
-	else if (ownBlob.y >= mapSize.height) ownBlob.y = mapSize.height;
-
-    if (ownBlob.direction === 0) ownBlob.y = ownBlob.directionChangeCoordinates.y - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
-    else if (ownBlob.direction === 1) ownBlob.x = ownBlob.directionChangeCoordinates.x + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
-    else if (ownBlob.direction === 2) ownBlob.y = ownBlob.directionChangeCoordinates.y + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
-    else if (ownBlob.direction === 3) ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 20));
     displayUI();
-    socket.emit("ffaCoordinateChange", ownBlob);
 }, 1);
 
 socket.on("ffaPlayerNommed", eventd => {
     displayLeaderboard();
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].br = eventd.loser.br;
     blobs[blobs.findIndex(v => v.owner === eventd.winner.owner)].br = eventd.winner.br;
-    if (eventd.loser.owner === ownBlob.owner) {
-        ownBlob.x = eventd.loser.x;
-        ownBlob.y = eventd.loser.y;
-    }
+    blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangeCoordinates.x = eventd.loser.directionChangeCoordinates.x;
+    blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangeCoordinates.y = eventd.loser.directionChangeCoordinates.y;
+    blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangedAt = eventd.loser.directionChangedAt;
+
 	const nomHistoryDiv = document.getElementById("nom-hist");
 	const nomEntryDiv = document.createElement("div");
 	nomEntryDiv.className = "nom-hist-entry";

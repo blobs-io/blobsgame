@@ -3,40 +3,56 @@ socket.on("ffaPlayerDelete", eventd => {
     blobs.splice(blobs.findIndex(v => v.owner === eventd), 1);
 });
 socket.on("ffaLoginFailed", str => alert(str));
-socket.on("ffaPlayerUpdate", async eventd => {
-    for (const player of eventd) {
-        if (player.owner !== ownBlob.owner) {
-            if (blobs.some(v => v.owner === player.owner)) {
-                blobs[blobs.findIndex(v => v.owner === player.owner)].x = player.x;
-                blobs[blobs.findIndex(v => v.owner === player.owner)].y = player.y;
-                blobs[blobs.findIndex(v => v.owner === player.owner)].br = player.br;
-            } else {
-                const n = new BlobObj(player.br, player.owner, player.x, player.y);
-                await n.setBlob();
-                n.display(true, true);
-                blobs.push(n);
-            }
-        } 
-    }
-    blobs = blobs.filter(v => blobs.filter(vv => vv.owner === v.owner).length < 2);
-});
 socket.on("ffaObjectsHeartbeat", eventd => {
     for (let i = 0; i < eventd.walls.length; ++i) {
         const wall = new WallObj(eventd.walls[i].x, eventd.walls[i].y);
         objects.walls.push(wall);
     }
 });
-socket.on("ffaHeartbeat", d => {
+socket.on("ffaHeartbeat", async d => {
     if (d.role == -1 && !/[\?\&]guest=true/.test(window.location.search)) return document.location.href = "/login/";
     ownBlob.owner = d.username;
+    ownBlob.directionChangedAt = Date.now();
+    ownBlob.directionChangeCoordinates.x = d.x;
+    ownBlob.directionChangeCoordinates.y = d.y;
     ownBlob.br = d.br;
     ownBlob.ready = true;
     ownBlob.role = d.role;
-    mapSize.width = d.mapSize.width;
-    mapSize.height = d.mapSize.height;
     blobs.push(ownBlob);
+    for (const blob of d.users) {
+		if (blob.owner !== ownBlob.owner && !blobs.some(v => v.owner === blob.owner)) {
+			const n = new BlobObj(blob.br, blob.owner);
+			n.directionChangeCoordinates = {
+				x: blob._x,
+				y: blob._y
+			};
+			n.directionChangedAt = blob.directionChangedAt;
+			await n.setBlob();
+			n.display(true, true);
+			blobs.push(n);
+		}
+	}
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");
+socket.on("ffaDirectionChanged", d => {
+	if (d.owner === ownBlob.owner) return;
+	const target = blobs[blobs.findIndex(v => v.owner === d.owner)];
+	if (typeof target === "undefined") return;
+	target.direction = d.direction;
+});
+socket.on("ffaUserJoin", async d => {
+	if (d.owner === ownBlob.owner) return;
+	if (blobs.some(v => v.owner === d.owner)) return;
+	const n = new BlobObj(d.br, d.owner);
+	n.directionChangeCoordinates = {
+		x: d._x,
+		y: d._y
+	};
+	n.directionChangedAt = d.directionChangedAt;
+    await n.setBlob();
+    n.display(true, true);
+    blobs.push(n);
+});
 
 
 // Events (Window/Document)
@@ -73,18 +89,23 @@ document.addEventListener("keydown", eventd => {
     switch (eventd.keyCode) {
         case 13: // newline
             ownBlob.direction = 4;
+			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 4 }));
             break;
         case 87: // w
             ownBlob.direction = 0;
+			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 0 }));
             break;
         case 68: // d
             ownBlob.direction = 1;
+			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 1 }));
             break;
         case 83: // s
             ownBlob.direction = 2;
+			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 2 }));
             break;
         case 65: // a
             ownBlob.direction = 3;
+			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 3 }));
             break;
         case 78: // n
             if (Date.now() - ownBlob.lastnom <= 1500) return;

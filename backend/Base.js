@@ -14,7 +14,7 @@ Base.discordAuth = {
 		token: undefined
 	}
 };
-Base.algorith = "./b {ownbr} {opponentbr} --br";
+Base.algorith = "./b {ownbr} {opponentbr} 1";
 Base.bcrypt = require("bcrypt");
 Base.sqlite = require("sqlite");
 Base.io = Base.socket(Base.server);
@@ -24,10 +24,6 @@ Base.captchas = Base.sockets = [ ];
 Base.rooms = [
 	{
 		id: "ffa",
-		mapSize: {
-			width: 2000,
-			height: 2000
-		},
 		players: [],
 		objects: {
 			walls: []

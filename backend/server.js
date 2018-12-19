@@ -75,11 +75,11 @@ setInterval(async () => {
     });
 }, 1000);
 
-// Emit blob objects to all FFA players
+/*// Emit blob objects to all FFA players
 setInterval(() => {
 	if (Base.rooms.find(v => v.id === "ffa").players.length === 0) return;
     io.sockets.emit("ffaPlayerUpdate", Base.rooms.find(v => v.id === "ffa").players);
-}, 10);
+}, 10);*/
 
 io.on("connection", data => {
     try {
