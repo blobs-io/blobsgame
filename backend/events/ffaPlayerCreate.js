@@ -16,10 +16,8 @@ ffaPlayerCreateEvent.run = async (...args) => {
         };
     } else socket.guest = false;
 
-
-    const nblob = {};
-    nblob.x = Math.floor(Math.random() * 600);
-    nblob.y = Math.floor(Math.random() * 600);
+    const nblob = {},
+        room = Base.rooms.find(v => v.id === "ffa");
     nblob.owner = socket.username;
     nblob.direction = 0;
     nblob.br = socket.br;
@@ -29,12 +27,13 @@ ffaPlayerCreateEvent.run = async (...args) => {
     nblob.role = socket.role;
     nblob.guest = socket.guest;
     nblob.distance = 0;
-    Base.rooms.find(v => v.id === "ffa").players.push(nblob);
-    io.to(data.id).emit("ffaObjectsHeartbeat", Base.rooms.find(v => v.id === "ffa").objects);
+    room.players.push(nblob);
+    io.to(data.id).emit("ffaObjectsHeartbeat", room.objects);
     io.to(data.id).emit("ffaHeartbeat", {
 		username: socket.username,
 		br: socket.br,
-		role: socket.role
+		role: socket.role,
+        mapSize: room.mapSize
 	});
 };
 
