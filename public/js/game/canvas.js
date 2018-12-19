@@ -72,10 +72,10 @@ socket.on("ffaPlayerNommed", eventd => {
     displayLeaderboard();
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].br = eventd.loser.br;
     blobs[blobs.findIndex(v => v.owner === eventd.winner.owner)].br = eventd.winner.br;
-    if (eventd.loser.owner === ownBlob.owner) {
-        ownBlob.x = eventd.loser.x;
-        ownBlob.y = eventd.loser.y;
-    }
+    blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangeCoordinates.x = eventd.loser.directionChangeCoordinates.x;
+    blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangeCoordinates.y = eventd.loser.directionChangeCoordinates.y;
+    blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangedAt = eventd.loser.directionChangedAt;
+
 	const nomHistoryDiv = document.getElementById("nom-hist");
 	const nomEntryDiv = document.createElement("div");
 	nomEntryDiv.className = "nom-hist-entry";
