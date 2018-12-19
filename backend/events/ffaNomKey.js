@@ -82,7 +82,6 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
     if (!eventd) return;
     if (parseInt(eventd.x) === NaN || parseInt(eventd.y) === NaN || parseInt(eventd.br) === NaN) return;
 
-
     for (const blobobj of Base.rooms.find(v => v.id === "ffa").players) {
         if (eventd.owner !== blobobj.owner) {
             if (eventd.x < (blobobj.x + 30) && eventd.x > (blobobj.x - 30)) {
@@ -102,9 +101,12 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                         let result = parseInt(execSync(Base.algorith.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
                         if (result === 0) ++result;
                         Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === winner.owner)].br = (winner.br + result > 9999 ? 9999 : winner.br + result);
-                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].x = Math.floor(Math.random() * 150) + 150;
-                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].y = Math.floor(Math.random() * 150) + 150;
                         Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].br = (loser.br - result <= 0 ? 1 : loser.br - result);
+
+                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
+                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
+                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].directionChangedAt = Date.now();
+
 
                         loser.br = Base.rooms.find(v => v.id === "ffa").players.find(v => v.owner === loser.owner).br;
                         winner.br = Base.rooms.find(v => v.id === "ffa").players.find(v => v.owner === winner.owner).br;
