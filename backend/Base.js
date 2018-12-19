@@ -24,6 +24,10 @@ Base.captchas = Base.sockets = [ ];
 Base.rooms = [
 	{
 		id: "ffa",
+		mapSize: {
+			width: 2000,
+			height: 2000
+		},
 		players: [],
 		objects: {
 			walls: []
