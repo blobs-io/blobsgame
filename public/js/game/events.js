@@ -20,7 +20,7 @@ socket.on("ffaHeartbeat", async d => {
     ownBlob.role = d.role;
     blobs.push(ownBlob);
     for (const blob of d.users) {
-		if (blob.owner !== ownBlob.owner) {
+		if (blob.owner !== ownBlob.owner && !blobs.some(v => v.owner === blob.owner)) {
 			const n = new BlobObj(blob.br, blob.owner);
 			n.directionChangeCoordinates = {
 				x: blob._x,
@@ -42,6 +42,7 @@ socket.on("ffaDirectionChanged", d => {
 });
 socket.on("ffaUserJoin", async d => {
 	if (d.owner === ownBlob.owner) return;
+	if (blobs.some(v => v.owner === d.owner)) return;
 	const n = new BlobObj(d.br, d.owner);
 	n.directionChangeCoordinates = {
 		x: d._x,
