@@ -12,8 +12,8 @@ objects = {
 };
 var scale = 1;
 const mapSize = {
-	width: 2000,
-	height: 2000
+	width: 1,
+	height: 1
 };
 const border = {
 	left: { from: { x: 0, y: 0,}, to: { x: 0, y: 0 } },
