@@ -32,6 +32,8 @@ socket.on("ffaHeartbeat", d => {
     ownBlob.br = d.br;
     ownBlob.ready = true;
     ownBlob.role = d.role;
+    mapSize.width = d.mapSize.width;
+    mapSize.height = d.mapSize.height;
     blobs.push(ownBlob);
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");
