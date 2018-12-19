@@ -93,23 +93,21 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                     Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players[Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.findIndex(v => v.id === data.id)].lastnom = Date.now();
 
 
-                    let winner = eventd;
-                    let loser = blobobj;
+                    let winner = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)];
+                    let loser = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === blobobj.owner)];
 
                     if (eventd.br === blobobj.br) eventd.br -= 1;
                     if (parseInt(blobobj.br) !== NaN) {
                         let result = parseInt(execSync(Base.algorith.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
                         if (result === 0) ++result;
-                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === winner.owner)].br = (winner.br + result > 9999 ? 9999 : winner.br + result);
-                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].br = (loser.br - result <= 0 ? 1 : loser.br - result);
+                        winner.br = (winner.br + result > 9999 ? 9999 : winner.br + result);
+                        loser.br = (loser.br - result <= 0 ? 1 : loser.br - result);
 
-                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
-                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
-                        Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === loser.owner)].directionChangedAt = Date.now();
+                        loser.directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
+                        loser.directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
+                        loser.directionChangedAt = Date.now();
 
 
-                        loser.br = Base.rooms.find(v => v.id === "ffa").players.find(v => v.owner === loser.owner).br;
-                        winner.br = Base.rooms.find(v => v.id === "ffa").players.find(v => v.owner === winner.owner).br;
 
                         await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(loser.br - result <= 0 ? 1 : loser.br - result), loser.owner]));
                         await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(winner.br + result > 9999 ? 9999 : winner.br + result), winner.owner]));
