@@ -89,23 +89,23 @@ document.addEventListener("keydown", eventd => {
     switch (eventd.keyCode) {
         case 13: // newline
             ownBlob.direction = 4;
-			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 4 }));
+			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 4, time: Date.now() }));
             break;
         case 87: // w
             ownBlob.direction = 0;
-			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 0 }));
+            socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 0, time: Date.now() }));
             break;
         case 68: // d
             ownBlob.direction = 1;
-			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 1 }));
+            socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 1, time: Date.now() }));
             break;
         case 83: // s
             ownBlob.direction = 2;
-			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 2 }));
+            socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 2, time: Date.now() }));
             break;
         case 65: // a
             ownBlob.direction = 3;
-			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 3 }));
+            socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 3, time: Date.now() }));
             break;
         case 78: // n
             if (Date.now() - ownBlob.lastnom <= 1500) return;
