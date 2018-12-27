@@ -10,8 +10,10 @@
     "bcrypt": "^3.0.2",
     "express": "^4.16.4",
     "node-fetch": "^2.3.0",
+    "npm": "^6.5.0",
     "socket.io": "^2.2.0",
-    "sqlite": "^3.0.0"
+    "sqlite": "^3.0.0",
+    "sqlite3": "^4.0.4"
   },
   "engines": {
     "node": "8.x"
