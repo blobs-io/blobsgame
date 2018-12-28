@@ -6,6 +6,7 @@ socket.on("ffaLoginFailed", str => alert(str));
 socket.on("ffaObjectsHeartbeat", eventd => {
     for (let i = 0; i < eventd.walls.length; ++i) {
         const wall = new WallObj(eventd.walls[i].x, eventd.walls[i].y);
+        wall.type = eventd.walls[i].type;
         objects.walls.push(wall);
     }
 });
