@@ -8,6 +8,7 @@ class WallObj {
         this.img = new Image();
         this.img._ready = false;
         this.url = "../assets/brickwall.png";
+        this.type = 0;
     }
 
     setImage(img = this.url) {
