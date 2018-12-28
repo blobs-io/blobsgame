@@ -13,6 +13,12 @@ const {
     writeFileSync
 } = require("fs");
 
+// Maps
+const Room = require("./structures/Room");
+const Maps = require("./structures/Maps");
+const maps = new Maps();
+Base.rooms.push(new Room(maps.mapStore.find(v => v.map.name === "default"), "ffa"));
+
 // API
 const APIController = require("./api/Controller");
 const api = new APIController(Base.express.app);
