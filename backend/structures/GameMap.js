@@ -1,7 +1,5 @@
 module.exports = class GameMap {
-    constructor(name, players = [], objects = { walls: [] }) {
-        this.map = name;
-        this.players = players;
-        this.objects = objects;
+    constructor(json) {
+        this.map = json;
     }
 };
