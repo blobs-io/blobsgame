@@ -21,15 +21,7 @@ Base.io = Base.socket(Base.server);
 Base.sessions = require("./SessionIDManager");
 Base.utils = { };
 Base.captchas = Base.sockets = [ ];
-Base.rooms = [
-	{
-		id: "ffa",
-		players: [],
-		objects: {
-			walls: []
-		}
-	}
-];
+Base.rooms = [];
 
 // Add objects
 for(let i = 0; i < 50; ++i) {
