@@ -19,6 +19,7 @@ ffaPlayerCreateEvent.run = async (...args) => {
     
     
     const nblob = new Player();
+    const room = Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")];
     nblob.directionChangeCoordinates.x = Math.floor(Math.random() * 600);
     nblob.directionChangeCoordinates.y = Math.floor(Math.random() * 600);
     nblob.role = socket.role;
@@ -26,15 +27,19 @@ ffaPlayerCreateEvent.run = async (...args) => {
     nblob.br = socket.br;
     nblob.id = data.id;
     nblob.guest = socket.guest;
-    Base.rooms.find(v => v.id === "ffa").players.push(nblob);
-    io.to(data.id).emit("ffaObjectsHeartbeat", Base.rooms.find(v => v.id === "ffa").objects);
+    nblob.maximumCoordinates = {
+        width: room.map.map.mapSize.width,
+        height: room.map.map.mapSize.height
+    };
+    room.players.push(nblob);
+    io.to(data.id).emit("ffaObjectsHeartbeat", room.map.map.objects);
     io.to(data.id).emit("ffaHeartbeat", {
 		username: socket.username,
 		br: socket.br,
 		role: socket.role,
 		x: nblob.directionChangeCoordinates.x,
 		y: nblob.directionChangeCoordinates.y,
-		users: Base.rooms.find(v => v.id === "ffa").players
+		users: room.players
 	});
 	io.sockets.emit("ffaUserJoin", Object.assign(nblob, {x: nblob.x, y: nblob.y}))
 };
