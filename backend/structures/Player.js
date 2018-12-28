@@ -13,6 +13,7 @@ module.exports = class Player {
 		this.directionChangedAt = Date.now();
 		this.guest = false;
 		this.distance = 0;
+		this.maximumCoordinates = { };
 	}
 	
 	get x() {
@@ -20,7 +21,7 @@ module.exports = class Player {
 		if (this.direction === 1) x = this.directionChangeCoordinates.x + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		else if (this.direction === 3) x = this.directionChangeCoordinates.x - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		if (x < 0) x = 0;
-		else if (x > 2000) x = 2000;
+		else if (x > this.maximumCoordinates.width) x = this.maximumCoordinates.width;
 		return x;
 	}
 	
@@ -33,7 +34,7 @@ module.exports = class Player {
 		if (this.direction === 0) y = this.directionChangeCoordinates.y - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		else if (this.direction === 2) y = this.directionChangeCoordinates.y + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		if (y < 0) y = 0;
-		else if (y > 2000) y = 2000;
+		else if (y > this.maximumCoordinates.height) y = this.maximumCoordinates.height;
 		return y;
 	}
 	
