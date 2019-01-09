@@ -35,7 +35,8 @@ module.exports = class Player {
 		if (x < 0) x = 0;
 		else if (x > this.maximumCoordinates.width) x = this.maximumCoordinates.width;
         if (isInObject(x, this.previousY, this.room.map.map.objects)) {
-            x = this.previousX - 10;
+            x = this.previousX - 30;
+            this.direction = 4;
         }
         else this.previousX = x;
 		return x;
@@ -52,7 +53,8 @@ module.exports = class Player {
 		if (y < 0) y = 0;
 		else if (y > this.maximumCoordinates.height) y = this.maximumCoordinates.height;
         if (isInObject(this.previousX, y, this.room.map.map.objects)) {
-            y = this.previousY - 10;
+            y = this.previousY - 30;
+            this.direction = 4;
         }
         else this.previousY = y;
 		return y;
