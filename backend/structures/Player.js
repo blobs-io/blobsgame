@@ -1,3 +1,9 @@
+function isInObject(x, y, objects) {
+    return objects.walls.some(v => x < (v.x + 30) && x > (v.x - 30) && y < (v.y + 30) && y > (v.y - 30));
+}
+
+const Base = require("../Base");
+
 module.exports = class Player {
 	constructor(x, y, owner, role = 0, blob = "blobowo") {
 		this._x = x;
@@ -14,14 +20,24 @@ module.exports = class Player {
 		this.guest = false;
 		this.distance = 0;
 		this.maximumCoordinates = { };
+		this.previousX = 0;
+		this.previousY = 0;
 	}
-	
+
+	get room() {
+		return Base.rooms.find(v => v.players.some(p => p.owner === this.owner));
+	}
+
 	get x() {
 		let x = this.directionChangeCoordinates.x;
 		if (this.direction === 1) x = this.directionChangeCoordinates.x + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		else if (this.direction === 3) x = this.directionChangeCoordinates.x - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		if (x < 0) x = 0;
 		else if (x > this.maximumCoordinates.width) x = this.maximumCoordinates.width;
+        if (isInObject(x, this.previousY, this.room.map.map.objects)) {
+            x = this.previousX - 10;
+        }
+        else this.previousX = x;
 		return x;
 	}
 	
@@ -35,6 +51,10 @@ module.exports = class Player {
 		else if (this.direction === 2) y = this.directionChangeCoordinates.y + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		if (y < 0) y = 0;
 		else if (y > this.maximumCoordinates.height) y = this.maximumCoordinates.height;
+        if (isInObject(this.previousX, y, this.room.map.map.objects)) {
+            y = this.previousY - 10;
+        }
+        else this.previousY = y;
 		return y;
 	}
 	
