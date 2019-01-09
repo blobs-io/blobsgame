@@ -78,7 +78,9 @@ class BlobObj {
 		else if (this.direction === 3) x = this.directionChangeCoordinates.x - (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		if (x < 0) x = 0;
 		else if (x > 2000) x = 2000;
-		if (isInObject(x, this.previousY)) x = this.previousX;
+		if (isInObject(x, this.previousY)) {
+		    x = this.previousX - 10;
+        }
         else this.previousX = x;
 		return x;
 	}
@@ -93,7 +95,9 @@ class BlobObj {
 		else if (this.direction === 2) y =  this.directionChangeCoordinates.y + (1.025 * ((Date.now() - this.directionChangedAt) / 20));
 		if (y < 0) y = 0;
 		else if (y > 2000) y = 2000;
-        if (isInObject(this.previousX, y)) y = this.previousY;
+        if (isInObject(this.previousX, y)) {
+            y = this.previousY - 10;
+        }
         else this.previousY = y;
 		return y;
 	}
