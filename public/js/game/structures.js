@@ -79,7 +79,8 @@ class BlobObj {
 		if (x < 0) x = 0;
 		else if (x > 2000) x = 2000;
 		if (isInObject(x, this.previousY)) {
-		    x = this.previousX - 10;
+		    x = this.previousX - 30;
+		    this._direction = 4;
         }
         else this.previousX = x;
 		return x;
@@ -96,7 +97,8 @@ class BlobObj {
 		if (y < 0) y = 0;
 		else if (y > 2000) y = 2000;
         if (isInObject(this.previousX, y)) {
-            y = this.previousY - 10;
+            y = this.previousY - 30;
+            this._direction = 4;
         }
         else this.previousY = y;
 		return y;
