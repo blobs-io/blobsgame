@@ -22,6 +22,7 @@ Base.sessions = require("./SessionIDManager");
 Base.utils = { };
 Base.captchas = Base.sockets = [ ];
 Base.rooms = [];
+Base.dbToken = null;
 
 // Add objects
 for(let i = 0; i < 50; ++i) {
