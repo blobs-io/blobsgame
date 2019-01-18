@@ -13,6 +13,17 @@ const {
     writeFileSync
 } = require("fs");
 
+// Database backup
+(v => {
+    Base.dbToken = v;
+    console.log("Token for database: " + v);
+    Base.express.app.get("/db.sqlite", (req, res) => {
+        if (req.query.pw === Base.dbToken) {
+            res.send(require("fs").readFileSync("./db.sqlite"))
+        }
+    });
+})(Base.sessions.generateSessionID(12));
+
 // Maps
 const Room = require("./structures/Room");
 const Maps = require("./structures/Maps");
@@ -53,10 +64,11 @@ if (!existsSync("./db.sqlite")) writeFileSync("./db.sqlite", "");
 sqlite.open("db.sqlite").then(async() => {
     // Create tables if they don't already exist
     await sqlite.run("CREATE TABLE IF NOT EXISTS logs (`name` TEXT, `amount` INTEGER)");
+    await sqlite.run("CREATE TABLE IF NOT EXISTS clans (`name` TEXT, `leader` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS verifications (`user` TEXT, `code` TEXT, `requestedAt` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS recentPromotions (`user` TEXT, `newTier` TEXT, `drop` INTEGER, `promotedAt` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS news (`headline` TEXT, `content` TEXT, `createdAt` TEXT)");
-    await sqlite.run("CREATE TABLE IF NOT EXISTS accounts (`username` TEXT, `password` TEXT, `br` INTEGER, `createdAt` TEXT, `role` INTEGER, `blobcoins` INTEGER, `lastDailyUsage` TEXT, `distance` INTEGER, blobs `TEXT`, `activeBlob` TEXT)");
+    await sqlite.run("CREATE TABLE IF NOT EXISTS accounts (`username` TEXT, `password` TEXT, `br` INTEGER, `createdAt` TEXT, `role` INTEGER, `blobcoins` INTEGER, `lastDailyUsage` TEXT, `distance` INTEGER, blobs `TEXT`, `activeBlob` TEXT, `clan` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS sessionids (`username` TEXT, `sessionid` TEXT, `expires` TEXT)");
     await sqlite.run("CREATE TABLE IF NOT EXISTS bans (`username` TEXT, `reason` TEXT, `bannedAt` TEXT, `expires` TEXT, `moderator` TEXT)");
 }).catch(console.log);
