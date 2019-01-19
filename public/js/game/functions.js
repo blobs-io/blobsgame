@@ -2,10 +2,31 @@
 function displayUI(excludes = []) {
     if (!excludes.includes("clearCanvas")) clearCanvas();
     if (!excludes.includes("drawBorder")) drawBorder();
-    if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
     if (!excludes.includes("displayCooldown")) displayCooldown();
     if (!excludes.includes("displayPlayerStats")) displayPlayerStats();
     if (!excludes.includes("displayWalls")) displayWalls();
+    if (!excludes.includes("displayNoNomAreas")) displayNoNomAreas();
+    if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
+}
+
+function displayNoNomAreas(context = ctx) {
+    for (let i = 0; i < objects.noNomAreas.length; ++i) {
+        let canvasPosX = 0,
+            canvasPosY = 0;
+        if (ownBlob.x >= objects.noNomAreas[i].startsAt.x) {
+            canvasPosX = (canvas.width / 2) - (ownBlob.x - objects.noNomAreas[i].startsAt.x);
+        } else if (ownBlob.x < objects.noNomAreas[i].startsAt.x) {
+            canvasPosX = (canvas.width / 2) + (objects.noNomAreas[i].startsAt.x - ownBlob.x);
+        }
+        if (ownBlob.y >= objects.noNomAreas[i].startsAt.y) {
+            canvasPosY = (canvas.height / 2) - (ownBlob.y - objects.noNomAreas[i].startsAt.y);
+        } else if (ownBlob.y < objects.noNomAreas[i].startsAt.y) {
+            canvasPosY = (canvas.height / 2) + (objects.noNomAreas[i].startsAt.y - ownBlob.y);
+        }
+        canvasPosX -= 35;
+        canvasPosY -= 35;
+        NoNomArea.display({ x: canvasPosX, y: canvasPosY }, { x: Math.abs(objects.noNomAreas[i].startsAt.x - objects.noNomAreas[i].endsAt.x), y: Math.abs(objects.noNomAreas[i].startsAt.y - objects.noNomAreas[i].endsAt.y) });
+    }
 }
 
 function clearCanvas(context = ctx) {
@@ -14,7 +35,7 @@ function clearCanvas(context = ctx) {
 
 function displayLeaderboard() {
     document.getElementById("leaderboard").innerHTML = "<h3>Leaderboard</h3>";
-    const sortedblobs = blobs.slice(0, 10).sort((a, b) => b.br > a.br);
+    const sortedblobs = blobs.slice(0, 10).sort((a, b) => b.br - a.br);
     for (let i = 0; i < sortedblobs.length; ++i) {
         const tier = getTier(sortedblobs[i].br || 0);
         const leaderboardEntry = document.createElement("div");
