@@ -9,6 +9,11 @@ socket.on("ffaObjectsHeartbeat", eventd => {
         wall.type = eventd.walls[i].type;
         objects.walls.push(wall);
     }
+    objects.noNomAreas = [];
+    for (let i = 0; i < eventd.noNomArea.length; ++i) {
+        const area = new NoNomArea(eventd.noNomArea[i].startsAt, eventd.noNomArea[i].endsAt);
+        objects.noNomAreas.push(area);
+    }
 });
 socket.on("ffaHeartbeat", async d => {
     if (d.role == -1 && !/[\?\&]guest=true/.test(window.location.search)) return document.location.href = "/login/";
