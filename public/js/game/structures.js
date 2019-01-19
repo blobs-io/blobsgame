@@ -152,6 +152,18 @@ class BlobObj {
         return this._direction = value;
     }
 
+    get inProtectedArea() {
+        let inArea = false;
+        let pos = { x: this.x, y: this.y }; // since defining it once is faster than executing the getter multiple times
+        for (let i = 0; i < objects.noNomAreas.length; ++i) {
+            if (objects.noNomAreas[i].startsAt.x <= pos.x
+                && objects.noNomAreas[i].startsAt.x + (Math.abs(objects.noNomAreas[i].endsAt.x - objects.noNomAreas[i].startsAt.x)) > pos.x
+                && objects.noNomAreas[i].startsAt.y <= pos.y
+                && objects.noNomAreas[i].startsAt.y + (Math.abs(objects.noNomAreas[i].endsAt.y - objects.noNomAreas[i].startsAt.y)) > pos.y) inArea = true;
+        }
+        return inArea;
+    }
+
     setBlob(blobimage = BlobCode.blobowo) {
         if (blobimage === BlobCode.partyblob0) blobimage = BlobCode.blobowo;
         return new Promise((a, b) => {
