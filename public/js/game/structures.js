@@ -26,6 +26,35 @@ class WallObj {
     }
 }
 
+class NoNomArea {
+    constructor(startsAt, endsAt) {
+        if (startsAt === undefined || endsAt === undefined) return;
+        if (startsAt.constructor.name !== "Object" || endsAt.constructor.name !== "Object") return;
+        this.startsAt = {
+            x: startsAt.x,
+            y: startsAt.y
+        };
+        this.endsAt = {
+            x: endsAt.x,
+            y: endsAt.y
+        };
+    }
+
+    display() {
+        return new Promise((a, b) => {
+            ctx.fillStyle = "#cee8bb";
+            ctx.fillRect(this.startsAt.x, this.startsAt.y, this.endsAt.x, this.endsAt.y);
+        });
+    }
+
+    static display(startsAt, endsAt) {
+        return new Promise((a, b) => {
+            ctx.fillStyle = "#cee8bb";
+            ctx.fillRect(startsAt.x, startsAt.y, endsAt.x, endsAt.y);
+        });
+    }
+}
+
 // Blob structure
 class BlobCode {
     static get blobowo() {
