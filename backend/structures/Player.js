@@ -63,4 +63,17 @@ module.exports = class Player {
 	set y(value) {
 		return this._y = value;
 	}
+
+	get inProtectedArea() {
+		const objects = this.room.map.map.objects;
+        let inArea = false;
+        let pos = { x: this.x, y: this.y }; // since defining it once is faster than executing the getter multiple times
+        for (let i = 0; i < objects.noNomArea.length; ++i) {
+            if (objects.noNomArea[i].startsAt.x <= pos.x
+                && objects.noNomArea[i].startsAt.x + (Math.abs(objects.noNomArea[i].endsAt.x - objects.noNomArea[i].startsAt.x)) > pos.x
+                && objects.noNomArea[i].startsAt.y <= pos.y
+                && objects.noNomArea[i].startsAt.y + (Math.abs(objects.noNomArea[i].endsAt.y - objects.noNomArea[i].startsAt.y)) > pos.y) inArea = true;
+        }
+        return inArea;
+    }
 };
