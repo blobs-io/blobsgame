@@ -10,9 +10,9 @@ appCreateEvent.run = (...args) => {
     const [sessionid, displayError, sessions, io, data, sqlite, sockets] = args;
     return new Promise((resolve, reject) => {
 		sqlite.all("SELECT promotedAt FROM recentPromotions ORDER BY promotedAt ASC").then(res => {
-			for (const promotion of res) {
-				if (Date.now() - parseInt(promotion.promotedAt) >= 86400000) {
-					sqlite.run(`DELETE FROM recentPromotions WHERE promotedAt="${promotion.promotedAt}"`);
+			for (let i = 0; i < res.length; ++i) {
+				if (Date.now() - parseInt(res[i].promotedAt) >= 86400000) {
+					sqlite.run(`DELETE FROM recentPromotions WHERE promotedAt="${res[i].promotedAt}"`);
 				}
 			}
 		});
