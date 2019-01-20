@@ -55,18 +55,18 @@ function displayLeaderboard() {
 }
 
 function displayWalls(context = ctx) {
-    for (const wall of objects.walls) {
+    for (let i = 0; i < objects.walls.length; ++i) {
         let canvasPosX = 0,
         canvasPosY = 0;
-        if (ownBlob.x >= wall.x) {
-            canvasPosX = (canvas.width / 2) - (ownBlob.x - wall.x);
-        } else if (ownBlob.x < wall.x) {
-            canvasPosX = (canvas.width / 2) + (wall.x - ownBlob.x);
+        if (ownBlob.x >= objects.walls[i].x) {
+            canvasPosX = (canvas.width / 2) - (ownBlob.x - objects.walls[i].x);
+        } else if (ownBlob.x < objects.walls[i].x) {
+            canvasPosX = (canvas.width / 2) + (objects.walls[i].x - ownBlob.x);
         }
-        if (ownBlob.y >= wall.y) {
-            canvasPosY = (canvas.height / 2) - (ownBlob.y - wall.y);
-        } else if (ownBlob.y < wall.y) {
-            canvasPosY = (canvas.height / 2) + (wall.y - ownBlob.y);
+        if (ownBlob.y >= objects.walls[i].y) {
+            canvasPosY = (canvas.height / 2) - (ownBlob.y - objects.walls[i].y);
+        } else if (ownBlob.y < objects.walls[i].y) {
+            canvasPosY = (canvas.height / 2) + (objects.walls[i].y - ownBlob.y);
         }
         canvasPosY -= 45;
         canvasPosX -= 45;
