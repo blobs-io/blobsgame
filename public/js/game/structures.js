@@ -81,7 +81,9 @@ class BlobCode {
 }
 
 function isInObject(x, y) {
-    return objects.walls.some(v => x < (v.x + 30) && x > (v.x - 30) && y < (v.y + 30) && y > (v.y - 30));
+    let inObject = false;
+    for(let i = 0; i < objects.walls.length; ++i) if (x < (objects.walls[i].x + 30) && x > (objects.walls[i].x - 30) && y < (objects.walls[i].y + 30) && y > (objects.walls[i].y - 30)) inObject = true;
+    return inObject;
 }
 
 class BlobObj {
