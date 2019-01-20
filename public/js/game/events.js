@@ -25,14 +25,14 @@ socket.on("ffaHeartbeat", async d => {
     ownBlob.ready = true;
     ownBlob.role = d.role;
     blobs.push(ownBlob);
-    for (const blob of d.users) {
-		if (blob.owner !== ownBlob.owner && !blobs.some(v => v.owner === blob.owner)) {
-			const n = new BlobObj(blob.br, blob.owner);
+    for (let i = 0; i < d.users.length; ++i) {
+		if (d.users[i].owner !== ownBlob.owner && !blobs.some(v => v.owner === d.users[i].owner)) {
+			const n = new BlobObj(d.users[i].br, d.users[i].owner);
 			n.directionChangeCoordinates = {
-				x: blob._x,
-				y: blob._y
+				x: d.users[i]._x,
+				y: d.users[i]._y
 			};
-			n.directionChangedAt = blob.directionChangedAt;
+			n.directionChangedAt = d.users[i].directionChangedAt;
 			await n.setBlob();
 			n.display(true, true);
 			blobs.push(n);
