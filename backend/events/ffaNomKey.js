@@ -84,60 +84,61 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
 
     for (const blobobj of Base.rooms.find(v => v.id === "ffa").players) {
         if (eventd.owner !== blobobj.owner) {
-            if (eventd.x < (blobobj.x + 30) && eventd.x > (blobobj.x - 30)) {
-                if (eventd.y < (blobobj.y + 30) && eventd.y > (blobobj.y - 30)) {
-                    if (eventd.guest === true || blobobj.guest === true) return;
-                    if (Date.now() - eventd.lastnom < 1500) return; // Nom cooldown (1.5 seconds)
-                    // If blob is nommed
-                    
-                    Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players[Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.findIndex(v => v.id === data.id)].lastnom = Date.now();
+            if (eventd.inProtectedArea === false) {
+                if (eventd.x < (blobobj.x + 30) && eventd.x > (blobobj.x - 30)) {
+                    if (eventd.y < (blobobj.y + 30) && eventd.y > (blobobj.y - 30)) {
+                        if (eventd.guest === true || blobobj.guest === true) return;
+                        if (Date.now() - eventd.lastnom < 1500) return; // Nom cooldown (1.5 seconds)
+                        // If blob is nommed
+
+                        Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players[Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.findIndex(v => v.id === data.id)].lastnom = Date.now();
 
 
-                    let winner = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)];
-                    let loser = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === blobobj.owner)];
+                        let winner = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)];
+                        let loser = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === blobobj.owner)];
 
-                    if (eventd.br === blobobj.br) eventd.br -= 1;
-                    if (parseInt(blobobj.br) !== NaN) {
-                        let result = parseInt(execSync(Base.algorith.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
-                        if (result === 0) ++result;
-                        winner.br = (winner.br + result > 9999 ? 9999 : winner.br + result);
-                        loser.br = (loser.br - result <= 0 ? 1 : loser.br - result);
+                        if (eventd.br === blobobj.br) eventd.br -= 1;
+                        if (parseInt(blobobj.br) !== NaN) {
+                            let result = parseInt(execSync(Base.algorith.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
+                            if (result === 0) ++result;
+                            winner.br = (winner.br + result > 9999 ? 9999 : winner.br + result);
+                            loser.br = (loser.br - result <= 0 ? 1 : loser.br - result);
 
-                        loser.directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
-                        loser.directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
-                        loser.directionChangedAt = Date.now();
+                            loser.directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
+                            loser.directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
+                            loser.directionChangedAt = Date.now();
 
 
+                            await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(loser.br - result <= 0 ? 1 : loser.br), loser.owner]));
+                            await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(winner.br + result > 9999 ? 9999 : winner.br), winner.owner]));
 
-                        await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(loser.br - result <= 0 ? 1 : loser.br), loser.owner]));
-                        await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(winner.br + result > 9999 ? 9999 : winner.br), winner.owner]));
-
-                        const dropRes = {
-                            winner: promotedTo(winner.br - result, winner.br) || {
-                                drop: undefined
-                            },
-                            loser: promotedTo(loser.br + result, loser.br) || {
-                                drop: undefined
+                            const dropRes = {
+                                winner: promotedTo(winner.br - result, winner.br) || {
+                                    drop: undefined
+                                },
+                                loser: promotedTo(loser.br + result, loser.br) || {
+                                    drop: undefined
+                                }
+                            };
+                            if (typeof dropRes.winner.drop !== "undefined") {
+                                sqlite.prepare("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)").then(prepared => {
+                                    prepared.run([winner.owner, dropRes.winner.newTier, dropRes.winner.drop, Date.now()]);
+                                });
+                            } else if (typeof dropRes.loser.drop !== "undefined") {
+                                sqlite.prepare("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)").then(prepared => {
+                                    prepared.run([loser.owner, dropRes.loser.newTier, dropRes.loser.drop, Date.now()]);
+                                });
                             }
-                        };
-                        if (typeof dropRes.winner.drop !== "undefined") {
-                            sqlite.prepare("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)").then(prepared => {
-                                prepared.run([winner.owner, dropRes.winner.newTier, dropRes.winner.drop, Date.now()]);
-                            });
-                        } else if (typeof dropRes.loser.drop !== "undefined") {
-                            sqlite.prepare("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)").then(prepared => {
-                                prepared.run([loser.owner, dropRes.loser.newTier, dropRes.loser.drop, Date.now()]);
+
+
+                            io.sockets.emit("ffaPlayerNommed", {
+                                winner,
+                                loser,
+                                result
                             });
                         }
 
-
-                        io.sockets.emit("ffaPlayerNommed", {
-                            winner,
-                            loser,
-                            result
-                        });
                     }
-
                 }
             }
         }
