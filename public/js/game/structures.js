@@ -42,14 +42,14 @@ class NoNomArea {
 
     display() {
         return new Promise((a, b) => {
-            ctx.fillStyle = "#cee8bb";
+            ctx.fillStyle = "#aaddb5";
             ctx.fillRect(this.startsAt.x, this.startsAt.y, this.endsAt.x, this.endsAt.y);
         });
     }
 
     static display(startsAt, endsAt) {
         return new Promise((a, b) => {
-            ctx.fillStyle = "#cee8bb";
+            ctx.fillStyle = "#aaddb5";
             ctx.fillRect(startsAt.x, startsAt.y, endsAt.x, endsAt.y);
         });
     }
