@@ -27,6 +27,6 @@ module.exports = class Player {
 		return {
 			path: "player/:username",
 			category: "player"
-		}
+		};
 	}
 };
