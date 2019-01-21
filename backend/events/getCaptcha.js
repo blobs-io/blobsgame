@@ -1,4 +1,4 @@
-class getCaptchaEvent {};
+class getCaptchaEvent {}
 /**
  * Runs the getCaptcha Event
  * 
