@@ -164,7 +164,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
                         socket.emit("switchBlob", blob);
                     });
                 }
-            };
+            }
 
             // Online user list
             if (data.online.length > 0) {
