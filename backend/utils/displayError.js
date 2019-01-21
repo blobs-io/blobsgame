@@ -10,7 +10,7 @@
  */
 module.exports = (msg, data, event, status, io) => {
     io.to(data.id).emit(event, {
-        status: status,
+        status,
         message: msg
     });
 }
