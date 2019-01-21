@@ -106,7 +106,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
     if (sessionid.length > 0) {
         socket.emit("appCreate", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
         socket.on("appCreate", async function(data) {
-            if (data.status != 200) {
+            if (data.status !== 200) {
                 console.error(JSON.stringify(data));
                 return document.location.href = "/login/";
             } else ready = true;
