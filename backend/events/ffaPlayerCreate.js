@@ -16,8 +16,8 @@ ffaPlayerCreateEvent.run = async (...args) => {
             guest: true
         };
     } else socket.guest = false;
-    
-    
+
+
     const nblob = new Player();
     const room = Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")];
     nblob.directionChangeCoordinates.x = Math.floor(Math.random() * 600);
@@ -41,7 +41,7 @@ ffaPlayerCreateEvent.run = async (...args) => {
 		y: nblob.directionChangeCoordinates.y,
 		users: room.players
 	});
-	io.sockets.emit("ffaUserJoin", Object.assign(nblob, {x: nblob.x, y: nblob.y}))
+	io.sockets.emit("ffaUserJoin", Object.assign(nblob, {x: nblob.x, y: nblob.y}));
 };
 
 module.exports = ffaPlayerCreateEvent;
