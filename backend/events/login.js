@@ -1,4 +1,4 @@
-class loginEvent {};
+class loginEvent {}
 /**
  * Runs the login Event
  * 
