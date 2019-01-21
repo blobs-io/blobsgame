@@ -34,7 +34,7 @@ appCreateEvent.run = (...args) => {
                     }).catch(console.log);
                 }
                 if(session) {
-					 require("../utils/getDataFromPlayer")(session.username, sqlite).then(async playerData => {
+                    require("../utils/getDataFromPlayer")(session.username, sqlite).then(async playerData => {
                         io.to(data.id).emit("appCreate", {
                             status: 200,
                             username: session.username,
