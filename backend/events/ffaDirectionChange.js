@@ -1,4 +1,4 @@
-class ffaDirectionChangeEvent {};
+class ffaDirectionChangeEvent {}
 
 ffaDirectionChangeEvent.run = (...args) => {
     const [eventd, data, io, Base] = args;
