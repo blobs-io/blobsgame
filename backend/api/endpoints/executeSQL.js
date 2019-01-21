@@ -4,7 +4,7 @@ const Base = require("../../Base");
 module.exports = class executeSQL {
     static async run(...data) {
         const [req, res] = data;
-        res.set("Content-Type", "application/json")
+        res.set("Content-Type", "application/json");
         if (typeof req.headers.sessionid !== "string" || typeof req.headers.query !== "string") {
             res.set("status", 400);
             res.send({
