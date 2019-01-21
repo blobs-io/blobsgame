@@ -5,7 +5,7 @@ module.exports = class APIController {
 		if (typeof route !== "string" || typeof app === "undefined") throw new ReferenceError("Please pass a route string and an express app object as constructor parameter.");
 		this.routes = fs.readdirSync(__dirname + "/endpoints/").map(v => {
 			const endpoint = require(`./endpoints/${v}`);
-			return Object.assign(endpoint.info, {run: endpoint.run})
+			return Object.assign(endpoint.info, {run: endpoint.run});
 		});
 		this.app = app;
 		this.route = route;
