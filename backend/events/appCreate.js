@@ -51,7 +51,7 @@ appCreateEvent.run = (...args) => {
 								username: v.owner,
 								br: v.br,
 								role: 0
-							}})),
+							}; })),
                             coins: playerData.blobcoins,
                             distance: playerData.distance,
                             lastDaily: playerData.lastDailyUsage,
