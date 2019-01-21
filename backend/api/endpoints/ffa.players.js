@@ -11,6 +11,6 @@ module.exports = class Players {
 		return {
 			path: "ffa/players",
 			category: "ffa"
-		}
+		};
 	}
 };
