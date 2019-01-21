@@ -1,4 +1,4 @@
-class Base {};
+class Base {}
 
 Base.express = {
     express: require("express")
