@@ -102,6 +102,7 @@ exports.getSession = (database, data) => {
                     database.prepare("SELECT * FROM sessionids WHERE username = ?").then(prepare => {
                         prepare.get([data.value]).then(resolve).catch(reject);
                     }).catch(reject);
+                    break;
                 case "expiresAt":
                     database.prepare("SELECT * FROM sessionids WHERE expires = ?").then(prepare => {
                         prepare.get([data.value]).then(resolve).catch(reject);
