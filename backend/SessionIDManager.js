@@ -77,7 +77,7 @@ exports.exists = (database, data) => {
                     break;
             }
         } catch (e) {
-            reject(e)
+            reject(e);
         }
     });
 }
