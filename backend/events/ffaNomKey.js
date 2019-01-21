@@ -80,8 +80,7 @@ function promotedTo(oldbr, newbr) {
 ffaNomKey.run = async (data, io, Base, sqlite) => {
     const eventd = Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.find(v => v.id === data.id);
     if (!eventd) return;
-    if (parseInt(eventd.x) === NaN || parseInt(eventd.y) === NaN || parseInt(eventd.br) === NaN) return;
-
+    if (isNaN(eventd.x) || isNaN(eventd.y) || isNaN(eventd.br)) return;
     for (const blobobj of Base.rooms.find(v => v.id === "ffa").players) {
         if (eventd.owner !== blobobj.owner) {
             if (eventd.inProtectedArea === false) {
