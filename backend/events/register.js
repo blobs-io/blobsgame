@@ -1,4 +1,4 @@
-class registerEvent {};
+class registerEvent {}
 /**
  * Runs the register Event
  * 
