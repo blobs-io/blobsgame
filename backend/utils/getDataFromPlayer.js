@@ -7,4 +7,4 @@ module.exports = (username, sqlite) => {
             })
         }).catch(reject);
     });
-}
+};
