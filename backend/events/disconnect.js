@@ -1,4 +1,4 @@
-class disconnectEvent {};
+class disconnectEvent {}
 
 /**
  * Runs the disconnect event.
