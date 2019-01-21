@@ -97,7 +97,7 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                         let loser = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === blobobj.owner)];
 
                         if (eventd.br === blobobj.br) eventd.br -= 1;
-                        if (parseInt(blobobj.br) !== NaN) {
+                        if (!isNaN(blobobj.br)) {
                             let result = parseInt(execSync(Base.algorith.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
                             if (result === 0) ++result;
                             winner.br = (winner.br + result > 9999 ? 9999 : winner.br + result);
