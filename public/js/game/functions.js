@@ -7,6 +7,15 @@ function displayUI(excludes = []) {
     if (!excludes.includes("displayWalls")) displayWalls();
     if (!excludes.includes("displayNoNomAreas")) displayNoNomAreas();
     if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
+
+
+	ctx.font = "40px Raleway";
+	ctx.fillStyle = "white";
+	ctx.fillText(ownBlob.health, canvas.width / 2, canvas.height - 20);
+	ctx.font = "17px Raleway";
+	ctx.fillText("HP", canvas.width / 2 + 70, canvas.height - 20);
+
+
 }
 
 function displayNoNomAreas(context = ctx) {
