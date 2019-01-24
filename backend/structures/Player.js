@@ -22,6 +22,7 @@ module.exports = class Player {
 		this.maximumCoordinates = { };
 		this.previousX = 0;
 		this.previousY = 0;
+		this.health = 100;
 	}
 
 	get room() {
