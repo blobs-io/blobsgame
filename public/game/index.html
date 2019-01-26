@@ -60,14 +60,6 @@
 <script src="../js/game/other.js"></script>
 <script src="../js/particles.js"></script>
 <script>
-	// Shadow
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-    ctx.shadowBlur = 5;
-    ctx.shadowColor = (() => {
-		const colors = ["#e74c3c", "#9b59b6", "#1abc9c"];
-		return colors[Math.floor(Math.random() * colors.length)];
-	})();
     (async() => {
         const bar = document.getElementById("bar-inside");
         request("/api/ffa/players", "GET", {}).then(res => {
