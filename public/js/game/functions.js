@@ -9,11 +9,11 @@ function displayUI(excludes = []) {
     if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
 
 
-	ctx.font = "40px Raleway";
+	ctx.font = "50px Raleway";
 	ctx.fillStyle = "white";
-	ctx.fillText(ownBlob.health, canvas.width / 2, canvas.height - 20);
-	ctx.font = "17px Raleway";
-	ctx.fillText("HP", canvas.width / 2 + 70, canvas.height - 20);
+	ctx.fillText(ownBlob.health, canvas.width / 2 - 20, canvas.height - 20);
+	ctx.font = "20px Raleway";
+	ctx.fillText("HP", canvas.width / 2 + 65, canvas.height - 20);
 
 
 }
@@ -43,14 +43,17 @@ function clearCanvas(context = ctx) {
 }
 
 function displayLeaderboard() {
+	const placementColors = ["#e74c3c", "#e67e22", "#9b59b6", "#3498db", "#2980b9", "#2ecc71", "#f1c40f", "#d35400", "#8e44ad", "#16a085"];
     document.getElementById("leaderboard").innerHTML = "<h3>Leaderboard</h3>";
     const sortedblobs = blobs.slice(0, 10).sort((a, b) => b.br - a.br);
     for (let i = 0; i < sortedblobs.length; ++i) {
         const tier = getTier(sortedblobs[i].br || 0);
         const leaderboardEntry = document.createElement("div");
-        const usernameEntry = document.createElement("span");
+		const usernameEntry = document.createElement("span");
+		usernameEntry.style.color = placementColors[i];
         const brLabel = document.createElement("span");
-        const linebreak = document.createElement("br");
+		brLabel.style.color = placementColors[i];
+		const linebreak = document.createElement("br");
         leaderboardEntry.className = "leaderboard-entry";
         usernameEntry.className = "user-entry";
         usernameEntry.innerHTML = (i + 1) + ". " + sortedblobs[i].owner.substr(0, 12);
