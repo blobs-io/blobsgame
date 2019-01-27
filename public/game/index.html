@@ -60,6 +60,7 @@
 <script src="../js/game/other.js"></script>
 <script src="../js/particles.js"></script>
 <script>
+	initParticles();
     (async() => {
         const bar = document.getElementById("bar-inside");
         request("/api/ffa/players", "GET", {}).then(res => {
