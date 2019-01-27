@@ -1,8 +1,8 @@
-(() => {
+function initParticles(custom_canvas) {
 	if (/(Android|webOS|iPad|iPod|Windows Phone|BlackBerry|iPhone)/.test(navigator.userAgent)) {
 		return document.body.removeChild(document.getElementById("particles"));
 	}
-	const pCanvas = document.getElementById("particles");
+	const pCanvas = custom_canvas || document.getElementById("particles");
 	const pctx = pCanvas.getContext("2d");
 	// CSS
 	pCanvas.style.position = "fixed";
@@ -66,4 +66,4 @@
 		}
 	}, 10);
 	
-})();
+}
