@@ -10,12 +10,17 @@ function displayUI(excludes = []) {
 
 
 	ctx.font = "50px Raleway";
-	ctx.fillStyle = "white";
+
+	if (ownBlob.health >= 80) ctx.fillStyle = "#2ecc71";
+	else if (ownBlob.health >= 50) ctx.fillStyle = "#f39c12";
+	else if (ownBlob.health >= 30) ctx.fillStyle = "#e67e22";
+	else if (ownBlob.health >= 10) ctx.fillStyle = "#e74c3c";
+	else ctx.fillStyle = "#c0392b";
+
 	ctx.fillText(ownBlob.health, canvas.width / 2 - 20, canvas.height - 20);
 	ctx.font = "20px Raleway";
 	ctx.fillText("HP", canvas.width / 2 + 65, canvas.height - 20);
-
-
+	ctx.fillStyle = "white";
 }
 
 function displayNoNomAreas(context = ctx) {
