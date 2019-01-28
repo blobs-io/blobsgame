@@ -101,7 +101,7 @@ class BlobObj {
         };
         this.previousX = 0;
         this.previousY = 0;
-	this.health = 100;
+	    this.health = 100;
     }
     
     get x() {
