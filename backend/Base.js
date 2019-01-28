@@ -14,7 +14,7 @@ Base.discordAuth = {
 		token: undefined
 	}
 };
-Base.algorith = "./b {ownbr} {opponentbr} 1";
+Base.algorith = "./b {ownbr} {opponentbr} --br";
 Base.bcrypt = require("bcrypt");
 Base.sqlite = require("sqlite");
 Base.io = Base.socket(Base.server);
