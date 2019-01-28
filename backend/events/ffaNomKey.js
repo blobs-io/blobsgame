@@ -86,7 +86,7 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
             if (eventd.inProtectedArea === false) {
                 if (eventd.x < (blobobj.x + 30) && eventd.x > (blobobj.x - 30)) {
                     if (eventd.y < (blobobj.y + 30) && eventd.y > (blobobj.y - 30)) {
-                        if (eventd.guest === true || blobobj.guest === true) return;
+                        const hasGuest = eventd.guest === true || blobobj.guest === true;
                         if (Date.now() - eventd.lastnom < 1500) return; // Nom cooldown (1.5 seconds)
                         // If blob is nommed
 						
@@ -103,17 +103,12 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                         let winner = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)];
                         let loser = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === blobobj.owner)];
 
-                        if (eventd.br === blobobj.br) eventd.br -= 1;
-                        if (!isNaN(blobobj.br)) {
+                        if (!isNaN(blobobj.br) && !hasGuest) {
+                            if (eventd.br === blobobj.br) eventd.br -= 1;
                             let result = parseInt(execSync(Base.algorith.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
                             if (result === 0) ++result;
                             winner.br = (winner.br + result > 9999 ? 9999 : winner.br + result);
                             loser.br = (loser.br - result <= 0 ? 1 : loser.br - result);
-
-                            loser.directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
-                            loser.directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
-                            loser.directionChangedAt = Date.now();
-
 
                             await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(loser.br - result <= 0 ? 1 : loser.br), loser.owner]));
                             await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(winner.br + result > 9999 ? 9999 : winner.br), winner.owner]));
@@ -135,14 +130,17 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                                     prepared.run([loser.owner, dropRes.loser.newTier, dropRes.loser.drop, Date.now()]);
                                 });
                             }
-
-
-                            io.sockets.emit("ffaPlayerNommed", {
-                                winner,
-                                loser,
-                                result
-                            });
                         }
+
+                        loser.directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
+                        loser.directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
+                        loser.directionChangedAt = Date.now();
+
+                        io.sockets.emit("ffaPlayerNommed", {
+                            winner,
+                            loser,
+                            result: typeof result !== "undefined" ? result : 0
+                        });
 
                     }
                 }
