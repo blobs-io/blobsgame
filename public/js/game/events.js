@@ -70,15 +70,19 @@ for(const btnid of ["btnup", "btndown", "btnleft", "btnright", "nom-btn-mobile"]
 		switch(btnid) {
 			case "btnup":
             ownBlob.direction = 0;
+            socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 0, time: Date.now() }));
 			break;
 			case "btndown":
             ownBlob.direction = 2;
+            socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 2, time: Date.now() }));
 			break;
 			case "btnleft":
-			ownBlob.direction = 3
+			ownBlob.direction = 3;
+			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 3, time: Date.now() }));
 			break;
 			case "btnright":
 			ownBlob.direction = 1;
+			socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 1, time: Date.now() }));
 			break;
 			case "nom-btn-mobile":
             if (Date.now() - ownBlob.lastnom <= 1500) return;
