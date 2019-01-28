@@ -33,7 +33,6 @@
 			</div>
 			<div id="players">
 				<h1 class="heading centered">Online</h1>
-				<!--<span class="player"><img src="../assets/emblems/emblem_diamond.png" width="20" height="20" style="vertical-align: middle" /><span class="player-name" style="color: #16f7ef;">y21</span> (9023 BR)</span>-->
 
 			</div>
 			<div id="tip">
@@ -61,11 +60,7 @@
 <script src="../js/game/other.js"></script>
 <script src="../js/particles.js"></script>
 <script>
-	// Shadow
-    ctx.shadowOffsetX = 3;
-    ctx.shadowOffsetY = 3;
-    ctx.shadowBlur = 5;
-    ctx.shadowColor = "DarkGoldenRod";
+	initParticles();
     (async() => {
         const bar = document.getElementById("bar-inside");
         request("/api/ffa/players", "GET", {}).then(res => {

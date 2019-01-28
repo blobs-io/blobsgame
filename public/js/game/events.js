@@ -59,6 +59,9 @@ socket.on("ffaUserJoin", async d => {
     n.display(true, true);
     blobs.push(n);
 });
+socket.on("ffaHealthUpdate", newHealth => {
+	if (typeof newHealth === "number") ownBlob.health = newHealth;
+});
 
 
 // Events (Window/Document)
