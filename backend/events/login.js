@@ -36,12 +36,6 @@ loginEvent.run = (...args) => {
                             type: "username",
                             value: res.username
                         }).then(session => {
-                            if (session) {
-                                sessions.deleteSession(sqlite, {
-                                    type: "username",
-                                    value: res.username
-                                }).catch(console.log);
-                            }
                             sessions.registerID(sqlite, res.username).then(id => {
                                 io.to(data.id).emit("login", {
                                     status: 200,
