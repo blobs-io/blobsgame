@@ -32,6 +32,9 @@ socket.on("ffaHeartbeat", async d => {
 				x: d.users[i]._x,
 				y: d.users[i]._y
 			};
+			n.previousX = d.users[i]._x;
+			n.previousY = d.users[i]._y;
+			n._direction = d.users[i].direction;
 			n.directionChangedAt = d.users[i].directionChangedAt;
 			await n.setBlob();
 			n.display(true, true);
