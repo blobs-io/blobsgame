@@ -1,6 +1,9 @@
 const canvas = document.getElementsByTagName("canvas")[0];
 const ctx = canvas.getContext("2d");
-const sessionid = (window.location.search.match(/[\?\&]sid=[^\&]{12,20}/) || [""])[0];
+const sessionid = (() => {
+    const cookie = document.cookie.split(/; */).find(v => v.startsWith("session=")) || "";
+    return cookie.substr(cookie.indexOf("=") + 1);
+})();
 let lastTick = Date.now();
 let blobs = [],
 objects = {

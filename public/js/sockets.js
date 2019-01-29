@@ -85,7 +85,10 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             } else {
                 buttonClicked = true;
                 document.getElementById("auth").innerHTML = message.replace("<type>", "success").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
-                if (typeof data.session_id !== "undefined") document.location.href = server + "/app?sessionid=" + data.session_id;
+                if (typeof data.session_id !== "undefined") {
+                    document.cookie = "session=" + data.session_id + ";expires=" + new Date(Date.now() + 9e5).toUTCString() + ";path=/";
+                    document.location.href = server + "/app/";
+                }
             }
         });
     });
@@ -102,9 +105,12 @@ if (/register(\/.*)?$/.test(window.location.href)) {
         all: undefined
     };
     var ready = false;
-    const sessionid = (window.location.search.match(/[\?\&]sessionid=[^\&]{12,20}/) || []);
+    const sessionid = (() => {
+        const cookie = document.cookie.split(/; */).find(v => v.startsWith("session=")) || "";
+        return cookie.substr(cookie.indexOf("=") + 1);
+    })();
     if (sessionid.length > 0) {
-        socket.emit("appCreate", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
+        socket.emit("appCreate", sessionid);
         socket.on("appCreate", async function(data) {
             if (data.status !== 200) {
                 console.error(JSON.stringify(data));
@@ -240,11 +246,11 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 
             // Button events
             document.getElementById("play-btn").addEventListener("click", () => {
-                document.location.href = "/game?sid=" + sessionid[0].substr(sessionid[0].indexOf("=") + 1);
+                document.location.href = "/game/";
             });
 
             document.getElementById("logout-btn").addEventListener("click", () => {
-                socket.emit("sessionDelete", sessionid[0].substr(sessionid[0].indexOf("=") + 1));
+                socket.emit("sessionDelete", sessionid);
             });
 
             document.getElementsByClassName("daily-bonus")[0].addEventListener("click", () => {
@@ -254,7 +260,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             document.getElementById("query-btn").addEventListener("click", () => {
                 const query = prompt("Insert SQL statement");
                 const headers = {
-                    sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1),
+                    sessionid: sessionid,
                     query
                 };
                 request("/api/executeSQL/run", "GET", headers).then(() => {
@@ -268,13 +274,13 @@ if (/register(\/.*)?$/.test(window.location.href)) {
 
             document.getElementById("verify-btn").addEventListener("click", () => {
                 request("/api/verify", "GET", {
-                    sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1)
+                    sessionid
                 }).then(xhr => {
                     const response = JSON.parse(xhr.responseText);
                     alert("Verification code: " + response.code);
                 }).catch(xhr => {
                     request("/api/verify?request=true", "GET", {
-                        sessionid: sessionid[0].substr(sessionid[0].indexOf("=") + 1)
+                        sessionid
                     }).then(xhr2 => {
                         const response = JSON.parse(xhr2.responseText);
                         alert("Old verification code: " + response.code);
@@ -309,7 +315,6 @@ if (/register(\/.*)?$/.test(window.location.href)) {
                 document.getElementById("blobcoins-label").innerHTML = `Blobcoins: ${data.coins += 20}`;
             });
             socket.on("blobChange", newBlob => {
-                console.log((blobs.current || data.activeBlob));
                 document.getElementById(newBlob + "-btn").className = "success-alert";
                 document.getElementById(newBlob + "-btn").innerHTML = "Selected";
                 document.getElementById((blobs.current || data.activeBlob) + "-btn").className = "pick-blob";
