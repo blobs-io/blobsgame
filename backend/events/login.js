@@ -36,7 +36,13 @@ loginEvent.run = (...args) => {
                             type: "username",
                             value: res.username
                         }).then(session => {
-                            sessions.registerID(sqlite, res.username).then(id => {
+                            sessions.registerID(sqlite, res.username).then(async id => {
+                                if (session) {
+                                    await sessions.deleteSession(sqlite, {
+                                        type: "session",
+                                        value: session
+                                    }).catch(() => {});
+                                }
                                 io.to(data.id).emit("login", {
                                     status: 200,
                                     message: "Successfully logged in.",
