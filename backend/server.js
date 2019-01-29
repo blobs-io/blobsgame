@@ -109,6 +109,7 @@ io.on("connection", data => {
 				});
 				if (!session) return;
 				const dbData = await require("./utils/getDataFromPlayer")(session.username, sqlite);
+				if (Base.sockets.some(v => v.username === session.username)) Base.sockets.splice(Base.sockets.findIndex(v => v.username === session.username), 1);
                 Base.sockets.push({
                     sessionid: _,
                     socketid: data.id,
@@ -118,10 +119,6 @@ io.on("connection", data => {
                     lastDaily: dbData.lastDailyUsage,
                     inactiveSince: null
                 });
-                sessions.deleteSession(sqlite, {
-                    type: "session",
-                    value: _
-                }).catch(()=>{});
             } catch (e) {
                 console.log(e);
             }
