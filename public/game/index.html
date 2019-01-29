@@ -82,7 +82,7 @@
                 } else {
                     bar.style.width = "100%";
    					setTimeout(() => {
-                        socket.emit("ffaPlayerCreate", sessionid.substr(sessionid.indexOf("=") + 1));
+                        socket.emit("ffaPlayerCreate", sessionid);
                         document.body.removeChild(document.getElementById("loading-screen"));
                         document.getElementById("game").style.display = "block";
 					}, 1500);
