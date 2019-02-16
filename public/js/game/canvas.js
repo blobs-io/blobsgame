@@ -34,6 +34,10 @@ const emblems = {
     guest: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_guest-or-unknown.png"; return image; })(),
     admin: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_admin.png"; return image; })(),
 };
+const details = {
+	mode: "FFA",
+	singleplayer: false
+};
 
 canvas.width = window.innerWidth - 30;
 canvas.height = window.innerHeight - 30;
@@ -54,14 +58,17 @@ setInterval(() => {
 			const diff = (Date.now() - timestampBefore);
 			document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
 		});
-		request("/api/ffa/players", "GET").then(res => {
-			const request = JSON.parse(res.responseText);
-			for (const blob of request) {
-				const target = blobs[blobs.findIndex(v => v.owner === blob.owner)];
-				target.directionChangeCoordinates = blob.directionChangeCoordinates;
-				target.directionChangedAt = blob.directionChangedAt;
-			}
-		});
+		if (details.singleplayer === false) {
+            request("/api/ffa/players", "GET").then(res => {
+                const request = JSON.parse(res.responseText);
+                for (const blob of request) {
+                    const target = blobs[blobs.findIndex(v => v.owner === blob.owner)];
+                    target.directionChangeCoordinates = blob.directionChangeCoordinates;
+                    target.directionChangedAt = blob.directionChangedAt;
+                }
+            });
+        }
+
         lastTick = Date.now();
     }
     if (ownBlob.x <= 1 && ownBlob.direction === 3) return displayUI();
