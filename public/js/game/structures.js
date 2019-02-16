@@ -238,4 +238,17 @@ class BlobObj {
             }
         }
     }
+
+    static find(x, y) { // because Array.find is slow
+        let obj;
+        for(let i=0; i < blobs.length; ++i) {
+            if (x < (blobs[i].x + 30) && x > (blobs[i].x - 30)) {
+                if (y < (blobs[i].y + 30) && y > (blobs[i].y - 30) && blobs[i].owner !== ownBlob.owner) {
+                    obj = blobs[i];
+                    break;
+                }
+            }
+        }
+        return obj;
+    }
 }
