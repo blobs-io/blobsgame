@@ -179,6 +179,19 @@ function getTier(br) {
     return result;
 }
 
+function nom(attackBlob, target) {
+    if (attackBlob.x < (target.x + 30) && attackBlob.x > (target.x - 30)) {
+        if (attackBlob.y < (target.y + 30) && attackBlob.y > (target.y - 30)) {
+
+            target.health -= Math.floor(Math.random() * 10) + 30;
+            if (target.health <= 0) {
+                socket.emit("singleplayerNomKey", { attackBlob, target });
+                target.health = 100;
+            }
+        }
+    }
+}
+
 function getTierByName(name) {
 	switch (name) {
 		case "bronze": return getTier(1000); break;
