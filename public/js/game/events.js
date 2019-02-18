@@ -26,7 +26,19 @@ socket.on("ffaHeartbeat", async d => {
     ownBlob.ready = true;
     ownBlob.role = d.role;
     blobs.push(ownBlob);
-    if (details.singleplayer) return;
+    if (details.singleplayer) {
+        d.users = [];
+        for(let i=0; i < 40; ++i) {
+            d.users.push({
+                _x: Math.floor(Math.random() * mapSize.width),
+                _y: Math.floor(Math.random() * mapSize.height),
+                br: Math.random() > Math.random() ? ownBlob.br - (Math.floor(Math.random() * 499)) : ownBlob.br + (Math.floor(Math.random() * 499)),
+                owner: Math.random().toString(19).substr(2, 6),
+                direction: 4,
+                directionChangedAt: Date.now()
+            });
+        }
+    }
     for (let i = 0; i < d.users.length; ++i) {
 		if (d.users[i].owner !== ownBlob.owner && !blobs.some(v => v.owner === d.users[i].owner)) {
 			const n = new BlobObj(d.users[i].br, d.users[i].owner);
