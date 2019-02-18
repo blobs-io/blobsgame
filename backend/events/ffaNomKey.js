@@ -92,7 +92,11 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
 						
 					    blobobj.health -= Math.floor(Math.random() * 10) + 30;
 						if (blobobj.health > 0) {
-							io.to(blobobj.id).emit("ffaHealthUpdate", blobobj.health);	
+							io.sockets.emit("ffaHealthUpdate", {
+							    health: blobobj.health,
+                                user: blobobj.owner
+                            });
+							blobs.health = 100;
 							break;
 						}
 
