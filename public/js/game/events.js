@@ -34,7 +34,7 @@ socket.on("ffaHeartbeat", async d => {
                 _y: Math.floor(Math.random() * mapSize.height),
                 br: Math.random() > Math.random() ? ownBlob.br - (Math.floor(Math.random() * 499)) : ownBlob.br + (Math.floor(Math.random() * 499)),
                 owner: Math.random().toString(19).substr(2, 6),
-                direction: 4,
+                direction: Math.floor(Math.random() * 3) + 1,
                 directionChangedAt: Date.now()
             });
         }
