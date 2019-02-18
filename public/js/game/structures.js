@@ -172,7 +172,10 @@ class BlobObj {
         return new Promise((a, b) => {
             try {
                 this.img.src = blobimage;
-                this.img.onload = () => a(), this.img._ready = true;
+                this.img.onload = () => {
+                    this.img._ready = true;
+                    a();
+                }
             } catch (e) {
                 b(e);
             }
@@ -185,6 +188,9 @@ class BlobObj {
             const canvasX = canvas.width / 2 - w;
             const canvasY = canvas.height / 2 - h;
             const tier = getTier(this.br || 0);
+            ctx.moveTo(canvasX - (15 + 15 * scale), canvasY - 30);
+            ctx.lineTo(canvasX + (90 * (this.health / 100)) - (15 + 15 * scale), canvasY - 30);
+            ctx.stroke();
             if (typeof this.owner === "undefined") return;
             if (this.owner === ownBlob.owner) {
 				ctx.fillStyle = "#" + tier.colorCode;
@@ -220,6 +226,7 @@ class BlobObj {
 				ctx.fillStyle = "#" + tier.colorCode;
 				
                 ctx.drawImage(this.img, blobCanvasX, blobCanvasY, w * scale, h * scale);
+
                 if (du === true) {
                     ctx.font = (15 * scale).toString() + "px Dosis";
                     ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), blobCanvasX, (blobCanvasY) - 10);
