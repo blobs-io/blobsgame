@@ -78,9 +78,11 @@ socket.on("ffaUserJoin", async d => {
     n.display(true, true);
     blobs.push(n);
 });
-socket.on("ffaHealthUpdate", newHealth => {
+socket.on("ffaHealthUpdate", target => {
     if (details.singleplayer) return;
-	if (typeof newHealth === "number") ownBlob.health = newHealth;
+	if (typeof target.health === "number") {
+        (blobs.find(v => v.owner === target.user) || {}).health = target.health;
+    }
 });
 
 
