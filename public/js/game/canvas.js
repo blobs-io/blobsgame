@@ -85,8 +85,8 @@ socket.on("ffaPlayerNommed", eventd => {
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangeCoordinates.x = eventd.loser.directionChangeCoordinates.x;
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangeCoordinates.y = eventd.loser.directionChangeCoordinates.y;
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangedAt = eventd.loser.directionChangedAt;
-	
-	if (eventd.loser.owner === ownBlob.owner) ownBlob.health = 100;
+
+    blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].health = 100;
 
 	const nomHistoryDiv = document.getElementById("nom-hist");
 	const nomEntryDiv = document.createElement("div");
