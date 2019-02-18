@@ -110,6 +110,7 @@ function displayPlayerStats(context = ctx) {
 }
 
 function drawBorder(context = ctx) {
+    context.beginPath();
     context.strokeStyle = "white";
     const diffXPos = ownBlob.x + (canvas.width / 2);
     const diffXNeg = ownBlob.x - (canvas.width / 2);
@@ -119,6 +120,7 @@ function drawBorder(context = ctx) {
         context.beginPath();
         context.moveTo(border.right.from.x = (canvas.width - (diffXPos - mapSize.width)), border.right.from.y = (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
         context.lineTo(border.right.to.x = (canvas.width - (diffXPos - mapSize.width)), border.right.to.y = (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
+        context.closePath();
         context.stroke();
     } else if(border.right.from.x !== 0 || border.right.from.y !== 0 || border.right.to.x !== 0 || border.right.to.y !== 0) {
         border.right.from.x = border.right.from.y = border.right.to.x = border.right.to.y = 0;
@@ -127,6 +129,7 @@ function drawBorder(context = ctx) {
         context.beginPath();
         context.moveTo(border.left.from.x = (-(diffXNeg + 35)), border.left.from.y = (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
         context.lineTo(border.left.to.x = (-(diffXNeg + 35)), border.left.to.y = (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
+        context.closePath();
         context.stroke();
     } else if(border.left.from.x !== 0 || border.left.from.y !== 0 || border.left.to.x !== 0 || border.left.to.y !== 0) {
         border.left.from.x = border.left.from.y = border.left.to.x = border.left.to.y = 0;
@@ -135,6 +138,7 @@ function drawBorder(context = ctx) {
         context.beginPath();
         context.moveTo(border.bottom.from.x = (diffXNeg < 0 ? -(diffXNeg + 35) : 0), border.bottom.from.y = (canvas.height - (diffYPos - mapSize.height)));
         context.lineTo(border.bottom.to.x = (diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), border.bottom.to.y = (canvas.height - (diffYPos - mapSize.height)));
+        context.closePath();
         context.stroke();
     } else if(border.bottom.from.x !== 0 || border.bottom.from.y !== 0 || border.bottom.to.x !== 0 || border.bottom.to.y !== 0) {
         border.bottom.from.x = border.bottom.from.y = border.bottom.to.x = border.bottom.to.y = 0;
@@ -143,6 +147,7 @@ function drawBorder(context = ctx) {
         context.beginPath();
         context.moveTo(border.top.from.x = (diffXNeg < 0 ? -(diffXNeg + 35) : 0), border.top.from.y = (-(diffYNeg + 35)));
         context.lineTo(border.top.to.x = (diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), border.top.to.y = (-(diffYNeg + 35)));
+        context.closePath();
         context.stroke();
     } else if(border.top.from.x !== 0 || border.top.from.y !== 0 || border.top.to.x !== 0 || border.top.to.y !== 0) {
         border.top.from.x = border.top.from.y = border.top.to.x = border.top.to.y = 0;
