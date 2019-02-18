@@ -184,13 +184,11 @@ class BlobObj {
 
     display(du = false, dbr = false, w = 30, h = 30) {
         return new Promise((a, b) => {
-            if (!this.img._ready) b("Image not loaded.");
+            if (!this.img._ready) b("Image not loaded.")
+            ctx.beginPath();
             const canvasX = canvas.width / 2 - w;
             const canvasY = canvas.height / 2 - h;
             const tier = getTier(this.br || 0);
-            ctx.moveTo(canvasX - (15 + 15 * scale), canvasY - 30);
-            ctx.lineTo(canvasX + (90 * (this.health / 100)) - (15 + 15 * scale), canvasY - 30);
-            ctx.stroke();
             if (typeof this.owner === "undefined") return;
             if (this.owner === ownBlob.owner) {
 				ctx.fillStyle = "#" + tier.colorCode;
@@ -201,6 +199,11 @@ class BlobObj {
                 if (emblems[tier.tier].complete) {
                     ctx.drawImage(emblems[tier.tier], canvasX - (15 + 15 * scale), canvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
                 }
+                ctx.strokeStyle = "lightgreen";
+                ctx.moveTo(canvasX - (15 + 15 * scale), canvasY - 3);
+                ctx.lineTo(canvasX - (15 + 15 * scale) + (100 * (this.health / 100)), canvasY - 3);
+                ctx.closePath();
+                ctx.stroke();
             } else {
                 let blobCanvasX = 0,
                     blobCanvasY = 0;
@@ -232,6 +235,11 @@ class BlobObj {
                     ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), blobCanvasX, (blobCanvasY) - 10);
                     ctx.fillStyle = "white";
                 }
+                ctx.strokeStyle = "lightgreen";
+                ctx.moveTo(blobCanvasX - (15 + 15 * scale), blobCanvasY - 3);
+                ctx.lineTo(blobCanvasX - (15 + 15 * scale) + (100 * (this.health / 100)), blobCanvasY - 3);
+                ctx.closePath();
+                ctx.stroke();
             }
         });
     }
