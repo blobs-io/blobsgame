@@ -96,9 +96,10 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
 							    health: blobobj.health,
                                 user: blobobj.owner
                             });
-							blobs.health = 100;
 							break;
-						}
+						} else {
+                            blobobj.health = 100;
+                        }
 
 
                         Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players[Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.findIndex(v => v.id === data.id)].lastnom = Date.now();
