@@ -42,26 +42,26 @@ const details = {
 canvas.width = window.innerWidth - 30;
 canvas.height = window.innerHeight - 30;
 
-// Coordinate updates
-let lastIteration = Date.now();
-setInterval(() => {
-	// FPS meter
-	if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
-	lastIteration = Date.now();
-	// Blob coordinates
-    if (ownBlob.ready === false) return;
+function draw() {
+    // FPS meter
+    if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
+    lastIteration = Date.now();
+    // Blob coordinates
+    if (ownBlob.ready === false) return window.requestAnimationFrame(draw);
     if (Date.now() - lastTick > 1500) {
-    	for(let i=0; i < blobs.length; ++i) {
-    		if (blobs[i].owner !== ownBlob.owner) decide(blobs[i]);
-		}
-    	displayLeaderboard();
-    	const timestampBefore = Date.now();
-		request("/api/ping", "GET").then(res => {
-			const request = JSON.parse(res.responseText);
-			const diff = (Date.now() - timestampBefore);
-			document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
-		});
-		if (details.singleplayer === false) {
+        if (details.singleplayer === true) {
+            for (let i = 0; i < blobs.length; ++i) {
+                if (blobs[i].owner !== ownBlob.owner) {} //decide(blobs[i]);
+            }
+        }
+        displayLeaderboard();
+        const timestampBefore = Date.now();
+        request("/api/ping", "GET").then(res => {
+            const request = JSON.parse(res.responseText);
+            const diff = (Date.now() - timestampBefore);
+            document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
+        });
+        if (details.singleplayer === false) {
             request("/api/ffa/players", "GET").then(res => {
                 const request = JSON.parse(res.responseText);
                 for (const blob of request) {
@@ -79,7 +79,11 @@ setInterval(() => {
     else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
     else if (ownBlob.x >= mapSize.width && ownBlob.direction === 1) return displayUI();
     displayUI();
-}, 1);
+}
+
+// Coordinate updates
+let lastIteration = Date.now();
+window.requestAnimationFrame(draw);
 
 socket.on("ffaPlayerNommed", eventd => {
     displayLeaderboard();
