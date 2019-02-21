@@ -51,6 +51,9 @@ setInterval(() => {
 	// Blob coordinates
     if (ownBlob.ready === false) return;
     if (Date.now() - lastTick > 1500) {
+    	for(let i=0; i < blobs.length; ++i) {
+    		if (blobs[i].owner !== ownBlob.owner) decide(blobs[i]);
+		}
     	displayLeaderboard();
     	const timestampBefore = Date.now();
 		request("/api/ping", "GET").then(res => {
