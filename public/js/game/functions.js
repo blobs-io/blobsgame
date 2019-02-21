@@ -21,6 +21,7 @@ function displayUI(excludes = []) {
 	ctx.font = "20px Raleway";
 	ctx.fillText("HP", canvas.width / 2 + 65, canvas.height - 20);
 	ctx.fillStyle = "white";
+    window.requestAnimationFrame(draw);
 }
 
 function displayNoNomAreas(context = ctx) {
