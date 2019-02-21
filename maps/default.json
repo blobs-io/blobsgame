@@ -5,28 +5,7 @@
     "height": 2000
   },
   "objects": {
-    "noNomArea": [
-      {
-        "startsAt": {
-          "x": 0,
-          "y": 0
-        },
-        "endsAt": {
-          "x": 350,
-          "y": 350
-        }
-      },
-      {
-        "startsAt": {
-          "x": 1650,
-          "y": 0
-        },
-        "endsAt": {
-          "x": 2000,
-          "y": 350
-        }
-      }
-    ],
+    "noNomArea": [],
     "walls": [
       { "x": 970, "y": 900, "type": 0 },
       { "x": 1000, "y": 900, "type": 0 },
