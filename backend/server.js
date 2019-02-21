@@ -137,12 +137,14 @@ io.on("connection", data => {
         data.on("ffaNomKey", () => require("./events/ffaNomKey").run(data, io, Base, sqlite));
 
         // Other events
-	data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", Base.sockets.filter(v => v.inactiveSince === null).concat(Base.rooms.find(v => v.id === "ffa").players).length));
+	    data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", Base.sockets.filter(v => v.inactiveSince === null).concat(Base.rooms.find(v => v.id === "ffa").players).length));
         data.on("getCaptcha", () => require("./events/getCaptcha").run(sessions, io, data, captchas).then(res => captchas = res));
         data.on("login", res => require("./events/login").run(res, io, data, sqlite, bcrypt, sessions, utils.displayError));
         data.on("register", res => require("./events/register").run(res, io, data, utils.displayError, captchas, bcrypt, sqlite));
         data.on("sessionDelete", sessionid => require("./events/sessionDelete").run(sessionid, sessions, sqlite, io, data));
         data.on("receiveDailyBonus", () => require("./events/receiveDailyBonus").run(data, io, Base.sockets, sqlite));
         data.on("switchBlob", blob => require("./events/switchBlob").run(data, io, Base.sockets, sqlite, blob));
+        data.on("ffaSinglePlayerCreate", blob => require("./events/ffaSinglePlayerCreate").run(blob, io, Base, data, Base.sockets));
+        data.on("singleplayerNomKey", eventd => require("./events/singleplayerNomKey").run(data, io, Base, sqlite, eventd));
     } catch (e) {}
 });

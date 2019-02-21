@@ -92,9 +92,14 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
 						
 					    blobobj.health -= Math.floor(Math.random() * 10) + 30;
 						if (blobobj.health > 0) {
-							io.to(blobobj.id).emit("ffaHealthUpdate", blobobj.health);	
+							io.sockets.emit("ffaHealthUpdate", {
+							    health: blobobj.health,
+                                user: blobobj.owner
+                            });
 							break;
-						}
+						} else {
+                            blobobj.health = 100;
+                        }
 
 
                         Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players[Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.findIndex(v => v.id === data.id)].lastnom = Date.now();

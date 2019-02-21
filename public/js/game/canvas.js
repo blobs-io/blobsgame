@@ -34,34 +34,44 @@ const emblems = {
     guest: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_guest-or-unknown.png"; return image; })(),
     admin: (() => { const image = new Image(); image.src = "../../assets/emblems/emblem_admin.png"; return image; })(),
 };
+const details = {
+	mode: "FFA",
+	singleplayer: false
+};
 
 canvas.width = window.innerWidth - 30;
 canvas.height = window.innerHeight - 30;
 
-// Coordinate updates
-let lastIteration = Date.now();
-setInterval(() => {
-	// FPS meter
-	if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
-	lastIteration = Date.now();
-	// Blob coordinates
-    if (ownBlob.ready === false) return;
+function draw() {
+    // FPS meter
+    if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
+    lastIteration = Date.now();
+    // Blob coordinates
+    if (ownBlob.ready === false) return window.requestAnimationFrame(draw);
     if (Date.now() - lastTick > 1500) {
-    	displayLeaderboard();
-    	const timestampBefore = Date.now();
-		request("/api/ping", "GET").then(res => {
-			const request = JSON.parse(res.responseText);
-			const diff = (Date.now() - timestampBefore);
-			document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
-		});
-		request("/api/ffa/players", "GET").then(res => {
-			const request = JSON.parse(res.responseText);
-			for (const blob of request) {
-				const target = blobs[blobs.findIndex(v => v.owner === blob.owner)];
-				target.directionChangeCoordinates = blob.directionChangeCoordinates;
-				target.directionChangedAt = blob.directionChangedAt;
-			}
-		});
+        if (details.singleplayer === true) {
+            for (let i = 0; i < blobs.length; ++i) {
+                if (blobs[i].owner !== ownBlob.owner) {} //decide(blobs[i]);
+            }
+        }
+        displayLeaderboard();
+        const timestampBefore = Date.now();
+        request("/api/ping", "GET").then(res => {
+            const request = JSON.parse(res.responseText);
+            const diff = (Date.now() - timestampBefore);
+            document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
+        });
+        if (details.singleplayer === false) {
+            request("/api/ffa/players", "GET").then(res => {
+                const request = JSON.parse(res.responseText);
+                for (const blob of request) {
+                    const target = blobs[blobs.findIndex(v => v.owner === blob.owner)];
+                    target.directionChangeCoordinates = blob.directionChangeCoordinates;
+                    target.directionChangedAt = blob.directionChangedAt;
+                }
+            });
+        }
+
         lastTick = Date.now();
     }
     if (ownBlob.x <= 1 && ownBlob.direction === 3) return displayUI();
@@ -69,7 +79,11 @@ setInterval(() => {
     else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
     else if (ownBlob.x >= mapSize.width && ownBlob.direction === 1) return displayUI();
     displayUI();
-}, 1);
+}
+
+// Coordinate updates
+let lastIteration = Date.now();
+window.requestAnimationFrame(draw);
 
 socket.on("ffaPlayerNommed", eventd => {
     displayLeaderboard();
@@ -78,8 +92,8 @@ socket.on("ffaPlayerNommed", eventd => {
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangeCoordinates.x = eventd.loser.directionChangeCoordinates.x;
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangeCoordinates.y = eventd.loser.directionChangeCoordinates.y;
     blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].directionChangedAt = eventd.loser.directionChangedAt;
-	
-	if (eventd.loser.owner === ownBlob.owner) ownBlob.health = 100;
+
+    blobs[blobs.findIndex(v => v.owner === eventd.loser.owner)].health = 100;
 
 	const nomHistoryDiv = document.getElementById("nom-hist");
 	const nomEntryDiv = document.createElement("div");
