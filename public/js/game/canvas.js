@@ -45,12 +45,12 @@ canvas.height = window.innerHeight - 30;
 
 function draw() {
     // FPS meter
-    if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
-    lastIteration = Date.now();
+    if(Date.nowR() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.nowR() - lastIteration)).toFixed(1)} FPS`;
+    lastIteration = Date.nowR();
     // Blob coordinates
     if (typeof ownBlob === "undefined") return window.requestAnimationFrame(draw);
     if (ownBlob.ready === false) return window.requestAnimationFrame(draw);
-    if (Date.now() - lastTick > 1500) {
+    if (Date.now() - lastTick > 2500) {
         if (details.singleplayer === true) {
             for (let i = 0; i < blobs.length; ++i) {
                 if (blobs[i].owner !== ownBlob.owner) {} //decide(blobs[i]);
