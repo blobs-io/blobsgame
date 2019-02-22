@@ -51,6 +51,15 @@
 		</div>
 	</div>
 </body>
+<script>
+    /**
+	 * Used to get the timestamp without delay
+     * @returns {number}
+     */
+    Date.nowR = () => {
+        return Date.now() - ping;
+    };
+</script>
 <script src="../js/sockets.js"></script>
 <script src="../js/request.js"></script>
 <script src="../js/game/structures.js"></script>
