@@ -47,6 +47,7 @@ function draw() {
     if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
     lastIteration = Date.now();
     // Blob coordinates
+    if (typeof ownBlob === "undefined") return window.requestAnimationFrame(draw);
     if (ownBlob.ready === false) return window.requestAnimationFrame(draw);
     if (Date.now() - lastTick > 1500) {
         if (details.singleplayer === true) {
