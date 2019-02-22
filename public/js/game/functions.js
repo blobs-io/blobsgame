@@ -98,9 +98,9 @@ function displayCooldown(context = ctx) {
     }
 
     const timerElement = document.createElement("span");
-    const nomReady = Date.now() - ownBlob.lastnom > 1500;
+    const nomReady = Date.nowR() - ownBlob.lastnom > 1500;
     timerElement.id = "cooldown-timer";
-    timerElement.innerHTML = !nomReady ? `${((1500 - (Date.now() - ownBlob.lastnom)) / 1000).toFixed(1)}s` : "Ready";
+    timerElement.innerHTML = !nomReady ? `${((1500 - (Date.nowR() - ownBlob.lastnom)) / 1000).toFixed(1)}s` : "Ready";
     document.getElementById("nom-cooldown").appendChild(timerElement);
 }
 
