@@ -5,7 +5,7 @@ ffaDirectionChangeEvent.run = (...args) => {
     const target = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)];
     if (target === undefined) return;
     if (typeof target.x !== "number" || typeof target.y !== "number") return;
-    target.directionChangedAt = Date.now() - eventd.time < 20000 ? eventd.time : Date.now();
+    target.directionChangedAt = Date.now();
     target.direction = eventd._direction;
     target.directionChangeCoordinates = {
 		x: eventd.directionChangeCoordinates.x,
