@@ -102,7 +102,7 @@ h3 {
 #nom-btn-mobile {
 	position: fixed;
 	right: 25px;
-	bottom: 100px;
+	bottom: 125px;
 }
 
 #wsinfo {
@@ -161,7 +161,5 @@ h3 {
 }
 
 #latency {
-	bottom: 5px;
-	right: 5px;
-	left: unset;
+	left: 70px;
 }
