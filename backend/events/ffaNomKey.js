@@ -117,6 +117,8 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
 
                             await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(loser.br - result <= 0 ? 1 : loser.br), loser.owner]));
                             await sqlite.prepare("UPDATE accounts SET br=? WHERE username=?").then(v => v.run([(winner.br + result > 9999 ? 9999 : winner.br), winner.owner]));
+                            await sqlite.prepare("UPDATE accounts SET wins = wins + 1 WHERE username=?").then(v => v.run([winner.owner]));
+                            await sqlite.prepare("UPDATE accounts SET losses = losses + 1 WHERE username=?").then(v => v.run([loser.owner]));
 
                             const dropRes = {
                                 winner: promotedTo(winner.br - result, winner.br) || {
