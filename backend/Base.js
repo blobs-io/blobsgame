@@ -14,7 +14,13 @@ Base.discordAuth = {
 		token: undefined
 	}
 };
-Base.algorith = "./b {ownbr} {opponentbr} --br";
+
+(() => {
+    const command = "b {ownbr} {opponentbr} --br";
+    if (process.platform === "linux") Base.algorithm = `./${command}`;
+    else Base.algorithm = command;
+})();
+
 Base.bcrypt = require("bcrypt");
 Base.sqlite = require("sqlite");
 Base.io = Base.socket(Base.server);
