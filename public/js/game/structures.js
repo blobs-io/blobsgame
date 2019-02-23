@@ -94,7 +94,7 @@ class BlobObj {
         this.img = new Image();
         this._direction = 0;
         this.lastnom = 0;
-        this.directionChangedAt = Date.nowR();
+        this.directionChangedAt = Date.now();
         this.directionChangeCoordinates = {
             x,
             y
@@ -106,8 +106,8 @@ class BlobObj {
     
     get x() {
 		let x = this.directionChangeCoordinates.x;
-		if (this.direction === 1) x = this.directionChangeCoordinates.x + (1.025 * ((Date.nowR() - this.directionChangedAt) / 10));
-		else if (this.direction === 3) x = this.directionChangeCoordinates.x - (1.025 * ((Date.nowR() - this.directionChangedAt) / 10));
+		if (this.direction === 1) x = this.directionChangeCoordinates.x + (1.025 * ((Date.now() - this.directionChangedAt) / 10));
+		else if (this.direction === 3) x = this.directionChangeCoordinates.x - (1.025 * ((Date.now() - this.directionChangedAt) / 10));
 		if (x < 0) x = 0;
 		else if (x > 2000) x = 2000;
 		if (isInObject(x, this.previousY)) {
@@ -124,8 +124,8 @@ class BlobObj {
 	
 	get y() {
 		let y = this.directionChangeCoordinates.y;
-		if (this.direction === 0) y = this.directionChangeCoordinates.y - (1.025 * ((Date.nowR() - this.directionChangedAt) / 10));
-		else if (this.direction === 2) y =  this.directionChangeCoordinates.y + (1.025 * ((Date.nowR() - this.directionChangedAt) / 10));
+		if (this.direction === 0) y = this.directionChangeCoordinates.y - (1.025 * ((Date.now() - this.directionChangedAt) / 10));
+		else if (this.direction === 2) y =  this.directionChangeCoordinates.y + (1.025 * ((Date.now() - this.directionChangedAt) / 10));
 		if (y < 0) y = 0;
 		else if (y > 2000) y = 2000;
         if (isInObject(this.previousX, y)) {
@@ -147,7 +147,7 @@ class BlobObj {
     set direction(value) {
 		const newX = this.x;
 		const newY = this.y;
-        this.directionChangedAt = Date.nowR();
+        this.directionChangedAt = Date.now();
         this.directionChangeCoordinates = {
             x: newX,
             y: newY
