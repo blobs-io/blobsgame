@@ -6,21 +6,23 @@ function displayUI(excludes = []) {
     if (!excludes.includes("displayPlayerStats")) displayPlayerStats();
     if (!excludes.includes("displayWalls")) displayWalls();
     if (!excludes.includes("displayNoNomAreas")) displayNoNomAreas();
+    if (!excludes.includes("displayHP")) displayHP();
     if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
+}
 
+function displayHP(context = ctx) {
+    context.font = "50px Raleway";
 
-	ctx.font = "50px Raleway";
+    if (ownBlob.health >= 80) context.fillStyle = "#2ecc71";
+    else if (ownBlob.health >= 50) context.fillStyle = "#f39c12";
+    else if (ownBlob.health >= 30) context.fillStyle = "#e67e22";
+    else if (ownBlob.health >= 10) context.fillStyle = "#e74c3c";
+    else context.fillStyle = "#c0392b";
 
-	if (ownBlob.health >= 80) ctx.fillStyle = "#2ecc71";
-	else if (ownBlob.health >= 50) ctx.fillStyle = "#f39c12";
-	else if (ownBlob.health >= 30) ctx.fillStyle = "#e67e22";
-	else if (ownBlob.health >= 10) ctx.fillStyle = "#e74c3c";
-	else ctx.fillStyle = "#c0392b";
-
-	ctx.fillText(ownBlob.health, canvas.width / 2 - 20, canvas.height - 20);
-	ctx.font = "20px Raleway";
-	ctx.fillText("HP", canvas.width / 2 + 65, canvas.height - 20);
-	ctx.fillStyle = "white";
+    context.fillText(ownBlob.health, canvas.width - 120, canvas.height - 20);
+    context.font = "20px Raleway";
+    context.fillText("HP", canvas.width - 35, canvas.height - 20);
+    context.fillStyle = "white";
     window.requestAnimationFrame(draw);
 }
 
@@ -106,8 +108,7 @@ function displayCooldown(context = ctx) {
 
 function displayPlayerStats(context = ctx) {
     context.font = "15px Dosis";
-    context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 90, canvas.height - 20);
-    context.fillText(`BR: ${ownBlob.br}`, canvas.width - 90, canvas.height - 40);
+    context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 80, canvas.height);
 }
 
 function drawBorder(context = ctx) {
