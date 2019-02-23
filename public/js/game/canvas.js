@@ -61,7 +61,7 @@ function draw() {
         request("/api/ping", "GET").then(res => {
             const request = JSON.parse(res.responseText);
             const diff = ping = (Date.now() - timestampBefore);
-            document.getElementById("latency").innerHTML = `Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
+            document.getElementById("latency").innerHTML = `• Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
         });
         if (details.singleplayer === false) {
             request("/api/ffa/players", "GET").then(res => {
