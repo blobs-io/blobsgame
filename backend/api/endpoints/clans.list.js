@@ -3,7 +3,7 @@ const { sqlite } = require("../../Base");
 module.exports = class ClanList {
 	static async run(...data) {
 		const [req, res] = data;
-		sqlite.all("select members, cr from clans order by cr desc").then(r => {
+		sqlite.all("select members, cr from clans order by cr desc limit 10").then(r => {
 			res.json(r);
 		});
 	}
