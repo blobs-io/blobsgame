@@ -40,7 +40,7 @@
 				margin: 3px;
 				float: left;
 				width: 200px;
-				font-family: "Consolas";
+				font-family: "Consolas", "Arial";
 				font-size: 14px;
 			}
 			.view-clan {
@@ -71,11 +71,26 @@
 				bottom: 3px;
 				left: 15px;
 			}
+			#content {
+				margin-top: 25px;
+			}
+			#warning {
+				color: black;
+				background-color: #ffeaa7;
+				border: 1px solid #fdcb6e;
+				width: 750px;
+				padding: 15px;
+			}
+			.horizontal-line {
+				border-bottom: 1px solid gray;
+				width: 850px;
+				margin: 20px 0 10px 0;
+			}
         </style>
     </head>
     <body>
         <header>
-            <img src="https://cdn.discordapp.com/emojis/458326620076507136.png?v=1" align="center" width="50" height="50"/>&nbsp;&nbsp;&nbsp;<h2 class="heading">Clans</h2>
+            <a href="/clans/" style="text-decoration: none; color: white;"><img src="https://cdn.discordapp.com/emojis/458326620076507136.png?v=1" align="center" width="50" height="50"/>&nbsp;&nbsp;&nbsp;<h2 class="heading">Clans</h2></a>
         </header>
 		<div id="top-clans">
 		<h2 class="heading-blue">🥇 Top Clans</h2>
@@ -83,22 +98,27 @@
 		<footer>
 			<span class="copyright-note">&copy; 2018-2019 blobs.io</span>
 		</footer>
-    </body>
 	<script>
+	(() => {
 		const xhr = new XMLHttpRequest();
 		xhr.open("GET", "/api/clans/list", true);
 		xhr.onload = () => {
 			if (xhr.readyState === 4) {
 				if (xhr.status === 200) {
-					const clans = JSON.parse(xhr.reponseText);
+					const clans = JSON.parse(xhr.responseText);
 					for(let i=0; i < clans.length; ++i) {
 						const clanDiv = document.createElement("div");
 						clanDiv.className = "clan-entry";
 						clanDiv.innerHTML = `<span class="clan-name">${clans[i].name.replace(/</g, "&lt;")}</span><br/><span class="clan-rating">${clans[i].members.split(",").length} members, ${clans[i].cr} cr</span><a href="view/${clans[i].name}" class="view-clan">View</a>`;
+						document.getElementById("top-clans").appendChild(clanDiv);
 					}
 				}
 			}
 		};
 		xhr.send(null);
+	})();
 	</script>
+    </body>
+    <script src="http://instantclick.io/v3.1.0/instantclick.min.js" data-no-instant></script>
+	<script data-no-instant>InstantClick.init();</script>
 </html>
