@@ -30,6 +30,11 @@ const Maps = require("./structures/Maps");
 const maps = new Maps();
 Base.rooms.push(new Room(maps.mapStore.find(v => v.map.name === "default"), "ffa"));
 
+// Clans
+const ClanManager = require("./clans/ClanManager.js");
+const clans = new ClanManager(Base.express.app, sqlite);
+clans.initRoute();
+
 // API
 const APIController = require("./api/Controller");
 const api = new APIController(Base.express.app);
