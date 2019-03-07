@@ -1,0 +1,124 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>blobs.io | clans</title>
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                font-family: "Arial";
+            }
+			body {
+				background-color: rgb(238, 238, 238);
+			}
+            header {
+                color: white;
+                padding-left: 15px;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                border: 1px solid #6c5ce7;
+                background-color: #6c5ce7;
+                height: 50px;
+				box-shadow: 2px 2px 5px #000000;
+            }
+            .heading {
+                display: inline;
+            }
+			.heading-blue {
+				color: #3498db;
+			}
+			#top-clans {
+				margin-left: auto;
+				margin-right: auto;
+				width: 500px;
+			}
+			.clan-entry {
+				border: 1px solid #bdc3c7;
+				border-radius: 3px;
+				background-color: white;
+				padding: 15px;
+				margin: 3px;
+				float: left;
+				width: 200px;
+				font-family: "Consolas", "Arial";
+				font-size: 14px;
+			}
+			.view-clan {
+				float: right;
+			}
+			.heading-red {
+				color: #e74c3c;
+			}
+			footer {
+				background-color: rgb(200, 200, 200);
+				padding: 15px;
+				position: absolute;
+				bottom: 0;
+				height: 50px;
+				width: calc(100% - 30px);
+				color: #2c3e50;
+			}
+			.copyright-note {
+				position: absolute;
+				right: 15px;
+				bottom: 3px;
+			}
+			.translate {
+				text-decoration: underline;
+			}
+			#translations {
+				position: absolute;
+				bottom: 3px;
+				left: 15px;
+			}
+			#content {
+				margin-top: 25px;
+			}
+			#warning {
+				color: black;
+				background-color: #ffeaa7;
+				border: 1px solid #fdcb6e;
+				width: 750px;
+				padding: 15px;
+			}
+			.horizontal-line {
+				border-bottom: 1px solid gray;
+				width: 850px;
+				margin: 20px 0 10px 0;
+			}
+        </style>
+    </head>
+    <body>
+        <header>
+            <a href="/clans/" style="text-decoration: none; color: white;"><img src="https://cdn.discordapp.com/emojis/458326620076507136.png?v=1" align="center" width="50" height="50"/>&nbsp;&nbsp;&nbsp;<h2 class="heading">Clans</h2></a>
+        </header>
+		<div id="top-clans">
+		<h2 class="heading-blue">🥇 Top Clans</h2>
+		</div>
+		<footer>
+			<span class="copyright-note">&copy; 2018-2019 blobs.io</span>
+		</footer>
+	<script>
+	(() => {
+		const xhr = new XMLHttpRequest();
+		xhr.open("GET", "/api/clans/list", true);
+		xhr.onload = () => {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					const clans = JSON.parse(xhr.responseText);
+					for(let i=0; i < clans.length; ++i) {
+						const clanDiv = document.createElement("div");
+						clanDiv.className = "clan-entry";
+						clanDiv.innerHTML = `<span class="clan-name">${clans[i].name.replace(/</g, "&lt;")}</span><br/><span class="clan-rating">${clans[i].members.split(",").length} members, ${clans[i].cr} cr</span><a href="view/${clans[i].name}" class="view-clan">View</a>`;
+						document.getElementById("top-clans").appendChild(clanDiv);
+					}
+				}
+			}
+		};
+		xhr.send(null);
+	})();
+	</script>
+    </body>
+    <script src="http://instantclick.io/v3.1.0/instantclick.min.js" data-no-instant></script>
+	<script data-no-instant>InstantClick.init();</script>
+</html>
