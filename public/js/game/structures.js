@@ -166,8 +166,8 @@ class BlobObj {
                     ctx.drawImage(emblems[tier.tier], canvasX - (15 + 15 * scale), canvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
                 }
                 ctx.strokeStyle = "lightgreen";
-                ctx.moveTo(canvasX - (15 + 15 * scale), canvasY - 3);
-                ctx.lineTo(canvasX - (15 + 15 * scale) + (100 * (this.health / 100)), canvasY - 3);
+                ctx.moveTo(canvasX - (15 + 15), canvasY - 3);
+                ctx.lineTo(canvasX - (15 / scale) + (100 * (this.health / 100)), canvasY - 3);
                 ctx.closePath();
                 ctx.stroke();
             } else {
