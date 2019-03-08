@@ -108,9 +108,10 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                         let winner = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)];
                         let loser = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === blobobj.owner)];
 
+						let result = undefined;
                         if (!isNaN(blobobj.br) && !hasGuest) {
                             if (eventd.br === blobobj.br) eventd.br -= 1;
-                            let result = parseInt(execSync(Base.algorithm.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
+                            result = parseInt(execSync(Base.algorithm.replace(/\{ownbr\}/g, eventd.br).replace(/\{opponentbr\}/g, blobobj.br)));
                             if (result === 0) ++result;
                             winner.br = (winner.br + result > 9999 ? 9999 : winner.br + result);
                             loser.br = (loser.br - result <= 0 ? 1 : loser.br - result);
@@ -146,7 +147,7 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                         io.sockets.emit("ffaPlayerNommed", {
                             winner,
                             loser,
-                            result: typeof result !== "undefined" ? result : 0
+                            result: typeof result !== undefined ? result : 0
                         });
 
                     }
