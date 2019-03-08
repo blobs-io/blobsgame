@@ -75,11 +75,21 @@ socket.on("ffaHealthUpdate", target => {
     }
 });
 socket.on("coordinateChange", players => {
+	if (!ownBlob.ready) return;
 	for(let i=0; i < players.length; ++i) {
 		if (players[i].owner !== ownBlob.owner) {
 			const target = blobs.find(v => v.owner === players[i].owner);
-			target.x = players[i].x;
-			target.y = players[i].y;
+			if (!target) {
+				const newBlob = new BlobObj(players[i].br, players[i].owner, players[i].x, players[i].y);
+				newBlob.setBlob().then(() => {
+					newBlob.display(true, true);
+					if (blobs.some(v => v.owner === players[i].owner)) return;
+					blobs.push(newBlob);
+				});
+			} else {
+				target.x = players[i].x;
+				target.y = players[i].y;
+			}
 		}
 	}
 });
