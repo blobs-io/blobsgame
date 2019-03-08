@@ -76,10 +76,22 @@ function draw() {
 
         lastTick = Date.now();
     }
-    if (ownBlob.x <= 1 && ownBlob.direction === 3) return displayUI();
-    else if (ownBlob.y <= 1 && ownBlob.direction === 0) return displayUI();
-    else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
-    else if (ownBlob.x >= mapSize.width && ownBlob.direction === 1) return displayUI();
+    if (ownBlob.x < 0 && ownBlob.direction === 3) {
+		ownBlob.x = 0;
+		return displayUI();
+	}
+    else if (ownBlob.y < 1 && ownBlob.direction === 0) {
+		ownBlob.y = 0;
+		return displayUI();
+	}
+    else if (ownBlob.y > mapSize.height && ownBlob.direction === 2) {
+		ownBlob.y = mapSize.height;
+		return displayUI();
+	}
+    else if (ownBlob.x > mapSize.width && ownBlob.direction === 1) {
+		ownBlob.x = mapSize.width;
+		return displayUI();
+	}
     
     if (ownBlob.direction === 0) ownBlob.y = ownBlob.directionChangeCoordinates.y - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
     else if (ownBlob.direction === 1) ownBlob.x = ownBlob.directionChangeCoordinates.x + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
