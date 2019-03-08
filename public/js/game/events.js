@@ -74,6 +74,15 @@ socket.on("ffaHealthUpdate", target => {
         (blobs.find(v => v.owner === target.user) || {}).health = target.health;
     }
 });
+socket.on("coordinateChange", players => {
+	for(let i=0; i < players.length; ++i) {
+		if (players[i].owner !== ownBlob.owner) {
+			const target = blobs.find(v => v.owner === players[i].owner);
+			target.x = players[i].x;
+			target.y = players[i].y;
+		}
+	}
+});
 
 
 // Events (Window/Document)
