@@ -23,52 +23,18 @@ module.exports = class Player {
 		this.previousX = 0;
 		this.previousY = 0;
 		this.health = 100;
+		this.x = x;
+		this.y = y;
 	}
 
 	get room() {
 		return Base.rooms.find(v => v.players.some(p => p.owner === this.owner));
 	}
 
-	get x() {
-		let x = this.directionChangeCoordinates.x;
-		if (this.direction === 1) x = this.directionChangeCoordinates.x + (1.025 * ((Date.now() - this.directionChangedAt) / 10));
-		else if (this.direction === 3) x = this.directionChangeCoordinates.x - (1.025 * ((Date.now() - this.directionChangedAt) / 10));
-		if (x < 0) x = 0;
-		else if (x > this.maximumCoordinates.width) x = this.maximumCoordinates.width;
-        if (isInObject(x, this.previousY, this.room.map.map.objects)) {
-            x = this.previousX - 30;
-            this.direction = 4;
-        }
-        else this.previousX = x;
-		return x;
-	}
-	
-	set x(value) {
-		return this._x = value;
-	}
-	
-	get y() {
-		let y = this.directionChangeCoordinates.y;
-		if (this.direction === 0) y = this.directionChangeCoordinates.y - (1.025 * ((Date.now() - this.directionChangedAt) / 10));
-		else if (this.direction === 2) y = this.directionChangeCoordinates.y + (1.025 * ((Date.now() - this.directionChangedAt) / 10));
-		if (y < 0) y = 0;
-		else if (y > this.maximumCoordinates.height) y = this.maximumCoordinates.height;
-        if (isInObject(this.previousX, y, this.room.map.map.objects)) {
-            y = this.previousY - 30;
-            this.direction = 4;
-        }
-        else this.previousY = y;
-		return y;
-	}
-	
-	set y(value) {
-		return this._y = value;
-	}
-
 	get inProtectedArea() {
 		const objects = this.room.map.map.objects;
         let inArea = false;
-        let pos = { x: this.x, y: this.y }; // since defining it once is faster than executing the getter multiple times
+        let pos = { x: this.x, y: this.y };
         for (let i = 0; i < objects.noNomArea.length; ++i) {
             if (objects.noNomArea[i].startsAt.x <= pos.x
                 && objects.noNomArea[i].startsAt.x + (Math.abs(objects.noNomArea[i].endsAt.x - objects.noNomArea[i].startsAt.x)) > pos.x
