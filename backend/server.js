@@ -98,6 +98,10 @@ setInterval(async () => {
     });
 }, 1000);
 
+setInterval(() => {
+	io.sockets.emit("coordinateChange", Base.rooms.find(v => v.id === "ffa").players);
+}, 20);
+
 io.on("connection", data => {
     try {
         data.on("disconnect", () => {
@@ -133,7 +137,7 @@ io.on("connection", data => {
         data.on("ffaPlayerCreate", blob => {
             require("./events/ffaPlayerCreate").run(blob, io, Base, data, Base.sockets);
         });
-        data.on("ffaCoordinateChange", eventd => {
+        data.on("coordinateChange", eventd => {
             require("./events/ffaCoordinateChange").run(eventd, data, io, Base, sqlite);
         });
         data.on("ffaDirectionChange", eventd => {
