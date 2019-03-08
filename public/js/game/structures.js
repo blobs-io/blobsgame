@@ -102,43 +102,9 @@ class BlobObj {
         this.previousX = 0;
         this.previousY = 0;
 	    this.health = 100;
+	    this.x = x;
+	    this.y = y;
     }
-    
-    get x() {
-		let x = this.directionChangeCoordinates.x;
-		if (this.direction === 1) x = this.directionChangeCoordinates.x + (1.025 * (((Date.now() - this.directionChangedAt) + ping) / 10));
-		else if (this.direction === 3) x = this.directionChangeCoordinates.x - (1.025 * (((Date.now() - this.directionChangedAt) + ping) / 10));
-		if (x < 0) x = 0;
-		else if (x > 2000) x = 2000;
-		if (isInObject(x, this.previousY)) {
-		    x = this.previousX - 30;
-		    this._direction = 4;
-        }
-        else this.previousX = x;
-		return x;
-	}
-	
-	set x(value) {
-		return this._x = value;
-	}
-	
-	get y() {
-		let y = this.directionChangeCoordinates.y;
-		if (this.direction === 0) y = this.directionChangeCoordinates.y - (1.025 * (((Date.now() - this.directionChangedAt) + ping) / 10));
-		else if (this.direction === 2) y =  this.directionChangeCoordinates.y + (1.025 * (((Date.now() - this.directionChangedAt) + ping) / 10));
-		if (y < 0) y = 0;
-		else if (y > 2000) y = 2000;
-        if (isInObject(this.previousX, y)) {
-            y = this.previousY - 30;
-            this._direction = 4;
-        }
-        else this.previousY = y;
-		return y;
-	}
-	
-	set y(value) {
-		return this._x = value;
-	}
 
     get direction() {
         return this._direction;
@@ -157,7 +123,7 @@ class BlobObj {
 
     get inProtectedArea() {
         let inArea = false;
-        let pos = { x: this.x, y: this.y }; // since defining it once is faster than executing the getter multiple times
+        let pos = { x: this.x, y: this.y };
         for (let i = 0; i < objects.noNomAreas.length; ++i) {
             if (objects.noNomAreas[i].startsAt.x <= pos.x
                 && objects.noNomAreas[i].startsAt.x + (Math.abs(objects.noNomAreas[i].endsAt.x - objects.noNomAreas[i].startsAt.x)) > pos.x
