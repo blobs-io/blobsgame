@@ -63,7 +63,7 @@ function draw() {
             const diff = ping = (Date.now() - timestampBefore);
             document.getElementById("latency").innerHTML = `• Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
         });
-        if (details.singleplayer === false) {
+        if (details.singleplayer === false && false) {
             request("/api/ffa/players", "GET").then(res => {
                 const request = JSON.parse(res.responseText);
                 for (const blob of request) {
@@ -80,6 +80,12 @@ function draw() {
     else if (ownBlob.y <= 1 && ownBlob.direction === 0) return displayUI();
     else if (ownBlob.y >= mapSize.height && ownBlob.direction === 2) return displayUI();
     else if (ownBlob.x >= mapSize.width && ownBlob.direction === 1) return displayUI();
+    
+    if (ownBlob.direction === 0) ownBlob.y = ownBlob.directionChangeCoordinates.y - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
+    else if (ownBlob.direction === 1) ownBlob.x = ownBlob.directionChangeCoordinates.x + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
+    else if (ownBlob.direction === 2) ownBlob.y = ownBlob.directionChangeCoordinates.y + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
+    else if (ownBlob.direction === 3) ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
+    if (details.singleplayer === false) socket.emit("coordinateChange", { x: ownBlob.x, y: ownBlob.y });
     displayUI();
 }
 
