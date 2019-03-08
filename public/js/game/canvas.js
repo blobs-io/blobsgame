@@ -76,19 +76,23 @@ function draw() {
 
         lastTick = Date.now();
     }
-    if (ownBlob.x < 0 && ownBlob.direction === 3) {
+    if (ownBlob.x < 0) {
+		ownBlob.direction = 4;
 		ownBlob.x = 0;
 		return displayUI();
 	}
-    else if (ownBlob.y < 1 && ownBlob.direction === 0) {
+    else if (ownBlob.y < 0) {
+		ownBlob.direction = 4;
 		ownBlob.y = 0;
 		return displayUI();
 	}
-    else if (ownBlob.y > mapSize.height && ownBlob.direction === 2) {
+    else if (ownBlob.y > mapSize.height) {
+		ownBlob.direction = 4;
 		ownBlob.y = mapSize.height;
 		return displayUI();
 	}
-    else if (ownBlob.x > mapSize.width && ownBlob.direction === 1) {
+    else if (ownBlob.x > mapSize.width) {
+		ownBlob.direction = 4;
 		ownBlob.x = mapSize.width;
 		return displayUI();
 	}
