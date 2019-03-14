@@ -233,3 +233,38 @@ class BlobObj {
         return obj;
     }
 }
+
+class Item {
+    constructor(x = Math.floor(Math.random() * mapSize.width), y = Math.floor(Math.random() * mapSize.height), itemid = Item.id.HEALTH) {
+        this.x = x;
+        this.y = y;
+        this.id = itemid;
+    }
+
+    display() {
+        let canvasPosX = 0,
+            canvasPosY = 0;
+        if (ownBlob.x >= this.x) {
+            canvasPosX = (canvas.width / 2) - (ownBlob.x - this.x);
+        } else if (ownBlob.x < this.x) {
+            canvasPosX = (canvas.width / 2) + (this.x - ownBlob.x);
+        }
+        if (ownBlob.y >=this.y) {
+            canvasPosY = (canvas.height / 2) - (ownBlob.y - this.y);
+        } else if (ownBlob.y < this.y) {
+            canvasPosY = (canvas.height / 2) + (this.y - ownBlob.y);
+        }
+        canvasPosY -= 45;
+        canvasPosX -= 45;
+        ctx.drawImage(objects.images.heart, canvasPosX, canvasPosY, 20, 20);
+    }
+
+    get state() {
+        if (this.x < (ownBlob.x + 10) && this.x > (ownBlob.x - 10) && this.y < (ownBlob.y + 10) && this.y > (ownBlob.y - 10)) return true;
+        else return false;
+    }
+}
+
+Item.id = {
+    HEALTH: 0
+};
