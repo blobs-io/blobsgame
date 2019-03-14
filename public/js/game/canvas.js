@@ -8,9 +8,12 @@ let lastTick = Date.now();
 let blobs = [],
 objects = {
 	walls: [],
+    items: [],
 	images: {
 		blobnom: null,
-		brickwall: (() => { const image = new Image(); image.src = "../../assets/brickwall.png"; return image; })()
+		brickwall: (() => { const image = new Image(); image.src = "../../assets/brickwall.png"; return image; })(),
+		heart: (() => { const image = new Image(); image.src = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/heart-icon.png"; return image; })(),
+
 	}
 };
 var scale = 1;
