@@ -75,6 +75,7 @@ socket.on("ffaHealthUpdate", target => {
     }
 });
 socket.on("coordinateChange", players => {
+    if (typeof ownBlob === "undefined") return;
 	if (!ownBlob.ready) return;
 	for(let i=0; i < players.length; ++i) {
 		if (players[i].owner !== ownBlob.owner) {
