@@ -195,7 +195,8 @@ if (/register(\/.*)?$/.test(window.location.href)) {
                     onlineUserElements.img.height = 20;
                     onlineUserElements.img.style.verticalAlign = "middle";
                     onlineUserElements.span.className = "online-user";
-                    onlineUserElements.span.innerHTML = `<span style="color: #${userTier.colorCode}">${onlineUser.username}</span> (${onlineUser.br} BR) <span style="color: ${locationList[onlineUser.location.toLowerCase()]};margin-left:20px">${onlineUser.location}</span>`;
+                    onlineUserElements.span.innerHTML = `<span style="color: #${userTier.colorCode}">${onlineUser.username}</span> (${onlineUser.br} BR) <span style="color: ${locationList[onlineUser.location.toLowerCase()]}">${onlineUser.location}</span>`;
+                    onlineUserElements.span.style.width = "300px";
                     document.getElementById("online-list").appendChild(onlineUserElements.img);
                     document.getElementById("online-list").appendChild(onlineUserElements.span);
                     document.getElementById("online-list").appendChild(onlineUserElements.br);
