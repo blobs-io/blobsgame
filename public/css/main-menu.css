@@ -1,12 +1,8 @@
 html {
-    background-color: #9a4e07;
-    background-image: url("../assets/brickwall.png");
 }
 body {
     margin: 25px;
-    border: 1px solid grey;
     border-radius: 3px;
-    padding: 10px;
     box-shadow: 10px 10px 2px #2C2F33;
 }
 #stats {
