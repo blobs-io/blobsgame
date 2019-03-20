@@ -100,6 +100,10 @@ if (/register(\/.*)?$/.test(window.location.href)) {
         document.getElementById("auth").appendChild(userCountElement);
     });
 } else if (/app(\/.*)?/.test(window.location.href)) {
+    const locationList = {
+        lobby: "#27ae60",
+        ffa: "#2980b9"
+    };
     const blobs = {
         current: undefined,
         all: undefined
@@ -191,7 +195,7 @@ if (/register(\/.*)?$/.test(window.location.href)) {
                     onlineUserElements.img.height = 20;
                     onlineUserElements.img.style.verticalAlign = "middle";
                     onlineUserElements.span.className = "online-user";
-                    onlineUserElements.span.innerHTML = `<span style="color: #${userTier.colorCode}">${onlineUser.username}</span> (${onlineUser.br} BR) @${onlineUser.location}`;
+                    onlineUserElements.span.innerHTML = `<span style="color: #${userTier.colorCode}">${onlineUser.username}</span> (${onlineUser.br} BR) <span style="color: ${locationList[onlineUser.location.toLowerCase()]};margin-left:20px">${onlineUser.location}</span>`;
                     document.getElementById("online-list").appendChild(onlineUserElements.img);
                     document.getElementById("online-list").appendChild(onlineUserElements.span);
                     document.getElementById("online-list").appendChild(onlineUserElements.br);
