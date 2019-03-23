@@ -170,6 +170,9 @@ class BlobObj {
                 ctx.lineTo(canvasX - (15 / scale) + (100 * (this.health / 100)), canvasY - 3);
                 ctx.closePath();
                 ctx.stroke();
+                if (this.role === 1) {
+                    ctx.drawImage(objects.images.crown, canvasX - (30 + 30 * scale), canvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
+                }
             } else {
                 let blobCanvasX = 0,
                     blobCanvasY = 0;
@@ -206,6 +209,9 @@ class BlobObj {
                 ctx.lineTo(blobCanvasX - (15 + 15 * scale) + (100 * (this.health / 100)), blobCanvasY - 3);
                 ctx.closePath();
                 ctx.stroke();
+                if (this.role === 1) {
+                    ctx.drawImage(objects.images.crown, canvasX - (30 + 30 * scale), canvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
+                }
             }
         });
     }
