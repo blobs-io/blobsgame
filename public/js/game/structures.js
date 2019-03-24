@@ -160,14 +160,17 @@ class BlobObj {
 				ctx.fillStyle = "#" + tier.colorCode;
                 ctx.font = (15 * scale).toString() + "px Dosis";
                 ctx.drawImage(this.img, canvasX, canvasY, w * scale, h * scale);
-                ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), canvasX, (canvasY) - 10);
+                ctx.font = "16px Raleway";
+                ctx.fillText(this.owner, canvasX - this.owner.length, (canvasY) - 27.5);
+                ctx.font = "13px Raleway";
+                ctx.fillText(this.br + " BR", canvasX, (canvasY) - 10);
                 ctx.fillStyle = "white";
                 if (emblems[tier.tier].complete) {
                     ctx.drawImage(emblems[tier.tier], canvasX - (15 + 15 * scale), canvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
                 }
                 ctx.strokeStyle = "lightgreen";
-                ctx.moveTo(canvasX - (15 + 15), canvasY - 3);
-                ctx.lineTo(canvasX - (15 / scale) + (100 * (this.health / 100)), canvasY - 3);
+                ctx.moveTo(canvasX - (35 * scale), canvasY - 3);
+                ctx.lineTo(canvasX - (35 / scale) + (100 * (this.health / 100)), canvasY - 3);
                 ctx.closePath();
                 ctx.stroke();
                 if (this.role === 1) {
@@ -201,7 +204,10 @@ class BlobObj {
 
                 if (du === true) {
                     ctx.font = (15 * scale).toString() + "px Dosis";
-                    ctx.fillText(this.owner + (dbr === true ? ` (${this.br})` : ""), blobCanvasX, (blobCanvasY) - 10);
+                    ctx.font = "16px Raleway";
+                    ctx.fillText(this.owner, blobCanvasX - this.owner.length, (blobCanvasY) - 27.5);
+                    ctx.font = "13px Raleway";
+                    ctx.fillText(this.br + " BR", blobCanvasX, (blobCanvasY) - 10);
                     ctx.fillStyle = "white";
                 }
                 ctx.strokeStyle = "lightgreen";
@@ -210,7 +216,7 @@ class BlobObj {
                 ctx.closePath();
                 ctx.stroke();
                 if (this.role === 1) {
-                    ctx.drawImage(objects.images.crown, canvasX - (30 + 30 * scale), canvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
+                    ctx.drawImage(objects.images.crown, blobCanvasX - (30 + 30 * scale), blobCanvasY - (10 + 15 * scale), 20 * scale, 20 * scale);
                 }
             }
         });
