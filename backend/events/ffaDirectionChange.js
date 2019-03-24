@@ -7,10 +7,11 @@ ffaDirectionChangeEvent.run = (...args) => {
     if (typeof target.x !== "number" || typeof target.y !== "number") return;
     target.directionChangedAt = Date.now() - eventd.directionChangedAt < 5000 ? eventd.directionChangedAt : Date.now();
     target.direction = eventd._direction;
+    target.distance += Math.abs(target.directionChangeCoordinates.x - target.x) + Math.abs(target.directionChangeCoordinates.y - target.y);
     target.directionChangeCoordinates = {
 		x: eventd.directionChangeCoordinates.x,
 		y: eventd.directionChangeCoordinates.y
-	};
+    };
 	io.sockets.emit("ffaDirectionChanged", Object.assign(JSON.parse(JSON.stringify(target)), { x: target.x, y: target.y }));
 };
 
