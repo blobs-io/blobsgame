@@ -7,8 +7,21 @@ function displayUI(excludes = []) {
     if (!excludes.includes("displayWalls")) displayWalls();
     if (!excludes.includes("displayNoNomAreas")) displayNoNomAreas();
     if (!excludes.includes("displayHP")) displayHP();
+    if (!excludes.includes("displayMinimap")) displayMinimap();
     if (!excludes.includes("BlobObjDisplay")) BlobObj.display(blobs, true, true);
 }
+
+function displayMinimap(context = ctx) {
+    context.beginPath();
+    context.strokeStyle = "white";
+    context.rect(canvas.width - 225, canvas.height - 75, 75, 75);
+    context.stroke();
+    context.fillStyle = "lightgreen";
+    context.fillRect(canvas.width - 225 + (65 / (mapSize.width / ownBlob.x)), canvas.height - 75 + (65 / (mapSize.height / ownBlob.y)), 10, 10);
+}
+/*
+
+*/
 
 function displayHP(context = ctx) {
     context.font = "50px Raleway";
