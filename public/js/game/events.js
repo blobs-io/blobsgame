@@ -35,7 +35,8 @@ socket.on("ffaHeartbeat", async d => {
 			n.directionChangeCoordinates = {
 				x: d.users[i]._x,
 				y: d.users[i]._y
-			};
+            };
+            n.role = d.users[i].role;
 			n.previousX = d.users[i]._x;
 			n.previousY = d.users[i]._y;
 			n._direction = d.users[i].direction;
@@ -62,7 +63,8 @@ socket.on("ffaUserJoin", async d => {
 	n.directionChangeCoordinates = {
 		x: d._x,
 		y: d._y
-	};
+    };
+    n.role = d.role;
 	n.directionChangedAt = d.directionChangedAt;
     await n.setBlob();
     n.display(true, true);
