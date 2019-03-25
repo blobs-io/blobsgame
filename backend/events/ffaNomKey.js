@@ -89,7 +89,9 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                         const hasGuest = eventd.guest === true || blobobj.guest === true;
                         if (Date.now() - eventd.lastnom < 1500) return; // Nom cooldown (1.5 seconds)
                         // If blob is nommed
-						
+                        
+                        eventd.lastnom = Date.now();
+
 					    blobobj.health -= Math.floor(Math.random() * 10) + 30;
 						if (blobobj.health > 0) {
 							io.sockets.emit("ffaHealthUpdate", {
@@ -101,8 +103,6 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                             blobobj.health = 100;
                         }
 
-
-                        Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players[Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.findIndex(v => v.id === data.id)].lastnom = Date.now();
 
 
                         let winner = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)];
