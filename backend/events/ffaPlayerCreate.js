@@ -4,7 +4,7 @@ const Player = require("../structures/Player");
 ffaPlayerCreateEvent.run = async (...args) => {
     const [blob, io, Base, data, sockets] = args;
     const room = Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")];
-    if (room.players.length >= 100) return;
+    if (room.players.length >= 100) return io.to(data.id).emit("ffaUnauthorized");
     let socket = sockets.find(v => v.sessionid === blob);
     if (!socket) {
         let guestID = Math.floor((Math.random() * 999) + 1).toString();
