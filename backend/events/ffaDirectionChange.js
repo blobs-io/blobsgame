@@ -12,7 +12,7 @@ ffaDirectionChangeEvent.run = (...args) => {
 		x: eventd.directionChangeCoordinates.x,
 		y: eventd.directionChangeCoordinates.y
     };
-	io.sockets.emit("ffaDirectionChanged", Object.assign(JSON.parse(JSON.stringify(target)), { x: target.x, y: target.y }));
+    io.sockets.emit("ffaDirectionChanged", Object.assign(JSON.parse(JSON.stringify(target)), { x: target.x, y: target.y }));
 };
 
 module.exports = ffaDirectionChangeEvent;
