@@ -72,9 +72,6 @@ class BlobCode {
     static get blobpeek() {
         return "../assets/blobpeek.png";
     }
-    static get partyblob() {
-        return "../assets/partyblob.gif";
-    }
     static get blobnom() {
         return "../assets/blobnom.png";
     }
