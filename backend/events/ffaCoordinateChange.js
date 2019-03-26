@@ -8,7 +8,7 @@ ffaCoordinateChangeEvent.run = async (...args) => {
         let prev = room.players[room.players.findIndex(v => v.id === data.id)];
         if (!prev) return;
         if((Math.abs(eventd.x - prev.x) > 50 || Math.abs(eventd.y - prev.y) > 50)) {
-            io.to(data.id).emit("ffaUnauthorized");
+            io.to(data.id).emit("ffaKick", "Suspicious coordinate change.");
             data.disconnect();
         } 
         eventd.lastnom = prev.lastnom;
