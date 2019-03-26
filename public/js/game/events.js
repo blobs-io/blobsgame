@@ -48,6 +48,10 @@ socket.on("ffaHeartbeat", async d => {
 	}
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");
+socket.on("ffaKick", (note) => {
+    alert("You have been kicked.\nReason: " + (note || "-"));
+    document.location.href = "/login/";
+});
 socket.on("ffaDirectionChanged", d => {
     if (details.singleplayer) return;
 	if (d.owner === ownBlob.owner) return;
