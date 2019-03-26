@@ -7,7 +7,10 @@ ffaCoordinateChangeEvent.run = async (...args) => {
 		if (!room) return;
         let prev = room.players[room.players.findIndex(v => v.id === data.id)];
         if (!prev) return;
-        if((Math.abs(eventd.x - prev.x) > 50 || Math.abs(eventd.y - prev.y) > 50)) return io.to(data.id).emit("ffaUnauthorized");
+        if((Math.abs(eventd.x - prev.x) > 50 || Math.abs(eventd.y - prev.y) > 50)) {
+            io.to(data.id).emit("ffaUnauthorized");
+            data.disconnect();
+        } 
         eventd.lastnom = prev.lastnom;
         eventd._directionChange = prev._directionChange;
         eventd.role = prev.role;
