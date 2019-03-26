@@ -8,6 +8,7 @@ ffaPlayerCreateEvent.run = async (...args) => {
     if (typeof blob !== "string") return;
     let socket = sockets.find(v => v.sessionid === blob);
     if (!socket) {
+        if (room.players.some(v => v.id === data.id)) return io.to(data.id).emit("ffaKick", "Only one player per socket allowed.");
         let guestID = Math.floor((Math.random() * 999) + 1).toString();
         while(sockets.some(v => v.username === `Guest${guestID}`)) {
             guestID = Math.floor((Math.random() * 999) + 1).toString();
