@@ -1,4 +1,5 @@
 class ffaCoordinateChangeEvent {}
+const AntiCheat = require("../anticheat");
 
 ffaCoordinateChangeEvent.run = async (...args) => {
     const [eventd, data, io, Base, sqlite] = args;
@@ -7,10 +8,16 @@ ffaCoordinateChangeEvent.run = async (...args) => {
 		if (!room) return;
         let prev = room.players[room.players.findIndex(v => v.id === data.id)];
         if (!prev) return;
-        if((Math.abs(eventd.x - prev.x) > 50 || Math.abs(eventd.y - prev.y) > 50)) {
-            io.to(data.id).emit("ffaKick", "Suspicious coordinate change.");
+        if(Math.abs(eventd.x - prev.x) > 3) {
+            prev.anticheat.penalize(1, Math.abs(eventd.x - prev.x));
+        }
+        if(Math.abs(eventd.y - prev.y) > 3) {
+            prev.anticheat.penalize(1, Math.abs(eventd.y - prev.y));
+        }
+        if (prev.anticheat.flags >= 0x14) {
+            io.to(data.id).emit("ffaKick", "Penalty limit reached.");
             data.disconnect();
-        } 
+        }
         eventd.lastnom = prev.lastnom;
         eventd._directionChange = prev._directionChange;
         eventd.role = prev.role;
@@ -20,7 +27,9 @@ ffaCoordinateChangeEvent.run = async (...args) => {
         if (eventd.y > 2000) eventd.y = 2000;
         prev.x = eventd.x;
         prev.y = eventd.y;
-	} catch (e) {}
+	} catch (e) {
+        console.log(e)
+    }
 };
 
 module.exports = ffaCoordinateChangeEvent;
