@@ -25,9 +25,6 @@ function displayMinimap(context = ctx) {
         }
     }
 }
-/*
-
-*/
 
 function displayHP(context = ctx) {
     context.font = "50px Raleway";

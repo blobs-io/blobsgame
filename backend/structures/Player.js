@@ -23,6 +23,7 @@ module.exports = class Player {
 		this.previousX = 0;
 		this.previousY = 0;
 		this.health = 100;
+		this.anticheat = {};
 		this.x = x;
 		this.y = y;
 	}

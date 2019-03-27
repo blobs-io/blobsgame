@@ -1,5 +1,6 @@
 class ffaPlayerCreateEvent {};
 const Player = require("../structures/Player");
+const AntiCheat = require("../anticheat");
 
 ffaPlayerCreateEvent.run = async (...args) => {
     const [blob, io, Base, data, sockets] = args;
@@ -23,6 +24,7 @@ ffaPlayerCreateEvent.run = async (...args) => {
 
 
     const nblob = new Player();
+    nblob.anticheat = new AntiCheat();
     nblob.directionChangeCoordinates.x = Math.floor(Math.random() * 600);
     nblob.directionChangeCoordinates.y = Math.floor(Math.random() * 600);
     nblob.role = socket.role;
