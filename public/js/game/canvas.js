@@ -48,6 +48,7 @@ canvas.height = window.innerHeight - 30;
 
 function draw() {
     // FPS meter
+    if (Date.now() - lastIteration > 1000) ownBlob.direction = ownBlob.direction;
     if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
     lastIteration = Date.now();
     // Blob coordinates
