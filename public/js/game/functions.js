@@ -18,12 +18,12 @@ function displayMinimap(context = ctx) {
     context.stroke();
     context.fillStyle = "lightgreen";
     context.fillRect(canvas.width - 225 + (65 / (mapSize.width / ownBlob.x)), canvas.height - 75 + (65 / (mapSize.height / ownBlob.y)), 10, 10);
-    blobs.forEach(function(blob) {
-        if (blob.owner != ownBlob.owner) {
+    for(let i=0; i < blobs.length; ++i) {
+        if (blobs[i].owner != ownBlob.owner) {
             context.fillStyle = "red";
-            context.fillRect(canvas.width - 225 + (65 / (mapSize.width / blob.x)), canvas.height - 75 + (65 / (mapSize.height / blob.y)), 10, 10);
+            context.fillRect(canvas.width - 225 + (65 / (mapSize.width / blobs[i].x)), canvas.height - 75 + (65 / (mapSize.height / blobs[i].y)), 10, 10);
         }
-    });
+    }
 }
 /*
 
