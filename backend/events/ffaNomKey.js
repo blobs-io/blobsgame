@@ -147,7 +147,7 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
                         io.sockets.emit("ffaPlayerNommed", {
                             winner,
                             loser,
-                            result: typeof result !== undefined ? result : 0
+                            result: typeof result !== "undefined" ? result : 0
                         });
 
                     }
