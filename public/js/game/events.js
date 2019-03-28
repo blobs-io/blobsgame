@@ -132,6 +132,18 @@ for(const btnid of ["btnup", "btndown", "btnleft", "btnright", "nom-btn-mobile"]
 	});
 }
 
+document.getElementById("kickbtn").addEventListener("click", () => {
+    if (ownBlob.role !== 1) return;
+    socket.emit("ffaKickPlayer", {
+        user: document.getElementById("target-name").value,
+        reason: document.getElementById("kick-reason").value
+    });
+});
+
+document.getElementById("closemenu").addEventListener("click", () => {
+    document.getElementById("kick-menu").style.display = "none";
+});
+
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth - 30;
     canvas.height = window.innerHeight - 30;
@@ -164,6 +176,11 @@ document.addEventListener("keydown", eventd => {
             ownBlob.lastnom = Date.now();
             if (!details.singleplayer) socket.emit("ffaNomKey");
             else nom(ownBlob, BlobObj.find(ownBlob.x, ownBlob.y));
+            break;
+        case 75: // k
+            if (ownBlob.role === 1) {
+                document.getElementById("kick-menu").style.display = "block";
+            }
             break;
         default:
             break;
