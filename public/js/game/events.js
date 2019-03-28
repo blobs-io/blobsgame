@@ -170,6 +170,9 @@ document.addEventListener("keydown", eventd => {
     }
 });
 
+window.addEventListener("blur", () => windowBlur = true)
+window.addEventListener("focus", () => windowBlur = false);
+
 const mouseScrollEvent = (...eventd) => {
     let [event] = eventd;
     if (typeof event === "undefined") event = window.event;
