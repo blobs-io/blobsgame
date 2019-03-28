@@ -144,6 +144,7 @@ io.on("connection", data => {
             require("./events/ffaDirectionChange").run(eventd, data, io, Base);
         });
         data.on("ffaNomKey", () => require("./events/ffaNomKey").run(data, io, Base, sqlite));
+        data.on("ffaKickPlayer", eventd => require("./events/ffaKickPlayer").run(eventd, data, io, Base));
 
         // Other events
 	    data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", Base.sockets.filter(v => v.inactiveSince === null).concat(Base.rooms.find(v => v.id === "ffa").players).length));
