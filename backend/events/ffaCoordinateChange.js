@@ -14,7 +14,7 @@ ffaCoordinateChangeEvent.run = async (...args) => {
             prev.anticheat.penalize(1, Math.abs(eventd.y - prev.y));
         }
         if (prev.anticheat.flags >= 0x14) {
-            io.to(data.id).emit("ffaKick", "Penalty limit reached.");
+            io.to(data.id).emit("ffaKick", "Too many flags.");
             data.disconnect();
         }
         eventd.lastnom = prev.lastnom;
