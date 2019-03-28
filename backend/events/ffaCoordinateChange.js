@@ -7,10 +7,12 @@ ffaCoordinateChangeEvent.run = async (...args) => {
 		if (!room) return;
         let prev = room.players[room.players.findIndex(v => v.id === data.id)];
         if (!prev) return;
-        if(Math.abs(eventd.x - prev.x) > 3) {
+        if(Math.abs(eventd.x - prev.x) > 50) {
+            console.log("X", Math.abs(eventd.x - prev.x));
             prev.anticheat.penalize(1, Math.abs(eventd.x - prev.x));
         }
-        if(Math.abs(eventd.y - prev.y) > 3) {
+        if(Math.abs(eventd.y - prev.y) > 50) {
+            console.log("Y", Math.abs(eventd.y - prev.y));
             prev.anticheat.penalize(1, Math.abs(eventd.y - prev.y));
         }
         if (prev.anticheat.flags >= 0x14) {
