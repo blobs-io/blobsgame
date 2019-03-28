@@ -163,3 +163,45 @@ h3 {
 #latency {
 	left: 70px;
 }
+
+.white {
+	color: white;
+}
+
+#kick-menu {
+	display: none;
+	z-index: 3;
+	position: fixed;
+	left: auto;
+	right: auto;
+	width: 200px;
+	height: 150px;
+	border: 1px solid red;
+}
+input {
+	display: block;
+	background-color: transparent;
+	outline: none;
+	border: none;
+	border-bottom: 1px solid white;
+	color: white;
+	width: 150px;
+	margin-left: auto;
+	margin-right: auto;
+}
+#kickbtn {
+	display: block;
+	margin-top: 5px;
+	width: 80%;
+	height: 35px;
+	margin-left: auto;
+	margin-right: auto;
+}
+#closemenu {
+	float: right;
+	background-color: red;
+	color: white;
+	padding: 3px;
+	border-radius: 3px;
+	font-family: "Raleway";
+}
