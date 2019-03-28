@@ -42,13 +42,15 @@ const details = {
 	singleplayer: false
 };
 let ping = 0;
+let windowBlur = false;
 
 canvas.width = window.innerWidth - 30;
 canvas.height = window.innerHeight - 30;
 
 function draw() {
+    if (windowBlur === true) return window.requestAnimationFrame(draw);
     // FPS meter
-    if (Date.now() - lastIteration > 1000) ownBlob.direction = ownBlob.direction;
+    if (Date.now() - lastIteration > 200) ownBlob.direction = ownBlob.direction;
     if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
     lastIteration = Date.now();
     // Blob coordinates
