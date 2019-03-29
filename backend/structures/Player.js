@@ -6,8 +6,6 @@ const Base = require("../Base");
 
 module.exports = class Player {
 	constructor(x, y, owner, role = 0, blob = "blobowo") {
-		this._x = x;
-		this._y = y;
 		this.owner = owner;
 		this.br = 0;
 		this.blob = blob;
