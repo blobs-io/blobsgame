@@ -150,6 +150,7 @@ window.addEventListener("resize", () => {
 });
 
 document.addEventListener("keydown", eventd => {
+    if (document.getElementById("kick-menu").style.display === "block") return;
     switch (eventd.keyCode) {
         case 13: // newline
             ownBlob.direction = 4;
@@ -179,6 +180,7 @@ document.addEventListener("keydown", eventd => {
             break;
         case 75: // k
             if (ownBlob.role === 1) {
+                ownBlob.direction = 4;
                 document.getElementById("kick-menu").style.display = "block";
             }
             break;
