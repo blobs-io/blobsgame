@@ -29,6 +29,10 @@ Base.utils = { };
 Base.captchas = Base.sockets = [ ];
 Base.rooms = [];
 Base.dbToken = null;
+Base.maintenance = {
+	enabled: false,
+	reason: ""
+};
 
 // Add objects
 for(let i = 0; i < 50; ++i) {
