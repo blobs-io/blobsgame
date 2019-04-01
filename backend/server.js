@@ -10,7 +10,8 @@ let sockets = Base.sockets;
 let captchas = Base.captchas;
 const {
     existsSync,
-    writeFileSync
+    writeFileSync,
+    readFileSync
 } = require("fs");
 
 // Database backup
@@ -47,6 +48,10 @@ const logger = new Logger({
     token: Base.discordAuth.logWebhook.token
 });
 Base.express.app.use((req, res, next) => {
+    if (Base.maintenance.enabled) {
+        res.send(readFileSync("./backend/Maintenance.html", "utf8").replace(/\{comment\}/g, Base.maintenance.reason));
+        return;
+    }
     if (/\/(\?.+)?$/.test(req.originalUrl)) {
         logger.requests.htmlOnly++;
         logger.sessionRequests.htmlOnly++;
@@ -102,7 +107,8 @@ setInterval(() => {
 	io.sockets.emit("coordinateChange", Base.rooms.find(v => v.id === "ffa").players);
 }, 20);
 
-io.on("connection", data => {
+if (!Base.maintenance.enabled){
+    io.on("connection", data => {
     try {
         data.on("disconnect", () => {
             const r = require("./events/disconnect").run(data, Base, io);
@@ -157,4 +163,7 @@ io.on("connection", data => {
         data.on("ffaSinglePlayerCreate", blob => require("./events/ffaSinglePlayerCreate").run(blob, io, Base, data, Base.sockets));
         data.on("singleplayerNomKey", eventd => require("./events/singleplayerNomKey").run(data, io, Base, sqlite, eventd));
     } catch (e) {}
-});
+    });
+} else {
+    console.log("Maintenance mode enabled.");
+}
