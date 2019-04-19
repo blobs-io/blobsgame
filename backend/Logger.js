@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 const formdata = require("form-data");
 
 module.exports = class Logger {
-    constructor(discordAuth = {}, requests = { total:0, htmlOnly: 0, ffa:0 }) {
+    constructor(discordAuth = {}, requests = { total:0, htmlOnly: 0, ffa: 0 }) {
         this._requests = requests;
         this.sessionRequests = {};
         for (const property in requests) {
