@@ -140,17 +140,17 @@ if (!Base.maintenance.enabled){
         });
 
         // FFA Events
-        data.on("ffaPlayerCreate", blob => {
-            require("./events/ffaPlayerCreate").run(blob, io, Base, data, Base.sockets);
+        data.on("playerCreate", (blob, gameid) => {
+            require("./events/ffaPlayerCreate").run(blob, io, Base, data, Base.sockets, gameid);
         });
-        data.on("coordinateChange", eventd => {
-            require("./events/ffaCoordinateChange").run(eventd, data, io, Base, sqlite);
+        data.on("coordinateChange", (eventd, gameid) => {
+            require("./events/ffaCoordinateChange").run(eventd, data, io, Base, sqlite, gameid);
         });
-        data.on("ffaDirectionChange", eventd => {
-            require("./events/ffaDirectionChange").run(eventd, data, io, Base);
+        data.on("directionChange", (eventd, gameid) => {
+            require("./events/ffaDirectionChange").run(eventd, data, io, Base, gameid);
         });
-        data.on("ffaNomKey", () => require("./events/ffaNomKey").run(data, io, Base, sqlite));
-        data.on("ffaKickPlayer", eventd => require("./events/ffaKickPlayer").run(eventd, data, io, Base));
+        data.on("nomKey", gameid => require("./events/ffaNomKey").run(data, io, Base, sqlite, gameid));
+        data.on("kickPlayer", (eventd, gameid) => require("./events/ffaKickPlayer").run(eventd, data, io, Base, gameid));
 
         // Other events
 	    data.on("requestOnlineCount", () => io.to(data.id).emit("onlineCount", Base.sockets.filter(v => v.inactiveSince === null).concat(Base.rooms.find(v => v.id === "ffa").players).length));
