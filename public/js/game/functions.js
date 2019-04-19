@@ -208,7 +208,7 @@ function nom(attackBlob, target) {
 
             target.health -= Math.floor(Math.random() * 10) + 30;
             if (target.health <= 0) {
-                socket.emit("singleplayerNomKey", { attackBlob, target });
+                socket.emit("singleplayerNomKey", { attackBlob, target }, "ffa");
                 target.health = 100;
             }
         }

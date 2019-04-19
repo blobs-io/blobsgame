@@ -107,7 +107,7 @@ function draw() {
     else if (ownBlob.direction === 1) ownBlob.x = ownBlob.directionChangeCoordinates.x + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
     else if (ownBlob.direction === 2) ownBlob.y = ownBlob.directionChangeCoordinates.y + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
     else if (ownBlob.direction === 3) ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
-    if (details.singleplayer === false) socket.emit("coordinateChange", { x: ownBlob.x, y: ownBlob.y });
+    if (details.singleplayer === false) socket.emit("coordinateChange", { x: ownBlob.x, y: ownBlob.y }, "ffa");
     displayUI();
 }
 

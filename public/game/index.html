@@ -90,7 +90,12 @@
                 } else {
                     bar.style.width = "100%";
    					setTimeout(() => {
-                        socket.emit("ffaPlayerCreate", sessionid);
+						if (/[&?]mode=colors/.test(document.location.search)) {
+							details.mode = "Colors";
+						} else {
+							socket.emit("playerCreate", sessionid, "ffa");
+							details.mode = "FFA";
+						}
                         document.body.removeChild(document.getElementById("loading-screen"));
                         document.getElementById("game").style.display = "block";
 					}, 1500);
