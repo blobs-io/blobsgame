@@ -1,9 +1,9 @@
 class ffaCoordinateChangeEvent {}
 
 ffaCoordinateChangeEvent.run = async (...args) => {
-    const [eventd, data, io, Base, sqlite] = args;
+    const [eventd, data, io, Base, sqlite, gameid] = args;
     try {
-		const room = Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")];
+		const room = Base.rooms[Base.rooms.findIndex(v => v.id === gameid)];
 		if (!room) return;
         let prev = room.players[room.players.findIndex(v => v.id === data.id)];
         if (!prev) return;

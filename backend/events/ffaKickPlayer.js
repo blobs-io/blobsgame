@@ -1,11 +1,11 @@
 class ffaKickPlayerEvent {}
 
 ffaKickPlayerEvent.run = async (...args) => {
-    const [eventd, data, io, Base] = args;
-    const room = Base.rooms.find(v => v.id === "ffa");
+    const [eventd, data, io, Base, gameid] = args;
+    const room = Base.rooms.find(v => v.id === gameid);
+    if (!room) return;
     const requester = room.players.find(v => v.id === data.id);
     if (!requester) return;
-    if (!room) return;
     if (requester.role !== 1) {
         io.to(data.id).emit("ffaKick", "Insufficient permissions.");
         return data.disconnect();

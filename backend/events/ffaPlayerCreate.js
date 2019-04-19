@@ -3,8 +3,9 @@ const Player = require("../structures/Player");
 const AntiCheat = require("../anticheat");
 
 ffaPlayerCreateEvent.run = async (...args) => {
-    const [blob, io, Base, data, sockets] = args;
-    const room = Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")];
+    const [blob, io, Base, data, sockets, gameid] = args;
+    const room = Base.rooms.find(v => v.id === gameid);
+    if (!room) return;
     if (room.players.length >= 100) return io.to(data.id).emit("ffaKick", "Too many players online (100).");
     if (typeof blob !== "string") return;
     let socket = sockets.find(v => v.sessionid === blob);

@@ -77,11 +77,13 @@ function promotedTo(oldbr, newbr) {
     return undefined;
 }
 
-ffaNomKey.run = async (data, io, Base, sqlite) => {
-    const eventd = Base.rooms[Base.rooms.findIndex(v => v.id === "ffa")].players.find(v => v.id === data.id);
+ffaNomKey.run = async (data, io, Base, sqlite, gameid) => {
+    const room = Base.rooms.find(v => v.id === gameid);
+    if (!room) return;
+    const eventd = room.players.find(v => v.id === data.id);
     if (!eventd) return;
     if (isNaN(eventd.x) || isNaN(eventd.y) || isNaN(eventd.br)) return;
-    for (const blobobj of Base.rooms.find(v => v.id === "ffa").players) {
+    for (const blobobj of room.players) {
         if (eventd.owner !== blobobj.owner) {
             if (eventd.inProtectedArea === false) {
                 if (eventd.x < (blobobj.x + 30) && eventd.x > (blobobj.x - 30)) {
@@ -105,8 +107,8 @@ ffaNomKey.run = async (data, io, Base, sqlite) => {
 
 
 
-                        let winner = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === eventd.owner)];
-                        let loser = Base.rooms.find(v => v.id === "ffa").players[Base.rooms.find(v => v.id === "ffa").players.findIndex(v => v.owner === blobobj.owner)];
+                        let winner = room.players.findIndex(v => v.owner === eventd.owner);
+                        let loser = room.players.findIndex(v => v.owner === blobobj.owner)];
 
 						let result = undefined;
                         if (!isNaN(blobobj.br) && !hasGuest) {
