@@ -6,6 +6,7 @@ import * as sqlite from "sqlite";
 
 // Other imports
 import Base from "./structures/Base";
+import Logger from "./structures/Logger";
 
 // Init base
 const base: Base = new Base({
@@ -29,3 +30,33 @@ base.initializeDatabase("./db.sqlite")
     })
     .catch(console.log);
 base.initializeRoutes().catch(console.error);
+
+// Initialize logger
+const logger = new Logger(base);
+logger.setInterval(() => {}, 60e3);
+
+// Handle (Log/Check for maintenance) requests
+base.server.app.use((req, res, next) => {
+    if (base.maintenance.enabled === true && base.maintenance.reason) {
+        res.send(fs.readFileSync("./backend/Maintenance.html", "utf8").replace(/\{comment\}/g, base.maintenance.reason));
+        return;
+    }
+    if (/\/(\?.+)?$/.test(req.originalUrl)) {
+        logger.requests.htmlOnly++;
+        logger.sessionRequests.htmlOnly++;
+    }
+    if (req.originalUrl.startsWith("/game/")) {
+        logger.requests.ffa++;
+        logger.sessionRequests.ffa++;
+    }
+    logger.requests.total++;
+    logger.sessionRequests.total++;
+    return next();
+});
+
+// Listen to events
+if (base.maintenance.enabled === false) {
+    base.io.on("connection", (data: any) => {
+        console.log("new connection", data.id);
+    });
+}
