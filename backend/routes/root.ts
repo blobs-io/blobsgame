@@ -7,6 +7,6 @@ export default class Root {
     };
 
     static run(req: any, res: any, base: Base): void {
-
+        res.send("yes");
     }
 }
