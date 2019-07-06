@@ -10,7 +10,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta property="og:image" content="https://cdn.discordapp.com/emojis/458326620076507136.png" />
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
 		<link rel="apple-touch-icon" sizes="57x57" href="../assets/favicons/apple-icon-57x57.png">
 		<link rel="apple-touch-icon" sizes="60x60" href="../assets/favicons/apple-icon-60x60.png">
 		<link rel="apple-touch-icon" sizes="72x72" href="../assets/favicons/apple-icon-72x72.png">
@@ -32,10 +31,12 @@
 	<body>
 	<canvas id="particles"></canvas>
 		<div id="auth">
+			<form method="POST" action="/login">
 			<div id="heading"><h1>Blobs<span class="green">.</span><span class="blue">io</span></h1></div>
-			<input type="text" placeholder="Username" id="user" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			<input type="password" placeholder="Password" id="pass" /><br/>
+			<input type="text" placeholder="Username" id="user" name="username" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="password" placeholder="Password" id="pass" name="password" /><br/>
 			<input type="submit" value="Sign In" id="login-btn" /><br/>
+			</form>
 			<span class="reg-label">No account yet? <a href="../register">Register</a></span>
 		</div>
 		<center><input type="submit" value="Play as guest" id="guest-btn" style="background-color: #27ae60;"></center>
