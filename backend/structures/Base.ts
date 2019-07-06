@@ -18,7 +18,6 @@ interface Server {
 interface BaseOptions {
     server: Server;
     wsServer: ws.Server;
-    socket: any;
     database?: any;
 }
 
@@ -36,7 +35,7 @@ export default class Base {
     public maintenance: Maintenance = {
         enabled: false
     };
-    public socket: (server: http.Server) => any;
+    public socket: any;
     public io: socket.Server;
     public _server: http.Server;
 
@@ -45,7 +44,7 @@ export default class Base {
         this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
         this.wsServer = options.wsServer;
         this.db = options.database;
-        this.socket = options.socket;
+        this.socket = socket;
 
 
         this.io = this.socket(this._server);
