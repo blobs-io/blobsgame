@@ -1,12 +1,16 @@
 import * as express from "express";
 import * as ws from "ws";
+import * as socket from "socket.io";
+import * as http from "http";
 
 // Import Routes
 import rootRoute from "../routes/root";
 import getDatabaseRoute from "../routes/getDatabase";
+import testRoute from "../routes/testRoute";
 
 interface Server {
     app: express.Application;
+    _server?: any;
     port: number;
     readyCallback?: () => any;
 }
@@ -14,9 +18,14 @@ interface Server {
 interface BaseOptions {
     server: Server;
     wsServer: ws.Server;
+    socket: any;
     database?: any;
 }
 
+interface Maintenance {
+    enabled: boolean;
+    reason?: string;
+}
 
 export default class Base {
     public server: Server;
@@ -24,13 +33,22 @@ export default class Base {
     public db: any;
     public dbToken: string;
     public dbPath: string | undefined;
+    public maintenance: Maintenance = {
+        enabled: false
+    };
+    public socket: (server: http.Server) => any;
+    public io: socket.Server;
+    public _server: http.Server;
 
     constructor(options: BaseOptions) {
         this.server = options.server;
-        this.server.app.listen(options.server.port, options.server.readyCallback);
+        this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
         this.wsServer = options.wsServer;
         this.db = options.database;
+        this.socket = options.socket;
 
+
+        this.io = this.socket(this._server);
         this.dbToken = Math.random().toString(36).substr(2); // TODO: use crypto instead of pseudo-random
     }
 
@@ -62,7 +80,8 @@ export default class Base {
     async initializeRoutes(): Promise<void> {
         const { app } = this.server;
 
-        app.get("/",          (req, res) => rootRoute.run(req, res, this));
-        app.get("/db.sqlite", (req, res) => getDatabaseRoute.run(req, res, this));
+        app.get(rootRoute.route.path,          (req, res) => rootRoute.run(req, res, this));
+        app.get(getDatabaseRoute.route.path,   (req, res) => getDatabaseRoute.run(req, res, this));
+        app.get(testRoute.route.path,          (req, res) => testRoute.run(req, res, this))
     }
 }
