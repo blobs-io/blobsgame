@@ -1,12 +1,18 @@
+// Import packages
 import * as express from "express";
 import * as ws from "ws";
 import * as socket from "socket.io";
 import * as http from "http";
 
+// Import structures
+import * as SessionIDManager from "./SessionIDManager";
+
 // Import Routes
 import rootRoute from "../routes/root";
 import getDatabaseRoute from "../routes/getDatabase";
 import testRoute from "../routes/testRoute";
+import loginRoute from "../routes/login";
+import bodyParser = require("body-parser");
 
 interface Server {
     app: express.Application;
@@ -46,9 +52,8 @@ export default class Base {
         this.db = options.database;
         this.socket = socket;
 
-
         this.io = this.socket(this._server);
-        this.dbToken = Math.random().toString(36).substr(2); // TODO: use crypto instead of pseudo-random
+        this.dbToken = SessionIDManager.generateSessionID(24);
     }
 
     /**
@@ -79,8 +84,18 @@ export default class Base {
     async initializeRoutes(): Promise<void> {
         const { app } = this.server;
 
+        app.use(bodyParser.urlencoded({ extended: true }));
+
         app.get(rootRoute.route.path,          (req, res) => rootRoute.run(req, res, this));
         app.get(getDatabaseRoute.route.path,   (req, res) => getDatabaseRoute.run(req, res, this));
-        app.get(testRoute.route.path,          (req, res) => testRoute.run(req, res, this))
+        app.get(testRoute.route.path,          (req, res) => testRoute.run(req, res, this));
+        app.get(loginRoute.route.path,         (req, res) => loginRoute.run(req, res, this));
+        app.post(loginRoute.route.path,         (req, res) => loginRoute.run(req, res, this, "post"));
+
+
+        // Assets / JS / CSS
+        app.use("/assets", express.static("./public/assets"));
+        app.use("/js", express.static("./public/js"));
+        app.use("/css", express.static("./public/css"));
     }
 }
