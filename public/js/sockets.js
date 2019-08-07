@@ -1,5 +1,7 @@
 const server = document.location.href.match(/https?:\/\/[^\/]+/)[0];
-const socket = io.connect(server);
+let socket;
+if (typeof io !== "undefined")
+    socket = io.connect(server);
 const message = "<div id=\"<type>-notif\"><message></div>";
 let buttonClicked = false;
 
@@ -61,43 +63,6 @@ if (/register(\/.*)?$/.test(window.location.href)) {
             }
             document.getElementById("auth").innerHTML = message.replace("<type>", "success").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
         }
-    });
-} else if (/login(\/.*)?$/.test(window.location.href)) {
-    // Browser detection test
-    if (/(Android|webOS|iPad|iPod|Windows Phone|BlackBerry|iPhone)/.test(navigator.userAgent)) {
-        const noteElement = document.createElement("div");
-        noteElement.id = "failure-notif";
-        noteElement.innerHTML = "Mobile support for Blobs.io is currently experimental and may not work. <a href=\"https://github.com/blobs-io/blobs.io/issues/new/choose\">Open an issue</a> if you experience problems.";
-        document.body.insertBefore(noteElement, document.body.firstChild);
-    }
-    document.getElementById("guest-btn").addEventListener("click", function(data) {
-        document.location.href = "/game?guest=true";
-    });
-    document.getElementById("login-btn").addEventListener("click", function(data) {
-        if (buttonClicked === true) return;
-        socket.emit("login", {
-            username: document.getElementById("user").value,
-            password: document.getElementById("pass").value
-        });
-        socket.on("login", function(data) {
-            if ([400, 403, 500].indexOf(data.status) > -1) {
-                document.getElementById("auth").innerHTML = message.replace("<type>", "failure").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
-            } else {
-                buttonClicked = true;
-                document.getElementById("auth").innerHTML = message.replace("<type>", "success").replace("<message>", data.message) + document.getElementById("auth").innerHTML;
-                if (typeof data.session_id !== "undefined") {
-                    document.cookie = "session=" + data.session_id + ";expires=" + new Date(Date.now() + 9e5).toUTCString() + ";path=/";
-                    document.location.href = server + "/app/";
-                }
-            }
-        });
-    });
-    socket.emit("requestOnlineCount");
-    socket.on("onlineCount", r => {
-        const userCountElement = document.createElement("span");
-        userCountElement.className = "online-count";
-        userCountElement.innerHTML = `${r} online`;
-        document.getElementById("auth").appendChild(userCountElement);
     });
 } else if (/app(\/.*)?/.test(window.location.href)) {
     const locationList = {
