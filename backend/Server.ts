@@ -3,6 +3,7 @@ import express = require("express");
 import * as fs from "fs";
 import * as ws from "ws";
 import * as sqlite from "sqlite";
+import cookieParser = require("cookie-parser");
 
 // Other imports
 import Base from "./structures/Base";
@@ -22,6 +23,9 @@ const base: Base = new Base({
     }),
     database: sqlite
 });
+
+
+base.server.app.use(cookieParser());
 
 // Init database/routes
 base.initializeDatabase("./db.sqlite")
@@ -55,8 +59,4 @@ base.server.app.use((req, res, next) => {
 });
 
 // Listen to events
-if (base.maintenance.enabled === false) {
-    base.io.on("connection", (data: any) => {
-        console.log("new connection", data.id);
-    });
-}
+base.initializeEvents().catch(() => {});
