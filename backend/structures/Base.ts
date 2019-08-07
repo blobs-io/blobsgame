@@ -3,6 +3,8 @@ import * as express from "express";
 import * as ws from "ws";
 import * as socket from "socket.io";
 import * as http from "http";
+import bodyParser = require("body-parser");
+import { readFileSync } from "fs";
 
 // Import structures
 import * as SessionIDManager from "./SessionIDManager";
@@ -12,7 +14,7 @@ import rootRoute from "../routes/root";
 import getDatabaseRoute from "../routes/getDatabase";
 import testRoute from "../routes/testRoute";
 import loginRoute from "../routes/login";
-import bodyParser = require("body-parser");
+import appRoute from "../routes/app";
 
 interface Server {
     app: express.Application;
@@ -74,6 +76,7 @@ export default class Base {
         await db.run("CREATE TABLE IF NOT EXISTS accounts (`username` TEXT, `password` TEXT, `br` INTEGER, `createdAt` TEXT, `role` INTEGER, `blobcoins` INTEGER, `lastDailyUsage` TEXT, `distance` INTEGER, blobs `TEXT`, `activeBlob` TEXT, `clan` TEXT, `wins` INTEGER, `losses` INTEGER)");
         await db.run("CREATE TABLE IF NOT EXISTS sessionids (`username` TEXT, `sessionid` TEXT, `expires` TEXT)");
         await db.run("CREATE TABLE IF NOT EXISTS bans (`username` TEXT, `reason` TEXT, `bannedAt` TEXT, `expires` TEXT, `moderator` TEXT)");
+        await db.get("SELECT count(*) FROM accounts").then(console.log.bind(null, "Accounts: "));
     }
 
     /**
@@ -90,12 +93,22 @@ export default class Base {
         app.get(getDatabaseRoute.route.path,   (req, res) => getDatabaseRoute.run(req, res, this));
         app.get(testRoute.route.path,          (req, res) => testRoute.run(req, res, this));
         app.get(loginRoute.route.path,         (req, res) => loginRoute.run(req, res, this));
+        app.get(appRoute.route.path,           (req, res) => appRoute.run(req, res, this));
         app.post(loginRoute.route.path,         (req, res) => loginRoute.run(req, res, this, "post"));
-
+        app.get("/game", (req, res) => res.send(readFileSync("./public/game/index.html", "utf8")));
 
         // Assets / JS / CSS
         app.use("/assets", express.static("./public/assets"));
         app.use("/js", express.static("./public/js"));
         app.use("/css", express.static("./public/css"));
+    }
+
+    async initializeEvents(): Promise<void> {
+        if (this.maintenance.enabled) throw new Error(this.maintenance.reason || "Maintenance");
+        const { io } = this;
+
+        io.on("connection", (data: any) => {
+            console.log("connection: " + data.id);
+        });
     }
 }

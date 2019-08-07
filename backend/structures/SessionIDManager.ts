@@ -28,7 +28,7 @@ export function generateSessionID(length: number): string {
  * @param {object=|number=} expires Either a timestamp or a date object when the session id expires (default: 15 minutes)
  * @returns {promise<string|object>} The registered session id or an object with error information
  */
-export function registerID(database: any, username: string, session?: string, expires?: Date|number) {
+export function registerID(database: any, username: string, session?: string, expires?: Date|number): Promise<string> {
     return new Promise((resolve, reject) => {
         if (typeof session === "undefined")
             session = generateSessionID(8);
