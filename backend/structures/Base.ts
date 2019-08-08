@@ -8,6 +8,9 @@ import { readFileSync } from "fs";
 
 // Import structures
 import * as SessionIDManager from "./SessionIDManager";
+import WS from "../WSEvents";
+import Room from "./Room";
+import Maps from "./Maps";
 
 // Import Routes
 import rootRoute from "../routes/root";
@@ -46,6 +49,10 @@ export default class Base {
     public socket: any;
     public io: socket.Server;
     public _server: http.Server;
+    public WSHandler: WS;
+    public rooms: Room[];
+    public maps: Maps;
+    public sockets: any[];
 
     constructor(options: BaseOptions) {
         this.server = options.server;
@@ -53,6 +60,12 @@ export default class Base {
         this.wsServer = options.wsServer;
         this.db = options.database;
         this.socket = socket;
+        this.sockets = [];
+        this.WSHandler = new WS(this);
+        this.maps = new Maps();
+
+        const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa");
+        this.rooms = [ ffaRoom ];
 
         this.io = this.socket(this._server);
         this.dbToken = SessionIDManager.generateSessionID(24);
@@ -108,7 +121,8 @@ export default class Base {
         const { io } = this;
 
         io.on("connection", (data: any) => {
-            console.log("connection: " + data.id);
+            data.on("disconnect", this.WSHandler.executeEvent.bind(null, "disconnect", data));
+            data.on("playerCreate", this.WSHandler.executeEvent.bind(null, "playerCreate", data));
         });
     }
 }
