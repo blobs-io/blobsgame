@@ -7,7 +7,8 @@ import AntiCheat from "./structures/AntiCheat";
 const EventTypes: any = {
     PLAYER_CREATE: "ffaPlayerCreate",
     PLAYER_KICK: "ffaKick",
-    DISCONNECT: "disconnect"
+    DISCONNECT: "disconnect",
+    COORDINATECHANGE: "coordinateChange"
 };
 
 export default class {
@@ -17,10 +18,12 @@ export default class {
         this.base = base;
     }
 
-    executeEvent(type: string, data: any, blob: any, gameid: string): any {
+    executeEvent(type: string, data: any, ...args: any[]): any {
         const { io } = this.base;
+        const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === "ffa");
+
         if (type === EventTypes.PLAYER_CREATE) {
-            const room: Room | void = this.base.rooms.find((v: Room) => v.id === gameid);
+            const blob: any = args[0];
             if (!room) return;
             if (room.players.length >= 100) io.to(data.id).emit(EventTypes.PLAYER_KICK, "Too many players online (100)!");
             if (typeof blob !== "string") return;
@@ -70,7 +73,6 @@ export default class {
             });
         }
         else if (type === EventTypes.DISCONNECT) {
-            const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === "ffa");
             if (!room) return;
             const player: Player | undefined = room.players.find((v: Player) => v.id === data.id);
             if (player) {
@@ -79,6 +81,9 @@ export default class {
                     this.base.db.run("UPDATE accounts SET distance = distance + ? WHERE username = ?", player.distance / 1000, player.owner).catch(console.log);
                 room.players.splice(room.players.findIndex((v: Player) => v.id === data.id), 1);
             }
+        }
+        else if (type === EventTypes.COORDINATECHANGE) {
+
         }
     }
 }
