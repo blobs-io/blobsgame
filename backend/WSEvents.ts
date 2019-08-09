@@ -5,6 +5,7 @@ import Player from "./structures/Player";
 import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
+import * as SessionIDManager from "./structures/SessionIDManager";
 
 const EventTypes: any = {
     PLAYER_CREATE: "ffaPlayerCreate",
@@ -12,7 +13,9 @@ const EventTypes: any = {
     DISCONNECT: "disconnect",
     COORDINATECHANGE: "coordinateChange",
     DIRECTIONCHANGE: "ffaDirectionChange",
-    NOMKEY: "ffaNomKey"
+    NOMKEY: "ffaNomKey",
+    PLAYER_KICK_C: "ffaKickPlayer",
+    SESSIONDELETE: "sessionDelete"
 };
 
 export default class {
@@ -209,6 +212,33 @@ export default class {
                 }
             }
 
+        }
+        else if (type === EventTypes.PLAYER_KICK_C) {
+            if (!room) return;
+            const requester: Player | undefined = room.players.find((v: Player) => v.id === data.id);
+            const eventd: any = args[0];
+            if (!requester) return;
+            if (typeof eventd.user !== "string" || typeof eventd.reason !== "string") return;
+            if (requester.role !== 1) {
+                io.to(data.id).emit("ffaKick", "Insufficient permissions.");
+                return data.disconnect();
+            } else {
+                const target: Player | undefined = room.players.find((v: Player) => v.owner === eventd.user);
+                if (!target || !target.id) return;
+                if (eventd.reason.length < 1 || eventd.reason.length > 256) return;
+                io.to(target.id).emit("ffaKick", eventd.reason);
+                io.sockets.sockets[target.id].disconnect();
+            }
+        }
+        else if (type === EventTypes.SESSIONDELETE) {
+            const session: any = args[0];
+            if (typeof session !== "string") return;
+            SessionIDManager.deleteSession(this.base.db, {
+                type: "session",
+                value: session
+            }).then(() => {
+                io.to(data.id).emit("sessionDelete");
+            }).catch(console.log);
         }
     }
 }
