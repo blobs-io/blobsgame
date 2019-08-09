@@ -125,13 +125,16 @@ export default class Base {
         const { io } = this;
 
         io.on("connection", (data: any) => {
-            data.on("disconnect", this.WSHandler.executeEvent.bind(null, "disconnect", data));
-            data.on("ffaPlayerCreate", this.WSHandler.executeEvent.bind(null, "ffaPlayerCreate", data));
-            data.on("coordinateChange", this.WSHandler.executeEvent.bind(null, "coordinateChange", data));
-            data.on("ffaDirectionChange", this.WSHandler.executeEvent.bind(null, "ffaDirectionChange", data));
-            data.on("ffaNomKey", this.WSHandler.executeEvent.bind(null, "ffaNomKey", data));
-            data.on("ffaKickPlayer", this.WSHandler.executeEvent.bind(null, "ffaKickPlayer", data));
-            data.on("sessionDelete", this.WSHandler.executeEvent.bind(null, "sessionDelete", data));
+            data.on("disconnect", (...data: any[]) => this.WSHandler.executeEvent("disconnect", data, ...data));
+            data.on("ffaPlayerCreate", (...data: any[]) => this.WSHandler.executeEvent("ffaPlayerCreate", data, ...data));
+            data.on("coordinateChange", (...data: any[]) => this.WSHandler.executeEvent("coordinateChange", data, ...data));
+            data.on("ffaDirectionChange", (...data: any[]) => this.WSHandler.executeEvent("ffaDirectionChange", data, ...data));
+            data.on("ffaNomKey", (...data: any[]) => this.WSHandler.executeEvent("ffaNomKey", data, ...data));
+            data.on("ffaKickPlayer", (...data: any[]) => this.WSHandler.executeEvent("ffaKickPlayer", data, ...data));
+            data.on("sessionDelete", (...data: any[]) => this.WSHandler.executeEvent("sessionDelete", data, ...data));
         });
+        setInterval(() => {
+            console.log("players", this.rooms[0].players.map(v => v.owner));
+        }, 3000);
     }
 }
