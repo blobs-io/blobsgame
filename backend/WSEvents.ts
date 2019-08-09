@@ -26,16 +26,22 @@ export default class {
     }
 
     executeEvent(type: string, data: any, ...args: any[]): any {
+        console.log(`[WS ${type}]: `, args);
         const {io} = this.base;
         const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === "ffa");
-
         if (type === EventTypes.PLAYER_CREATE) {
             const blob: any = args[0];
+
             if (!room) return;
+
             if (room.players.length >= 100) io.to(data.id).emit(EventTypes.PLAYER_KICK, "Too many players online (100)!");
+
             if (typeof blob !== "string") return;
+
             let socket: Socket = this.base.sockets.find((v: { sessionid: string }) => v.sessionid === blob);
+
             if (!socket) {
+
                 if (room.players.some((v: Player) => v.id === data.id)) return io.to(data.id).emit("ffaKick", "Only one player per socket allowed.");
                 let guestID: string = Math.floor((Math.random() * 999) + 1).toString();
                 while (this.base.sockets.some((v: { username: string }) => v.username === `Guest${guestID}`)) {
@@ -50,8 +56,11 @@ export default class {
             } else socket.guest = false;
 
 
+
             const newblob: Player = new Player(this.base);
+
             newblob.anticheat = new AntiCheat();
+
             newblob.directionChangeCoordinates.x = Math.floor(Math.random() * 600);
             newblob.directionChangeCoordinates.y = Math.floor(Math.random() * 600);
             newblob.role = socket.role;
@@ -59,25 +68,50 @@ export default class {
             newblob.br = socket.br;
             newblob.id = data.id;
             newblob.guest = socket.guest;
+
             newblob.maximumCoordinates = {
                 width: room.map.map.mapSize.width,
                 height: room.map.map.mapSize.height
             };
+
             room.players.push(newblob);
+
             io.to(data.id).emit("ffaObjectsHeartbeat", room.map.map.objects);
+
+            console.log("ffaHeartbeat", {
+                username: socket.username,
+                br: socket.br,
+                role: socket.role,
+                x: newblob.directionChangeCoordinates.x,
+                y: newblob.directionChangeCoordinates.y,
+                users: room.players.map((v: Player) => ({
+                    ...v,
+                    base: undefined,
+                    anticheat: undefined
+                }))
+            });
+
             io.to(data.id).emit("ffaHeartbeat", {
                 username: socket.username,
                 br: socket.br,
                 role: socket.role,
                 x: newblob.directionChangeCoordinates.x,
                 y: newblob.directionChangeCoordinates.y,
-                users: room.players
+                users: room.players.map((v: Player) => ({
+                    ...v,
+                    base: undefined,
+                    anticheat: undefined
+                }))
             });
+
             io.sockets.emit("ffaUserJoin", {
                 ...newblob,
                 x: newblob.x,
-                y: newblob.y
+                y: newblob.y,
+                base: undefined,
+                anticheat: undefined
             });
+
         }
         else if (type === EventTypes.DISCONNECT) {
             if (!room) return;
