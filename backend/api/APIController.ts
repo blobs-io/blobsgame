@@ -1,5 +1,5 @@
 import Base from "../structures/Base";
-import express from "express";
+import * as express from "express";
 import Socket from "../structures/Socket";
 import { appendFileSync } from "fs";
 import Room from "../structures/Room";
