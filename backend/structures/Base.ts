@@ -38,6 +38,7 @@ interface Maintenance {
 }
 
 export default class Base {
+    static algorithm: string = process.platform === "linux" ? "./b {ownbr} {opponentbr} --br" : "b {ownbr} {opponentbr} --br";
     public server: Server;
     public wsServer: ws.Server;
     public db: any;
@@ -122,7 +123,10 @@ export default class Base {
 
         io.on("connection", (data: any) => {
             data.on("disconnect", this.WSHandler.executeEvent.bind(null, "disconnect", data));
-            data.on("playerCreate", this.WSHandler.executeEvent.bind(null, "playerCreate", data));
+            data.on("ffaPlayerCreate", this.WSHandler.executeEvent.bind(null, "ffaPlayerCreate", data));
+            data.on("coordinateChange", this.WSHandler.executeEvent.bind(null, "coordinateChange", data));
+            data.on("ffaDirectionChange", this.WSHandler.executeEvent.bind(null, "ffaDirectionChange", data));
+            data.on("ffaNomKey", this.WSHandler.executeEvent.bind(null, "ffaNomKey", data));
         });
     }
 }
