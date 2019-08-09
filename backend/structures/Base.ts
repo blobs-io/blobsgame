@@ -127,6 +127,8 @@ export default class Base {
             data.on("coordinateChange", this.WSHandler.executeEvent.bind(null, "coordinateChange", data));
             data.on("ffaDirectionChange", this.WSHandler.executeEvent.bind(null, "ffaDirectionChange", data));
             data.on("ffaNomKey", this.WSHandler.executeEvent.bind(null, "ffaNomKey", data));
+            data.on("ffaKickPlayer", this.WSHandler.executeEvent.bind(null, "ffaKickPlayer", data));
+            data.on("sessionDelete", this.WSHandler.executeEvent.bind(null, "sessionDelete", data));
         });
     }
 }
