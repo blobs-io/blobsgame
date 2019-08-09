@@ -60,3 +60,4 @@ base.server.app.use((req, res, next) => {
 
 // Listen to events
 base.initializeEvents().catch(() => {});
+base.APIController.listen();
