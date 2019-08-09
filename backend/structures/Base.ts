@@ -18,6 +18,7 @@ import getDatabaseRoute from "../routes/getDatabase";
 import testRoute from "../routes/testRoute";
 import loginRoute from "../routes/login";
 import appRoute from "../routes/app";
+import APIController from "../api/APIController";
 
 interface Server {
     app: express.Application;
@@ -54,6 +55,7 @@ export default class Base {
     public rooms: Room[];
     public maps: Maps;
     public sockets: any[];
+    public APIController: APIController;
 
     constructor(options: BaseOptions) {
         this.server = options.server;
@@ -64,6 +66,7 @@ export default class Base {
         this.sockets = [];
         this.WSHandler = new WS(this);
         this.maps = new Maps();
+        this.APIController = new APIController(this.server.app, this);
 
         const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa");
         this.rooms = [ ffaRoom ];
