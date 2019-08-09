@@ -3,6 +3,7 @@ import express from "express";
 import Socket from "../structures/Socket";
 import { appendFileSync } from "fs";
 import Room from "../structures/Room";
+import * as SessionIDManager from "../structures/SessionIDManager";
 
 export default class APIController {
     public base: Base;
@@ -79,5 +80,110 @@ export default class APIController {
             }
             res.json(room.players);
         });
+        this.app.get("/api/ping", (req: express.Request, res: express.Response) => {
+            const arrived: number = Date.now();
+            res.json({
+                arrived
+            })
+        });
+        this.app.get("/api/player/:username", async (req: express.Request, res: express.Response) => {
+            if (typeof req.params.username === "undefined") {
+                res.status(400);
+                res.json({
+                    message: "No username provided."
+                });
+                return;
+            }
+
+            const result = await this.base.db.get("SELECT username, br, createdAt, role FROM accounts WHERE username = ?", req.params.username);
+            if (!result) {
+                res.status(400);
+                res.json({
+                    message: "User not found"
+                });
+                return;
+            }
+            res.status(200);
+            res.json({
+                result
+            });
+        });
+        this.app.get("/api/players", (req: express.Request, res: express.Response) => {
+            this.base.db.all("SELECT username, br, createdAt, role, wins, losses FROM accounts ORDER BY br DESC LIMIT 25")
+                .then(res.json);
+        });
+        this.app.get("/api/verify", async (req: express.Request, res: express.Response) => {
+            if (typeof req.headers.code === "undefined") {
+                if (typeof req.headers.sessionid === "undefined") {
+                    res.status(400);
+                    res.json({
+                        message: "Session ID not set. Check sessionid header."
+                    });
+                    return;
+                }
+                const requester: Socket = this.base.sockets.find((v: Socket) => v.sessionid === req.headers.sessionid);
+                if (!requester) {
+                    res.status(403);
+                    res.json({
+                        message: "Invalid session ID was provided."
+                    });
+                    return;
+                }
+
+                if (req.query.request === "true") {
+                    const query = await this.base.db.get("SELECT code FROM verifications WHERE user = ?", requester.username);
+                    if (!query) {
+                        res.status(400);
+                        res.json({
+                            message: "User did not request a verification code"
+                        });
+                        return;
+                    }
+
+                    res.json({
+                        code: query.code
+                    });
+                    return;
+                }
+
+                const query: any = await this.base.db.get("SELECT * FROM verifications WHERE user = ?", requester.username);
+                if (query) {
+                    res.status(403);
+                    res.json({
+                        message: "User already requested a verification code"
+                    });
+                    return;
+                }
+                let verificationCode;
+                while(true) {
+                    verificationCode = SessionIDManager.generateSessionID(16);
+                    const code = await this.base.db.get("SELECT code FROM verifications WHERE code = ?", verificationCode);
+                    if (!code) break;
+                }
+                await this.base.db.run("INSERT INTO verifications VALUES (?, ?, ?)", requester.username, verificationCode, Date.now());
+                res.json({
+                    code: verificationCode
+                });
+            } else if (typeof req.headers.code === "string") {
+                const result: {code: string, user: string} | undefined = await this.base.db.get("SELECT user FROM verifications WHERE code = ?", req.headers.code);
+                if (!result) {
+                    res.status(400);
+                    res.json({
+                        message: "Code was not found"
+                    });
+                    return;
+                }
+                await this.base.db.run("DELETE FROM verifications WHERE code = ?", req.headers.code);
+                res.json({
+                    user: result.user
+                });
+            } else {
+                res.status(400);
+                res.json({
+                    message: "Code is not a string. Check code header."
+                });
+            }
+        });
+
     }
 }
