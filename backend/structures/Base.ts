@@ -11,6 +11,8 @@ import * as SessionIDManager from "./SessionIDManager";
 import WS from "../WSEvents";
 import Room from "./Room";
 import Maps from "./Maps";
+import Player from "./Player";
+import Socket from "./Socket";
 
 // Import Routes
 import rootRoute from "../routes/root";
@@ -54,7 +56,7 @@ export default class Base {
     public WSHandler: WS;
     public rooms: Room[];
     public maps: Maps;
-    public sockets: any[];
+    public sockets: Socket[];
     public APIController: APIController;
 
     constructor(options: BaseOptions) {
@@ -133,8 +135,5 @@ export default class Base {
             data.on("ffaKickPlayer", (...data: any[]) => this.WSHandler.executeEvent("ffaKickPlayer", data, ...data));
             data.on("sessionDelete", (...data: any[]) => this.WSHandler.executeEvent("sessionDelete", data, ...data));
         });
-        setInterval(() => {
-            console.log("players", this.rooms[0].players.map(v => v.owner));
-        }, 3000);
     }
 }
