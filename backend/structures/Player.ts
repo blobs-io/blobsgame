@@ -20,7 +20,7 @@ export default class Player {
     public anticheat: any;
     public x: number | undefined;
     public y: number | undefined;
-    public base: Base;
+    public base: Base | undefined;
 
     constructor(base: Base, x?: number, y?: number, owner?: string, role: number = 0, blob: string = "blobowo") {
         this.owner = owner;
@@ -37,13 +37,23 @@ export default class Player {
         this.previousX = 0;
         this.previousY = 0;
         this.health = 100;
-        this.anticheat = {};
         this.x = x;
         this.y = y;
-        this.base = base;
+
+        Object.defineProperty(this, "anticheat", {
+            value: {},
+            enumerable: false,
+            writable: true
+        });
+        Object.defineProperty(this, "base", {
+            value: base,
+            enumerable: false,
+            writable: true
+        });
     }
 
     get room(): Room | undefined {
+        if (!this.base) return;
         return this.base.rooms.find((v: any) => v.players.some((p: any) => p.owner === this.owner));
     }
 
