@@ -2,6 +2,7 @@ import RouteInformation from "../structures/Route";
 import Base from "../structures/Base";
 import { readFile } from "fs";
 import * as bcrypt from "bcrypt";
+
 import * as SessionIDManager from "../structures/SessionIDManager";
 
 export default class AppRoute {
@@ -20,6 +21,13 @@ export default class AppRoute {
         });
         const user: any = await base.db.get("SELECT * FROM accounts WHERE username = ?", dbSession.username);
         const promotions: any = await base.db.all("SELECT * FROM recentPromotions ORDER BY promotedAt DESC LIMIT 10");
+        base.sockets.push({
+            username: dbSession.username,
+            br: user.br,
+            role: user.role,
+            guest: false,
+            sessionid: session
+        });
 
         if (req.query.old)
             readFile("./public/app/index.html", "utf8", (error: any, data: string) => {
