@@ -13,7 +13,7 @@ function request(url, method, headers) {
                 if (statusHeader) {
                     if (statusHeader.includes(",")) statusHeader = statusHeader.split(",")[1].substr(1);
                 }
-                if (xhr.status === 200 && statusHeader === "200") a(xhr);
+                if (xhr.status === 200) a(xhr);
                 else b(xhr);
             }
         };
