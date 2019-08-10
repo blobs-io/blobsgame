@@ -26,7 +26,6 @@ export default class {
     }
 
     executeEvent(type: string, data: any, ...args: any[]): any {
-        console.log(`[WS ${type}]: `, args);
         const {io} = this.base;
         const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === "ffa");
         if (type === EventTypes.PLAYER_CREATE) {
@@ -38,7 +37,7 @@ export default class {
 
             if (typeof blob !== "string") return;
 
-            let socket: Socket = this.base.sockets.find((v: { sessionid: string }) => v.sessionid === blob);
+            let socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === blob);
 
             if (!socket) {
 
@@ -74,22 +73,10 @@ export default class {
                 height: room.map.map.mapSize.height
             };
 
+
             room.players.push(newblob);
 
             io.to(data.id).emit("ffaObjectsHeartbeat", room.map.map.objects);
-
-            console.log("ffaHeartbeat", {
-                username: socket.username,
-                br: socket.br,
-                role: socket.role,
-                x: newblob.directionChangeCoordinates.x,
-                y: newblob.directionChangeCoordinates.y,
-                users: room.players.map((v: Player) => ({
-                    ...v,
-                    base: undefined,
-                    anticheat: undefined
-                }))
-            });
 
             io.to(data.id).emit("ffaHeartbeat", {
                 username: socket.username,
@@ -97,20 +84,10 @@ export default class {
                 role: socket.role,
                 x: newblob.directionChangeCoordinates.x,
                 y: newblob.directionChangeCoordinates.y,
-                users: room.players.map((v: Player) => ({
-                    ...v,
-                    base: undefined,
-                    anticheat: undefined
-                }))
+                users: room.players
             });
 
-            io.sockets.emit("ffaUserJoin", {
-                ...newblob,
-                x: newblob.x,
-                y: newblob.y,
-                base: undefined,
-                anticheat: undefined
-            });
+            io.sockets.emit("ffaUserJoin", newblob);
 
         }
         else if (type === EventTypes.DISCONNECT) {
