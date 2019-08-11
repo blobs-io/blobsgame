@@ -18,7 +18,6 @@ import ClanController from "../clans/ClanController";
 // Import Routes
 import rootRoute from "../routes/root";
 import getDatabaseRoute from "../routes/getDatabase";
-import testRoute from "../routes/testRoute";
 import loginRoute from "../routes/login";
 import appRoute from "../routes/app";
 
@@ -112,7 +111,6 @@ export default class Base {
 
         app.get(rootRoute.route.path,          (req, res) => rootRoute.run(req, res, this));
         app.get(getDatabaseRoute.route.path,   (req, res) => getDatabaseRoute.run(req, res, this));
-        app.get(testRoute.route.path,          (req, res) => testRoute.run(req, res, this));
         app.get(loginRoute.route.path,         (req, res) => loginRoute.run(req, res, this));
         app.get(appRoute.route.path,           (req, res) => appRoute.run(req, res, this));
         app.post(loginRoute.route.path,         (req, res) => loginRoute.run(req, res, this, "post"));
