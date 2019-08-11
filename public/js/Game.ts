@@ -1,16 +1,16 @@
 declare const io: Function;
-declare const request: (path: string, method: string, headers: any) => Promise<any>;
+declare const request: (path: string, method: string, headers?: any) => Promise<any>;
 declare const getTier: (br: number) => any;
 declare const socket: any;
-declare function displayMinimap(context: CanvasRenderingContext2D): void;
-declare function displayHP(context: CanvasRenderingContext2D): void;
-declare function displayNoNomAreas(context: CanvasRenderingContext2D): void;
-declare function clearCanvas(context: CanvasRenderingContext2D): void;
+declare function displayMinimap(context: CanvasRenderingContext2D | null): void;
+declare function displayHP(context: CanvasRenderingContext2D | null): void;
+declare function displayNoNomAreas(context: CanvasRenderingContext2D | null): void;
+declare function clearCanvas(context: CanvasRenderingContext2D | null): void;
 declare function displayLeaderboard(): void;
-declare function displayWalls(context: CanvasRenderingContext2D): void;
-declare function displayCooldown(context: CanvasRenderingContext2D): void;
-declare function displayPlayerStats(context: CanvasRenderingContext2D): void;
-declare function drawBorder(context: CanvasRenderingContext2D): void;
+declare function displayWalls(context: CanvasRenderingContext2D | null): void;
+declare function displayCooldown(context: CanvasRenderingContext2D | null): void;
+declare function displayPlayerStats(context: CanvasRenderingContext2D | null): void;
+declare function drawBorder(context: CanvasRenderingContext2D | null): void;
 declare function nom(attackBlob: any, target: any): void;
 
 const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
@@ -114,7 +114,6 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     // -------------
     // Enums
     // -------------
-
     enum BlobType {
         Blobowo = "../assets/blobowo.png",
         Blobevil = "../assets/blobevil.png",
@@ -126,11 +125,22 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     enum ItemType {
         Health = 0
     }
+    enum EventType {
+        COORDINATE_CHANGE = "coordinateChange",
+        OBJECTS_HEARTBEAT = "ffaObjectsHeartbeat",
+        HEARTBEAT         = "ffaHeartbeat",
+        UNAUTHORIZED      = "ffaUnauthorized",
+        KICK              = "ffaKick",
+        DIRECTION_CHANGE  = "ffaDirectionChanged",
+        LOGIN_FAILED      = "ffaLoginFailed",
+        PLAYER_CREATE     = "ffaPlayerCreate",
+        PLAYER_NOMMED     = "ffaPlayerNommed",
+        PLAYER_DELETE     = "ffaPlayerDelete"
+    }
 
     // -------------
     // Interfaces
     // -------------
-
     interface Coordinates {
         x: number;
         y: number;
@@ -149,7 +159,6 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     // -------------
     // Structures
     // -------------
-
     class WallObject {
         public x: number;
         public y: number;
@@ -355,10 +364,10 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         }
 
         static display(blobArray: BlobObject[],
-                       displayUser: false,
-                       displayBr: false,
-                       width: number,
-                       height: number): void {
+                       displayUser: boolean = false,
+                       displayBr: boolean = false,
+                       width: number = 30,
+                       height: number = 30): void {
             for (const blob of blobArray) {
                 blob.display(displayUser, displayBr, width, height);
             }
@@ -433,13 +442,171 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         if (!ownBlob || !ownBlob.ready) return window.requestAnimationFrame(animationFrame);
 
         // Ping
+        if (Date.now() - lastTick > 2500) {
+            displayLeaderboard();
+            const timestampBefore: number = Date.now();
+            request("/api/ping", "GET").then(res => {
+                const request: any = JSON.parse(res.responseText);
+                const diff: number = ping = (Date.now() - timestampBefore);
+                const latencyElement: HTMLElement | null = document.getElementById("latency");
+                if (!latencyElement) return;
+                latencyElement.innerHTML = `• Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
+            });
+            lastTick = Date.now();
+        }
 
+        let movable: boolean = true;
+        if (ownBlob.x < 0) {
+            ownBlob.direction = 4;
+            ownBlob.x = 0;
+            movable = false;
+        }
+        else if (ownBlob.y < 0) {
+            ownBlob.direction = 4;
+            ownBlob.y = 0;
+            movable = false;
+        }
+        else if (ownBlob.y > mapSize.height) {
+            ownBlob.direction = 4;
+            ownBlob.y = mapSize.height;
+            movable = false;
+        }
+        else if (ownBlob.x > mapSize.width) {
+            ownBlob.direction = 4;
+            ownBlob.x = mapSize.width;
+            movable = false;
+        }
+
+        if (ownBlob.direction === 0 && movable)
+            ownBlob.y = ownBlob.directionChangeCoordinates.y - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
+        else if (ownBlob.direction === 1 && movable)
+            ownBlob.x = ownBlob.directionChangeCoordinates.x + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
+        else if (ownBlob.direction === 2 && movable)
+            ownBlob.y = ownBlob.directionChangeCoordinates.y + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
+        else if (ownBlob.direction === 3 && movable)
+            ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
+        if (details.singleplayer === false && movable)
+            socket.emit(EventType.COORDINATE_CHANGE, { x: ownBlob.x, y: ownBlob.y }, "ffa");
+
+        clearCanvas(ctx);
+        drawBorder(ctx);
+        displayCooldown(ctx);
+        displayPlayerStats(ctx);
+        displayWalls(ctx);
+        displayNoNomAreas(ctx);
+        displayHP(ctx);
+        displayMinimap(ctx);
+        BlobObject.display(blobs, true, true);
     }
 
     let lastIteration: number = Date.now();
     window.requestAnimationFrame(animationFrame);
 
+    // -------------
+    // Events
+    // -------------
+    socket.on(EventType.PLAYER_NOMMED, (eventd: any) => {
+        const loser: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.loser.owner);
+        const winner: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.winner.owner);
+        if (!loser || !winner) return;
+        loser.br = eventd.loser.br;
+        winner.br = eventd.winner.br;
+        loser.directionChangeCoordinates.x = eventd.loser.directionChangeCoordinates.x;
+        loser.directionChangeCoordinates.y = eventd.loser.directionChangeCoordinates.y;
+        loser.directionChangedAt = eventd.loser.directionChangedAt;
+        loser.health = 100;
+        displayLeaderboard();
 
+        const nomHistoryDiv: HTMLElement | null = document.getElementById("nom-hist");
+        const nomEntryDiv: HTMLElement = document.createElement("div");
+        nomEntryDiv.className = "nom-hist-entry";
+        const nomUser: HTMLElement = document.createElement("span");
+        const targetUser: HTMLElement = document.createElement("span");
+        nomUser.className = "nom-user nom-entry";
+        nomUser.innerHTML = `${eventd.winner.owner} (+${eventd.result})`;
+        const newBRLabel: HTMLElement = document.createElement("span");
+        const newBRLabelLoser: HTMLElement = document.createElement("span");
+        newBRLabel.className = "new-br";
+        newBRLabel.innerHTML = eventd.winner.br + " BR";
+        const linebreakWinner: HTMLElement = document.createElement("br");
+        targetUser.className = "target-user nom-entry";
+        targetUser.innerHTML = `${eventd.loser.owner} (-${eventd.result})`;
+        newBRLabelLoser.className = "new-br";
+        newBRLabelLoser.innerHTML = eventd.loser.br + " BR";
+        const linebreakLoser: HTMLElement = document.createElement("br");
+        if (!nomHistoryDiv) return;
+        nomHistoryDiv.appendChild(nomEntryDiv);
+        nomEntryDiv.appendChild(nomUser);
+        nomEntryDiv.appendChild(newBRLabel);
+        nomEntryDiv.appendChild(linebreakWinner);
+        nomEntryDiv.appendChild(targetUser);
+        nomEntryDiv.appendChild(newBRLabelLoser);
+        nomEntryDiv.appendChild(linebreakLoser);
+
+        setTimeout(() => {
+            nomHistoryDiv.removeChild(nomEntryDiv);
+        }, 3500);
+    });
+    socket.on(EventType.PLAYER_DELETE, (eventd: any) => {
+        if (details.singleplayer) return;
+        blobs.splice(blobs.findIndex((v: BlobObject) => v.owner === eventd), 1);
+    });
+    socket.on(EventType.LOGIN_FAILED, alert);
+    socket.on(EventType.OBJECTS_HEARTBEAT, (eventd: any) => {
+        for (let i: number = 0; i < eventd.walls.length; ++i) {
+            const wall: WallObject = new WallObject(eventd.walls[i].x, eventd.walls[i].y);
+            wall.type = eventd.walls[i].type;
+            objects.walls.push(wall);
+        }
+        objects.noNomAreas = [];
+        for (let i: number = 0; i < eventd.noNomArea.length; ++i) {
+            const area: NoNomArea = new NoNomArea(eventd.noNomArea[i].startsAt, eventd.noNomArea[i].endsAt);
+            objects.noNomAreas.push(area);
+        }
+    });
+    socket.on(EventType.HEARTBEAT, (eventd: any) => {
+        if (eventd.role === -1 && !/[?&]guest=true/.test(window.location.search))
+            return document.location.href = "/login/";
+
+        // Own blob
+        ownBlob.owner = eventd.owner;
+        ownBlob.directionChangedAt = Date.now();
+        ownBlob.directionChangeCoordinates.x = ownBlob.x = eventd.x;
+        ownBlob.directionChangeCoordinates.y = ownBlob.y = eventd.y;
+        ownBlob.br = eventd.br;
+        ownBlob.ready = true;
+        ownBlob.role = eventd.role;
+        blobs.push(ownBlob);
+
+        if (details.singleplayer)
+            eventd.users = [];
+        for (let i: number = 0; i < eventd.users.length; ++i) {
+            const currentBlob: any = eventd.users[i];
+            if (currentBlob.owner === ownBlob.owner ||
+                blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) continue;
+            const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner);
+            newBlob.directionChangeCoordinates = {
+                x: currentBlob.x,
+                y: currentBlob.y
+            };
+            newBlob.role = currentBlob.role;
+            newBlob.direction = currentBlob.direction;
+            newBlob.directionChangedAt = currentBlob.directionChangedAt;
+            newBlob.setBlob()
+                .then(() => newBlob.display())
+                .then(() => {
+                    blobs.push(newBlob);
+                });
+        }
+    });
+    socket.on(EventType.UNAUTHORIZED, () => document.location.href = "/login");
+    socket.on(EventType.KICK, (eventd: string) => {
+        alert("You have been kicked.\nReason: " + (eventd || "-"));
+        document.location.href = "/login/";
+    });
+    socket.on(EventType.DIRECTION_CHANGE, (eventd: any) => {
+
+    });
 
     // -------------
     // Other
@@ -454,7 +621,6 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     if (/[?&]guest=true/.test(window.location.search)) {
         ownBlob.guest = true;
     }
-
 
 
     // Last part
@@ -486,7 +652,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                         if (/[&?]mode=colors/.test(document.location.search)) {
                             details.mode = "Colors";
                         } else {
-                            socket.emit("ffaPlayerCreate", sessionid, "ffa");
+                            socket.emit(EventType.PLAYER_CREATE, sessionid, "ffa");
                             details.mode = "FFA";
                         }
                         const loadingScreen: HTMLElement | null = document.getElementById("loading-screen");
