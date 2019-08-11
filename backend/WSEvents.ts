@@ -60,8 +60,8 @@ export default class {
 
             newblob.anticheat = new AntiCheat();
 
-            newblob.directionChangeCoordinates.x = Math.floor(Math.random() * 600);
-            newblob.directionChangeCoordinates.y = Math.floor(Math.random() * 600);
+            newblob.directionChangeCoordinates.x = newblob.x = Math.floor(Math.random() * 600);
+            newblob.directionChangeCoordinates.y = newblob.y = Math.floor(Math.random() * 600);
             newblob.role = socket.role;
             newblob.owner = socket.username;
             newblob.br = socket.br;
@@ -77,7 +77,6 @@ export default class {
             room.players.push(newblob);
 
             io.to(data.id).emit("ffaObjectsHeartbeat", room.map.map.objects);
-
             io.to(data.id).emit("ffaHeartbeat", {
                 username: socket.username,
                 br: socket.br,
