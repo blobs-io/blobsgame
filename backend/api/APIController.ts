@@ -4,6 +4,8 @@ import Socket from "../structures/Socket";
 import { appendFileSync } from "fs";
 import Room from "../structures/Room";
 import * as SessionIDManager from "../structures/SessionIDManager";
+import Jimp = require("jimp");
+import Captcha, {CAPTCHA_LIMIT} from "../structures/Captcha";
 
 export default class APIController {
     public base: Base;
@@ -186,6 +188,44 @@ export default class APIController {
                 });
             }
         });
+        this.app.get("/api/captcha/~/:id", (req: express.Request, res: express.Response) => {
+            new Jimp(160, 32, 0x000000, (err: any, image: any) => {
+                if (err) return res.status(500).json({
+                    message: "An error occurred while creating the image: " + err
+                });
+                const requested: Captcha | undefined = this.base.captchas.find((v: Captcha) => v.id === req.params.id);
+                if (!requested) return res.status(400).json({
+                    message: "Requested captcha not found"
+                });
+                Jimp.loadFont(Jimp.FONT_SANS_16_WHITE).then(font => {
+                    image
+                        .print(font, 5, 5, requested.captcha)
+                        .getBufferAsync(Jimp.MIME_JPEG)
+                        .then((buff: Buffer) => {
+                            res.header("Content-Type", "image/jpeg");
+                            res.send(buff);
+                        });
+                });
+            });
+        });
+        this.app.get("/api/captcha/request", (req: express.Request, res: express.Response) => {
+            if (this.base.captchas.length >= CAPTCHA_LIMIT) return res.status(400).json({
+                message: "Too many captchas. Please try again later."
+            });
+            const id: string = SessionIDManager.generateSessionID(16);
+            const captcha: string = SessionIDManager.generateSessionID(8);
+            const generatedAt: number = Date.now();
+            this.base.captchas.push({
+                id, generatedAt, captcha
+            });
+            res.json({
+                url: `/api/captcha/~/${id}`,
+                validUntil: generatedAt + 300000
+            });
 
+            setTimeout(() => {
+                this.base.captchas.splice(this.base.captchas.findIndex((v: Captcha) => v.captcha === captcha), 1);
+            }, 300000);
+        });
     }
 }
