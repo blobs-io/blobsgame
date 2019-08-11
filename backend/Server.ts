@@ -24,7 +24,6 @@ const base: Base = new Base({
     database: sqlite
 });
 
-
 base.server.app.use(cookieParser());
 
 // Init database/routes
@@ -41,8 +40,8 @@ logger.setInterval(() => {}, 60e3);
 
 // Handle (Log/Check for maintenance) requests
 base.server.app.use((req, res, next) => {
-    if (base.maintenance.enabled === true && base.maintenance.reason) {
-        res.send(fs.readFileSync("./backend/Maintenance.html", "utf8").replace(/\{comment\}/g, base.maintenance.reason));
+    if (base.maintenance.enabled && base.maintenance.reason) {
+        res.send(fs.readFileSync("./backend/Maintenance.html", "utf8").replace(/{comment}/g, base.maintenance.reason));
         return;
     }
     if (/\/(\?.+)?$/.test(req.originalUrl)) {
@@ -58,6 +57,6 @@ base.server.app.use((req, res, next) => {
     return next();
 });
 
-// Listen to events
+// Listen to events / endpoints
 base.initializeEvents().catch(() => {});
 base.APIController.listen();
