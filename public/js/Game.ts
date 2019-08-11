@@ -375,11 +375,12 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             }
         }
 
-        static find(x: number, y: number): BlobObject | undefined {
+        static find(x: number, y: number, excludeSelf: boolean = false): BlobObject | undefined {
             let obj;
             for(let i: number = 0; i < blobs.length; ++i) {
                 if (x < (blobs[i].x + 30) && x > (blobs[i].x - 30)) {
                     if (y < (blobs[i].y + 30) && y > (blobs[i].y - 30) && blobs[i].owner !== ownBlob.owner) {
+                        if (excludeSelf && blobs[i].owner === ownBlob.owner) continue;
                         obj = blobs[i];
                         break;
                     }
@@ -683,7 +684,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 0; // TODO: Use enum for direction instead of hardcoded number
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit("ffaDirectionChange", ownBlob); // TODO: Use enum for event emit
             } else if (buttonID === htmlButtonIDs[1]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -716,9 +717,9 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     }
 
     // Kick User
+    const kickMenu: HTMLElement | null = document.getElementById("kick-menu");
     {
         const kickElement: HTMLElement | null = document.getElementById("kickbtn");
-        const kickMenu: HTMLElement | null = document.getElementById("kick-menu");
         if (kickElement) {
             kickElement.addEventListener("click", () => {
                 if (ownBlob.role !== 1) return;
@@ -747,6 +748,95 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         canvas.width = window.innerWidth - 30;
         canvas.height = window.innerHeight - 30;
     });
+
+    // Controls
+    document.addEventListener("keydown", (eventd: KeyboardEvent) => {
+        switch (eventd.key) {
+            case "Enter":
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 4;
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+                break;
+            case "w":
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 0;
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+                break;
+            case "d":
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 1;
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+                break;
+            case "s":
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 2;
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+                break;
+            case "a":
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 3;
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+                break;
+            case "n":
+                if (Date.now() - ownBlob.lastnom <= 1500) return;
+                ownBlob.lastnom = Date.now();
+                if (!details.singleplayer)
+                    socket.emit("ffaNomKey");
+                else nom(ownBlob, BlobObject.find(ownBlob.x, ownBlob.y, true));
+                break;
+            case "k":
+                if (ownBlob.role === 1 && kickMenu)
+                    kickMenu.style.display = "block";
+                break;
+        }
+    });
+
+    // Window Blur / Focus
+    window.addEventListener("blur", () => windowBlur = true);
+    window.addEventListener("focus", () => windowBlur = false);
+
+    const mouseScrollEvent = (...eventd: any[]): void => {
+        let [event] = eventd;
+        if (typeof event === "undefined") event = window.event;
+        let deltaValue = 0;
+        if (event.wheelDelta) {
+            deltaValue = event.wheelDelta / 120;
+        } else if (event.detail) {
+            deltaValue = -event.detail / 3;
+        }
+        if (!deltaValue) return;
+
+        if (deltaValue < 0 && scale > .5) scale -= .1;
+        else if (scale < 7) scale += .1;
+    };
+    window.addEventListener("DOMMouseScroll", mouseScrollEvent);
+    window.onmousewheel = mouseScrollEvent;
+
 
 
     // -------------
