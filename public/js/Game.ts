@@ -131,6 +131,8 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         HEARTBEAT         = "ffaHeartbeat",
         UNAUTHORIZED      = "ffaUnauthorized",
         KICK              = "ffaKick",
+        USER_JOIN         = "ffaUserJoin",
+        HEALTH_UPDATE     = "ffaHealthUpdate",
         DIRECTION_CHANGE  = "ffaDirectionChanged",
         LOGIN_FAILED      = "ffaLoginFailed",
         PLAYER_CREATE     = "ffaPlayerCreate",
@@ -605,8 +607,147 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         document.location.href = "/login/";
     });
     socket.on(EventType.DIRECTION_CHANGE, (eventd: any) => {
-
+        if (details.singleplayer || eventd.owner === ownBlob.owner) return;
+        const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.owner);
+        if (!target) return;
+        target.direction = eventd.direction;
+        target.directionChangedAt = Date.now();
+        target.directionChangeCoordinates = {
+            x: target.x,
+            y: target.y
+        };
     });
+    socket.on(EventType.USER_JOIN, (eventd: any) => {
+        if (details.singleplayer ||
+            eventd.owner === ownBlob.owner ||
+            blobs.some((v: BlobObject) => v.owner === eventd.owner)) return;
+        const newBlob: BlobObject = new BlobObject(eventd.br, eventd.owner);
+        newBlob.directionChangeCoordinates = {
+            x: eventd.x,
+            y: eventd.y
+        };
+        newBlob.role = eventd.role;
+        newBlob.directionChangedAt = eventd.directionChangedAt;
+        newBlob
+            .setBlob()
+            .then(() => newBlob.display(true, true))
+            .then(() => {
+                blobs.push(newBlob);
+            });
+    });
+    socket.on(EventType.HEALTH_UPDATE, (eventd: any) => {
+        if (details.singleplayer || typeof eventd.health !== "number") return;
+        const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.user);
+        if (!target) return;
+        target.health = eventd.health;
+    });
+    socket.on(EventType.COORDINATE_CHANGE, (eventd: any[]) => {
+        if (!ownBlob || !ownBlob.ready) return;
+        for (let i: number = 0; i < eventd.length; ++i) {
+            const currentBlob: any = eventd[i];
+            if (currentBlob.owner === ownBlob.owner) continue;
+            const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
+            if (!target) {
+                const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
+                newBlob
+                    .setBlob()
+                    .then(() => newBlob.display(true, true))
+                    .then(() => {
+                        if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
+                        blobs.push(newBlob);
+                    });
+            } else {
+                target.x = currentBlob.x;
+                target.y = currentBlob.y;
+            }
+        }
+    });
+
+    // Mobile Controls
+    const htmlButtonIDs: string[] = [
+        "btnup",
+        "btndown",
+        "btnleft",
+        "btnright",
+        "nom-btn-mobile"
+    ];
+    for (const buttonID of htmlButtonIDs) {
+        const htmlElement: HTMLElement | null = document.getElementById(buttonID);
+        if (!htmlElement) continue;
+        htmlElement.addEventListener("click", () => {
+            if (buttonID === htmlButtonIDs[0]) {
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 0; // TODO: Use enum for direction instead of hardcoded number
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+            } else if (buttonID === htmlButtonIDs[1]) {
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 2;
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+            } else if (buttonID === htmlButtonIDs[2]) {
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 3;
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+            } else if (buttonID === htmlButtonIDs[3]) {
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates = {
+                    x: ownBlob.x,
+                    y: ownBlob.y
+                };
+                ownBlob.direction = 1;
+                if (!details.singleplayer)
+                    socket.emit("ffaDirectionChange", ownBlob);
+            }
+        });
+    }
+
+    // Kick User
+    {
+        const kickElement: HTMLElement | null = document.getElementById("kickbtn");
+        const kickMenu: HTMLElement | null = document.getElementById("kick-menu");
+        if (kickElement) {
+            kickElement.addEventListener("click", () => {
+                if (ownBlob.role !== 1) return;
+                const targetUserElement: HTMLElement | null = document.getElementById("target-name"),
+                    targetUserReason: HTMLElement | null = document.getElementById("kick-reason");
+                if (!targetUserElement || !targetUserReason) return;
+                socket.emit("ffaKickPlayer", {
+                    // @ts-ignore
+                    user: targetUserElement.value,
+                    // @ts-ignore
+                    reason: targetUserReason.value
+                });
+            });
+        }
+        const closeMenu: HTMLElement | null = document.getElementById("closemenu");
+        if (closeMenu) {
+            closeMenu.addEventListener("click", () => {
+                if (!kickMenu) return;
+                kickMenu.style.display = "none";
+            });
+        }
+    }
+
+    // Resizing window
+    window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth - 30;
+        canvas.height = window.innerHeight - 30;
+    });
+
 
     // -------------
     // Other
