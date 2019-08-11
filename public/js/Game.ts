@@ -2,17 +2,6 @@ declare const io: Function;
 declare const request: (path: string, method: string, headers?: any) => Promise<any>;
 declare const getTier: (br: number) => any;
 declare const socket: any;
-declare function displayMinimap(context: CanvasRenderingContext2D | null): void;
-declare function displayHP(context: CanvasRenderingContext2D | null): void;
-declare function displayNoNomAreas(context: CanvasRenderingContext2D | null): void;
-declare function clearCanvas(context: CanvasRenderingContext2D | null): void;
-declare function displayLeaderboard(): void;
-declare function displayWalls(context: CanvasRenderingContext2D | null): void;
-declare function displayCooldown(context: CanvasRenderingContext2D | null): void;
-declare function displayPlayerStats(context: CanvasRenderingContext2D | null): void;
-declare function drawBorder(context: CanvasRenderingContext2D | null): void;
-declare function nom(attackBlob: any, target: any): void;
-
 const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
 
 (() => {
@@ -208,6 +197,11 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             if (!ctx) throw new Error("ctx is null");
             ctx.fillStyle = "#aaddb5";
             ctx.fillRect(this.startsAt.x, this.startsAt.y, this.endsAt.x, this.endsAt.y);
+        }
+        static async display(startsAt: Coordinates, endsAt: Coordinates): Promise<any> {
+            if (!ctx) throw new Error("ctx is null");
+            ctx.fillStyle = "#aaddb5";
+            ctx.fillRect(startsAt.x, startsAt.y, endsAt.x, endsAt.y);
         }
     }
     class BlobObject {
@@ -837,7 +831,92 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     window.addEventListener("DOMMouseScroll", mouseScrollEvent);
     window.onmousewheel = mouseScrollEvent;
 
+    // -------------
+    // Functions
+    // -------------
+    function displayMinimap(context: CanvasRenderingContext2D | null = ctx): void {
+        if (!context) return;
+        context.beginPath();
+        context.strokeStyle = "white";
+        context.rect(canvas.width - 225, canvas.height - 75, 75, 75);
+        context.stroke();
+        context.fillStyle = "lightgreen";
+        context.fillRect(canvas.width - 225 + (65 / (mapSize.width / ownBlob.x)), canvas.height - 75 + (65 / (mapSize.height / ownBlob.y)), 10, 10);
+        for(let i: number = 0; i < blobs.length; ++i) {
+            if (blobs[i].owner != ownBlob.owner) {
+                context.fillStyle = "red";
+                context.fillRect(canvas.width - 225 + (65 / (mapSize.width / blobs[i].x)), canvas.height - 75 + (65 / (mapSize.height / blobs[i].y)), 10, 10);
+            }
+        }
+    }
+    function displayHP(context: CanvasRenderingContext2D | null = ctx): void {
+        if (!context) return;
+        context.font = "50px Raleway";
 
+        if (ownBlob.health >= 80) context.fillStyle = "#2ecc71";
+        else if (ownBlob.health >= 50) context.fillStyle = "#f39c12";
+        else if (ownBlob.health >= 30) context.fillStyle = "#e67e22";
+        else if (ownBlob.health >= 10) context.fillStyle = "#e74c3c";
+        else context.fillStyle = "#c0392b";
+
+        context.fillText(ownBlob.health.toString(), canvas.width - 120, canvas.height - 20);
+        context.font = "20px Raleway";
+        context.fillText("HP", canvas.width - 35, canvas.height - 20);
+        context.fillStyle = "white";
+    }
+    function displayNoNomAreas(context: CanvasRenderingContext2D | null = ctx): void {
+        if (!objects.noNomAreas) return;
+        for (let i: number = 0; i < objects.noNomAreas.length; ++i) {
+            let canvasPosX = 0,
+                canvasPosY = 0;
+            if (ownBlob.x >= objects.noNomAreas[i].startsAt.x) {
+                canvasPosX = (canvas.width / 2) - (ownBlob.x - objects.noNomAreas[i].startsAt.x);
+            } else if (ownBlob.x < objects.noNomAreas[i].startsAt.x) {
+                canvasPosX = (canvas.width / 2) + (objects.noNomAreas[i].startsAt.x - ownBlob.x);
+            }
+            if (ownBlob.y >= objects.noNomAreas[i].startsAt.y) {
+                canvasPosY = (canvas.height / 2) - (ownBlob.y - objects.noNomAreas[i].startsAt.y);
+            } else if (ownBlob.y < objects.noNomAreas[i].startsAt.y) {
+                canvasPosY = (canvas.height / 2) + (objects.noNomAreas[i].startsAt.y - ownBlob.y);
+            }
+            canvasPosX -= 35;
+            canvasPosY -= 35;
+            NoNomArea
+                .display({ x: canvasPosX, y: canvasPosY }, { x: Math.abs(objects.noNomAreas[i].startsAt.x - objects.noNomAreas[i].endsAt.x), y: Math.abs(objects.noNomAreas[i].startsAt.y - objects.noNomAreas[i].endsAt.y) })
+                .catch(console.error);
+        }
+    }
+    function clearCanvas(context: CanvasRenderingContext2D | null = ctx): void {
+        if (!context) return;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function displayLeaderboard(): void {
+        const placementColors: string[] = ["#e74c3c", "#e67e22", "#9b59b6", "#3498db", "#2980b9", "#2ecc71", "#f1c40f", "#d35400", "#8e44ad", "#16a085"];
+        const leaderboardElement: HTMLElement | null = document.getElementById("leaderboard");
+        if (!leaderboardElement) return;
+        leaderboardElement.innerHTML = "<h3>Leaderboard</h3>";
+        // @ts-ignore
+        const sortedblobs: BlobObject[] = blobs.slice(0, 10).sort((a: BlobObject, b: BlobObject) => b.br - a.br);
+        if (!sortedblobs) return;
+        for (let i = 0; i < sortedblobs.length; ++i) {
+            const leaderboardEntry = document.createElement("div");
+            const usernameEntry = document.createElement("span");
+            usernameEntry.style.color = placementColors[i];
+            const brLabel = document.createElement("span");
+            brLabel.style.color = placementColors[i];
+            const linebreak = document.createElement("br");
+            leaderboardEntry.className = "leaderboard-entry";
+            usernameEntry.className = "user-entry";
+            if (typeof sortedblobs[i].owner === "undefined") return;
+            usernameEntry.innerHTML = (i + 1) + ". " + sortedblobs[i].owner;
+            brLabel.className = "user-br";
+            brLabel.innerHTML = sortedblobs[i].br + " BR";
+            leaderboardElement.appendChild(leaderboardEntry);
+            leaderboardElement.appendChild(usernameEntry);
+            leaderboardElement.appendChild(brLabel);
+            leaderboardElement.appendChild(linebreak);
+        }
+    }
 
     // -------------
     // Other
