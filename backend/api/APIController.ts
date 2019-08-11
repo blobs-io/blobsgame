@@ -18,12 +18,14 @@ export default class APIController {
         this.app.get("/api/clans/:name", (req: express.Request, res: express.Response) => {
             if (req.params.name === "list") {
                 this.base.db.all("SELECT members, cr, name FROM clans ORDER BY cr DESC LIMIT 10")
-                    .then(res.json)
+                    .then((v: any) => {
+                        res.json(v);
+                    })
                     .catch((err: any) => {
                         res.status(500);
                         res.json({
-                            message: "An error occured",
-                            error: err
+                            message: "An error occurred",
+                            error: err.stack
                         });
                     });
             }
