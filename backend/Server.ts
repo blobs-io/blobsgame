@@ -60,3 +60,4 @@ base.server.app.use((req, res, next) => {
 // Listen to events / endpoints
 base.initializeEvents().catch(() => {});
 base.APIController.listen();
+base.ClanController.listen();
