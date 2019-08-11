@@ -17,6 +17,9 @@ export default class Root {
                 });
 
                 res.send(r);
+                setTimeout(() => {
+                    console.log("sup");
+                }, 20000);
             });
         } else if (method === "post") {
             const { username, password } = req.body;
