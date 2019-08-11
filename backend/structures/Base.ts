@@ -11,8 +11,9 @@ import * as SessionIDManager from "./SessionIDManager";
 import WS from "../WSEvents";
 import Room from "./Room";
 import Maps from "./Maps";
-import Player from "./Player";
 import Socket from "./Socket";
+import APIController from "../api/APIController";
+import ClanController from "../clans/ClanController";
 
 // Import Routes
 import rootRoute from "../routes/root";
@@ -20,7 +21,6 @@ import getDatabaseRoute from "../routes/getDatabase";
 import testRoute from "../routes/testRoute";
 import loginRoute from "../routes/login";
 import appRoute from "../routes/app";
-import APIController from "../api/APIController";
 
 interface Server {
     app: express.Application;
@@ -58,6 +58,7 @@ export default class Base {
     public maps: Maps;
     public sockets: Socket[];
     public APIController: APIController;
+    public ClanController: ClanController;
 
     constructor(options: BaseOptions) {
         this.server = options.server;
@@ -69,6 +70,7 @@ export default class Base {
         this.WSHandler = new WS(this);
         this.maps = new Maps();
         this.APIController = new APIController(this.server.app, this);
+        this.ClanController = new ClanController(this.server.app, this);
 
         const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa");
         this.rooms = [ ffaRoom ];
