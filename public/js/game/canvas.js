@@ -48,15 +48,20 @@ canvas.width = window.innerWidth - 30;
 canvas.height = window.innerHeight - 30;
 
 function draw() {
-    if (windowBlur === true) return window.requestAnimationFrame(draw);
+
+    if (windowBlur === true && false) return window.requestAnimationFrame(draw);
+
     // FPS meter
     if (Date.now() - lastIteration > 200) ownBlob.direction = ownBlob.direction;
     if(Date.now() - lastIteration > 100) document.getElementById("fps-meter").innerHTML = `${(10000 / (Date.now() - lastIteration)).toFixed(1)} FPS`;
     lastIteration = Date.now();
     // Blob coordinates
     if (typeof ownBlob === "undefined") return window.requestAnimationFrame(draw);
+
     if (ownBlob.ready === false) return window.requestAnimationFrame(draw);
+
     if (Date.now() - lastTick > 2500) {
+
         if (details.singleplayer === true) {
             for (let i = 0; i < blobs.length; ++i) {
                 if (blobs[i].owner !== ownBlob.owner) {} //decide(blobs[i]);
@@ -65,6 +70,7 @@ function draw() {
         displayLeaderboard();
         const timestampBefore = Date.now();
         request("/api/ping", "GET").then(res => {
+
             const request = JSON.parse(res.responseText);
             const diff = ping = (Date.now() - timestampBefore);
             document.getElementById("latency").innerHTML = `• Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
@@ -102,7 +108,7 @@ function draw() {
 		ownBlob.x = mapSize.width;
 		return displayUI();
 	}
-    
+
     if (ownBlob.direction === 0) ownBlob.y = ownBlob.directionChangeCoordinates.y - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
     else if (ownBlob.direction === 1) ownBlob.x = ownBlob.directionChangeCoordinates.x + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
     else if (ownBlob.direction === 2) ownBlob.y = ownBlob.directionChangeCoordinates.y + (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
@@ -149,7 +155,7 @@ socket.on("ffaPlayerNommed", eventd => {
 	nomEntryDiv.appendChild(targetUser);
 	nomEntryDiv.appendChild(newBRLabelLoser);
 	nomEntryDiv.appendChild(linebreakLoser);
-	
+
 	setTimeout(() => {
 		nomHistoryDiv.removeChild(nomEntryDiv);
 	}, 3500);

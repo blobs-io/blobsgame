@@ -10,7 +10,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta property="og:image" content="https://cdn.discordapp.com/emojis/458326620076507136.png" />
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
 		<link rel="apple-touch-icon" sizes="57x57" href="../assets/favicons/apple-icon-57x57.png">
 		<link rel="apple-touch-icon" sizes="60x60" href="../assets/favicons/apple-icon-60x60.png">
 		<link rel="apple-touch-icon" sizes="72x72" href="../assets/favicons/apple-icon-72x72.png">
@@ -32,19 +31,21 @@
 	<body>
 		<canvas id="particles"></canvas>
 		<div id="auth">
-			<h1>Blobs<span class="green">.</span><span class="blue">io</span></h1>
-			<input type="text" placeholder="Username" id="user" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			<input type="password" placeholder="Password" id="pass" /><br/>
-			<div id="captcha">
-				<canvas width="250" height="100" id="captcha-canvas">
-					Please use another browser than IE &gt;8
-				</canvas><br/>
-				<input type="text" maxlength="6" placeholder="Answer" id="captcha-input" style="
+			<form method="POST">
+				<h1>Blobs<span class="green">.</span><span class="blue">io</span></h1>
+				<input type="text" placeholder="Username" name="username" id="user" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="password" placeholder="Password" name="password" id="pass" /><br/>
+				<div id="captcha">
+					<canvas width="250" height="100" id="captcha-canvas">
+						Please use a browser that supports the canvas tag
+					</canvas><br/>
+					<input type="text" maxlength="16" placeholder="Answer" name="captcha-input" id="captcha-input" style="
     text-align: center;
 ">
-			</div>
-			<input type="submit" value="Register" id="register-btn" />
-			<span class="reg-label">Already have an account? <a href="../login">Login</a></span>
+				</div>
+				<input type="submit" value="Register" id="register-btn" />
+				<span class="reg-label">Already have an account? <a href="../login">Login</a></span>
+			</form>
 		</div>
 		<center><input type="submit" value="Play as guest" id="guest-btn" style="
     background-color: #27ae60;
@@ -52,9 +53,28 @@
 		<a href="https://github.com/blobs-io/blobs.io" id="peek"></a>
 		<span class="peek-label">Peek into the source</span>
 	</body>
-	<script src="../js/sockets.js"></script>
+	<script src="../js/request.js"></script>
 	<script src="../js/particles.js"></script>
 	<script>
 	initParticles();
+	(function() {
+		const server = document.location.href.match(/https?:\/\/[^\/]+/)[0];
+		const context = document.getElementById("captcha-canvas").getContext("2d");
+		context.fillStyle = "white";
+		context.font = "20px Arial";
+		context.fillText("Requesting captcha...", 6, 20);
+
+		request("/api/captcha/request", "GET").then(v => {
+			const response = JSON.parse(v.responseText);
+			console.log(server + response.url);
+			const image = new Image();
+			image.src = server + response.url;
+			image.onload = () => {
+				context.drawImage(image, 0, 0, 250, 100);
+			};
+		}).catch(err => {
+			console.log("An error occurred while trying to request a captcha: " + err.toString());
+		});
+	})();
 	</script>
 </html>

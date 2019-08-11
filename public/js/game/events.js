@@ -17,11 +17,11 @@ socket.on("ffaObjectsHeartbeat", eventd => {
     }
 });
 socket.on("ffaHeartbeat", async d => {
-    if (d.role == -1 && !/[\?\&]guest=true/.test(window.location.search)) return document.location.href = "/login/";
+    if (d.role === -1 && !/[\?\&]guest=true/.test(window.location.search)) return document.location.href = "/login/";
     ownBlob.owner = d.username;
     ownBlob.directionChangedAt = Date.now();
-    ownBlob.directionChangeCoordinates.x = d.x;
-    ownBlob.directionChangeCoordinates.y = d.y;
+    ownBlob.directionChangeCoordinates.x = ownBlob.x = d.x;
+    ownBlob.directionChangeCoordinates.y = ownBlob.y = d.y;
     ownBlob.br = d.br;
     ownBlob.ready = true;
     ownBlob.role = d.role;
@@ -30,22 +30,22 @@ socket.on("ffaHeartbeat", async d => {
         d.users = [];
     }
     for (let i = 0; i < d.users.length; ++i) {
-		if (d.users[i].owner !== ownBlob.owner && !blobs.some(v => v.owner === d.users[i].owner)) {
-			const n = new BlobObj(d.users[i].br, d.users[i].owner);
-			n.directionChangeCoordinates = {
-				x: d.users[i]._x,
-				y: d.users[i]._y
+        if (d.users[i].owner !== ownBlob.owner && !blobs.some(v => v.owner === d.users[i].owner)) {
+            const n = new BlobObj(d.users[i].br, d.users[i].owner);
+            n.directionChangeCoordinates = {
+                x: d.users[i].x,
+                y: d.users[i].y
             };
             n.role = d.users[i].role;
-			n.previousX = d.users[i]._x;
-			n.previousY = d.users[i]._y;
-			n._direction = d.users[i].direction;
-			n.directionChangedAt = d.users[i].directionChangedAt;
-			await n.setBlob();
-			n.display(true, true);
-			blobs.push(n);
-		}
-	}
+            n.previousX = d.users[i].x;
+            n.previousY = d.users[i].y;
+            n._direction = d.users[i].direction;
+            n.directionChangedAt = d.users[i].directionChangedAt;
+            await n.setBlob();
+            n.display(true, true);
+            blobs.push(n);
+        }
+    }
 });
 socket.on("ffaUnauthorized", () => document.location.href = "/login/");
 socket.on("ffaKick", (note) => {
@@ -54,90 +54,90 @@ socket.on("ffaKick", (note) => {
 });
 socket.on("ffaDirectionChanged", d => {
     if (details.singleplayer) return;
-	if (d.owner === ownBlob.owner) return;
-	const target = blobs[blobs.findIndex(v => v.owner === d.owner)];
-	if (typeof target === "undefined") return;
-	target.direction = d.direction;
+    if (d.owner === ownBlob.owner) return;
+    const target = blobs[blobs.findIndex(v => v.owner === d.owner)];
+    if (typeof target === "undefined") return;
+    target.direction = d.direction;
 });
 socket.on("ffaUserJoin", async d => {
     if (details.singleplayer) return;
-	if (d.owner === ownBlob.owner) return;
-	if (blobs.some(v => v.owner === d.owner)) return;
-	const n = new BlobObj(d.br, d.owner);
-	n.directionChangeCoordinates = {
-		x: d._x,
-		y: d._y
+    if (d.owner === ownBlob.owner) return;
+    if (blobs.some(v => v.owner === d.owner)) return;
+    const n = new BlobObj(d.br, d.owner);
+    n.directionChangeCoordinates = {
+        x: d.x,
+        y: d.y
     };
     n.role = d.role;
-	n.directionChangedAt = d.directionChangedAt;
+    n.directionChangedAt = d.directionChangedAt;
     await n.setBlob();
     n.display(true, true);
     blobs.push(n);
 });
 socket.on("ffaHealthUpdate", target => {
     if (details.singleplayer) return;
-	if (typeof target.health === "number") {
+    if (typeof target.health === "number") {
         (blobs.find(v => v.owner === target.user) || {}).health = target.health;
     }
 });
 socket.on("coordinateChange", players => {
     if (typeof ownBlob === "undefined") return;
-	if (!ownBlob.ready) return;
-	for(let i=0; i < players.length; ++i) {
-		if (players[i].owner !== ownBlob.owner) {
-			const target = blobs.find(v => v.owner === players[i].owner);
-			if (!target) {
-				const newBlob = new BlobObj(players[i].br, players[i].owner, players[i].x, players[i].y);
-				newBlob.setBlob().then(() => {
-					newBlob.display(true, true);
-					if (blobs.some(v => v.owner === players[i].owner)) return;
-					blobs.push(newBlob);
-				});
-			} else {
-				target.x = players[i].x;
-				target.y = players[i].y;
-			}
-		}
-	}
+    if (!ownBlob.ready) return;
+    for(let i=0; i < players.length; ++i) {
+        if (players[i].owner !== ownBlob.owner) {
+            const target = blobs.find(v => v.owner === players[i].owner);
+            if (!target) {
+                const newBlob = new BlobObj(players[i].br, players[i].owner, players[i].x, players[i].y);
+                newBlob.setBlob().then(() => {
+                    newBlob.display(true, true);
+                    if (blobs.some(v => v.owner === players[i].owner)) return;
+                    blobs.push(newBlob);
+                });
+            } else {
+                target.x = players[i].x;
+                target.y = players[i].y;
+            }
+        }
+    }
 });
 
 
 // Events (Window/Document)
 for(const btnid of ["btnup", "btndown", "btnleft", "btnright", "nom-btn-mobile"]) {
-	document.getElementById(btnid).addEventListener("click", () => {
-		switch(btnid) {
-			case "btnup":
-            ownBlob.direction = 0;
-            if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 0, time: Date.now() }), "ffa");
-			break;
-			case "btndown":
-            ownBlob.direction = 2;
-                if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 2, time: Date.now() }), "ffa");
-			break;
-			case "btnleft":
-			ownBlob.direction = 3;
-                if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 3, time: Date.now() }), "ffa");
-			break;
-			case "btnright":
-			ownBlob.direction = 1;
-                if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 1, time: Date.now() }), "ffa");
-			break;
-			case "nom-btn-mobile":
-            if (Date.now() - ownBlob.lastnom <= 1500) return;
-            ownBlob.lastnom = Date.now();
-            if (!details.singleplayer) socket.emit("nomKey", "ffa");
-            else nom(ownBlob, BlobObj.find(ownBlob.x, ownBlob.y));
-			break;
-		}
-	});
+    document.getElementById(btnid).addEventListener("click", () => {
+        switch(btnid) {
+            case "btnup":
+                ownBlob.direction = 0;
+                if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 0, time: Date.now() }));
+                break;
+            case "btndown":
+                ownBlob.direction = 2;
+                if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 2, time: Date.now() }));
+                break;
+            case "btnleft":
+                ownBlob.direction = 3;
+                if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 3, time: Date.now() }));
+                break;
+            case "btnright":
+                ownBlob.direction = 1;
+                if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 1, time: Date.now() }));
+                break;
+            case "nom-btn-mobile":
+                if (Date.now() - ownBlob.lastnom <= 1500) return;
+                ownBlob.lastnom = Date.now();
+                if (!details.singleplayer) socket.emit("ffaNomKey");
+                else nom(ownBlob, BlobObj.find(ownBlob.x, ownBlob.y));
+                break;
+        }
+    });
 }
 
 document.getElementById("kickbtn").addEventListener("click", () => {
     if (ownBlob.role !== 1) return;
-    socket.emit("kickPlayer", {
+    socket.emit("ffaKickPlayer", {
         user: document.getElementById("target-name").value,
         reason: document.getElementById("kick-reason").value
-    }, "ffa");
+    });
 });
 
 document.getElementById("closemenu").addEventListener("click", () => {
@@ -150,37 +150,35 @@ window.addEventListener("resize", () => {
 });
 
 document.addEventListener("keydown", eventd => {
-    if (document.getElementById("kick-menu").style.display === "block") return;
     switch (eventd.keyCode) {
         case 13: // newline
             ownBlob.direction = 4;
-            if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 4, time: Date.now() }), "ffa");
+            if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 4, time: Date.now() }));
             break;
         case 87: // w
             ownBlob.direction = 0;
-            if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 0, time: Date.now() }), "ffa");
+            if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 0, time: Date.now() }));
             break;
         case 68: // d
             ownBlob.direction = 1;
-            if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 1, time: Date.now() }), "ffa");
+            if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 1, time: Date.now() }));
             break;
         case 83: // s
             ownBlob.direction = 2;
-            if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 2, time: Date.now() }), "ffa");
+            if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 2, time: Date.now() }));
             break;
         case 65: // a
             ownBlob.direction = 3;
-            if (!details.singleplayer) socket.emit("directionChange", Object.assign(ownBlob, { _direction: 3, time: Date.now() }), "ffa");
+            if (!details.singleplayer) socket.emit("ffaDirectionChange", Object.assign(ownBlob, { _direction: 3, time: Date.now() }));
             break;
         case 78: // n
             if (Date.now() - ownBlob.lastnom <= 1500) return;
             ownBlob.lastnom = Date.now();
-            if (!details.singleplayer) socket.emit("nomKey", "ffa");
+            if (!details.singleplayer) socket.emit("ffaNomKey");
             else nom(ownBlob, BlobObj.find(ownBlob.x, ownBlob.y));
             break;
         case 75: // k
             if (ownBlob.role === 1) {
-                ownBlob.direction = 4;
                 document.getElementById("kick-menu").style.display = "block";
             }
             break;
