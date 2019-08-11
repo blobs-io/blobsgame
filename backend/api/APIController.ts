@@ -37,7 +37,7 @@ export default class APIController {
                 return;
             }
 
-            const requester: Socket = this.base.sockets.find((v: Socket) => v.sessionid === req.headers.sessionid);
+            const requester: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === req.headers.sessionid);
             if (typeof requester === "undefined") {
                 res.status(400);
                 res.json({
@@ -121,7 +121,7 @@ export default class APIController {
                     });
                     return;
                 }
-                const requester: Socket = this.base.sockets.find((v: Socket) => v.sessionid === req.headers.sessionid);
+                const requester: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === req.headers.sessionid);
                 if (!requester) {
                     res.status(403);
                     res.json({
