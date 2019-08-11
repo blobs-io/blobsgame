@@ -127,13 +127,19 @@ export default class Base {
         const { io } = this;
 
         io.on("connection", (data: any) => {
-            data.on("disconnect", (...data: any[]) => this.WSHandler.executeEvent("disconnect", data, ...data));
-            data.on("ffaPlayerCreate", (...data: any[]) => this.WSHandler.executeEvent("ffaPlayerCreate", data, ...data));
-            data.on("coordinateChange", (...data: any[]) => this.WSHandler.executeEvent("coordinateChange", data, ...data));
-            data.on("ffaDirectionChange", (...data: any[]) => this.WSHandler.executeEvent("ffaDirectionChange", data, ...data));
-            data.on("ffaNomKey", (...data: any[]) => this.WSHandler.executeEvent("ffaNomKey", data, ...data));
-            data.on("ffaKickPlayer", (...data: any[]) => this.WSHandler.executeEvent("ffaKickPlayer", data, ...data));
-            data.on("sessionDelete", (...data: any[]) => this.WSHandler.executeEvent("sessionDelete", data, ...data));
+            data.on("disconnect", (...args: any[]) => this.WSHandler.executeEvent("disconnect", data, ...args));
+            data.on("ffaPlayerCreate", (...args: any[]) => this.WSHandler.executeEvent("ffaPlayerCreate", data, ...args));
+            data.on("coordinateChange", (...args: any[]) => this.WSHandler.executeEvent("coordinateChange", data, ...args));
+            data.on("ffaDirectionChange", (...args: any[]) => this.WSHandler.executeEvent("ffaDirectionChange", data, ...args));
+            data.on("ffaNomKey", (...args: any[]) => this.WSHandler.executeEvent("ffaNomKey", data, ...args));
+            data.on("ffaKickPlayer", (...args: any[]) => this.WSHandler.executeEvent("ffaKickPlayer", data, ...args));
+            data.on("sessionDelete", (...args: any[]) => this.WSHandler.executeEvent("sessionDelete", data, ...args));
         });
+
+        setInterval(() => {
+            const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa");
+            if (!room) return;
+            io.sockets.emit("coordinateChange", room.players);
+        }, 20);
     }
 }
