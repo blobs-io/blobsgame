@@ -135,7 +135,7 @@ export default class {
             if (!eventd.directionChangeCoordinates) return;
             if (typeof eventd.directionChangeCoordinates.x !== "number" || typeof eventd.directionChangeCoordinates.y !== "number") return;
             player.directionChangedAt = Date.now() - eventd.directionChangedAt < 5000 ? eventd.directionChangedAt : Date.now();
-            player.direction = eventd._direction;
+            player.direction = eventd.direction;
             player.distance += Math.abs(player.directionChangeCoordinates.x - player.x) + Math.abs(player.directionChangeCoordinates.y - player.y);
             player.directionChangeCoordinates = {
                 x: eventd.directionChangeCoordinates.x,
