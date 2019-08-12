@@ -246,7 +246,8 @@ export default class APIController {
             this.base.db.run("UPDATE accounts SET lastDailyUsage = ?, blobcoins = blobcoins + 20 WHERE username = ?", Date.now(), socket.username)
                 .then(() => {
                     res.json({
-                        message: "Successfully received daily bonus"
+                        message: "Successfully received daily bonus",
+                        bonus: 20
                     });
                 }).catch((err: any) => {
                     res.status(500).json({
