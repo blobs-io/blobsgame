@@ -596,10 +596,9 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             newBlob.direction = currentBlob.direction;
             newBlob.directionChangedAt = currentBlob.directionChangedAt;
             newBlob.setBlob()
-                .then(() => newBlob.display())
-                .then(() => {
-                    blobs.push(newBlob);
-                });
+                .then(() => newBlob.display());
+
+            blobs.push(newBlob);
         }
     });
     socket.on(EventType.UNAUTHORIZED, () => document.location.href = "/login");
@@ -631,10 +630,8 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         newBlob.directionChangedAt = eventd.directionChangedAt;
         newBlob
             .setBlob()
-            .then(() => newBlob.display(true, true))
-            .then(() => {
-                blobs.push(newBlob);
-            });
+            .then(() => newBlob.display(true, true));
+        blobs.push(newBlob);
     });
     socket.on(EventType.HEALTH_UPDATE, (eventd: any) => {
         if (details.singleplayer || typeof eventd.health !== "number") return;
@@ -652,11 +649,9 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
                 newBlob
                     .setBlob()
-                    .then(() => newBlob.display(true, true))
-                    .then(() => {
-                        if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
-                        blobs.push(newBlob);
-                    });
+                    .then(() => newBlob.display(true, true));
+                if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
+                blobs.push(newBlob);
             } else {
                 target.x = currentBlob.x;
                 target.y = currentBlob.y;
