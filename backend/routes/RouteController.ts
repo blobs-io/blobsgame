@@ -35,7 +35,7 @@ export default class RouteController {
                 sessionid: session
             });
 
-            readFile("./public/app/index.html", "utf8", (error: any, data: string) => {
+            readFile("./public/app.html", "utf8", (error: any, data: string) => {
                 res.send(
                     data
                         .replace(/\[!BLOBRATING]/g, user.br)
@@ -61,7 +61,7 @@ export default class RouteController {
             }
         });
         this.app.get("/login", (req: express.Request, res: express.Response) => {
-            readFile("./public/login/index.html", "utf8", (e, r) => {
+            readFile("./public/login.html", "utf8", (e, r) => {
                 if (e) return res.status(500).json({
                     message: "An error occurred on the server (could not read file)"
                 });
@@ -132,7 +132,7 @@ export default class RouteController {
                 });
         });
         this.app.get("/register", (req: express.Request, res: express.Response) => {
-            readFile("./public/register/index.html", "utf8", (e, r) => {
+            readFile("./public/register.html", "utf8", (e, r) => {
                 if (e) return res.status(500).json({
                     message: "An error occurred on the server (could not read file)"
                 });
@@ -179,7 +179,7 @@ export default class RouteController {
             });
         });
         this.app.get("/game", (req: express.Request, res: express.Response) => {
-            readFile("./public/game/index.html", "utf8", (e, r) => {
+            readFile("./public/game.html", "utf8", (e, r) => {
                 if (e) return res.status(500).json({
                     message: "An error occurred on the server (could not read file)"
                 });
