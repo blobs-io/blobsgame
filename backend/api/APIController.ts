@@ -6,6 +6,7 @@ import Room from "../structures/Room";
 import * as SessionIDManager from "../structures/SessionIDManager";
 import Jimp = require("jimp");
 import Captcha, {CAPTCHA_LIMIT} from "../structures/Captcha";
+import * as DateFormatter from "../utils/DateFormatter";
 
 export default class APIController {
     public base: Base;
@@ -226,6 +227,32 @@ export default class APIController {
             setTimeout(() => {
                 this.base.captchas.splice(this.base.captchas.findIndex((v: Captcha) => v.captcha === captcha), 1);
             }, 300000);
+        });
+        this.app.post("/api/daily", async (req: express.Request, res: express.Response) => {
+            const { session } = req.headers;
+            if (!session) return res.status(400).json({
+                message: "No session ID provided. Check session header."
+            });
+            const socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
+            if (!socket)
+                return res.status(400).json({
+                    message: "Socket not found. Try logging in again and retry."
+                });
+            const dbUser: any = await this.base.db.get("SELECT * FROM accounts WHERE username = ?", socket.username);
+            if (Date.now() - dbUser.lastDailyUsage <= 86400000)
+                return res.status(400).json({
+                    message: `Please wait ${DateFormatter.format(86400000 - (Date.now() - dbUser.lastDailyUsage))}`
+                });
+            this.base.db.run("UPDATE accounts SET lastDailyUsage = ?, blobcoins = blobcoins + 20 WHERE username = ?", Date.now(), socket.username)
+                .then(() => {
+                    res.json({
+                        message: "Successfully received daily bonus"
+                    });
+                }).catch((err: any) => {
+                    res.status(500).json({
+                        message: "An error occured while updating database: " + err
+                    });
+                });
         });
     }
 }
