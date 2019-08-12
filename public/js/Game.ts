@@ -1,6 +1,5 @@
 declare const io: Function;
 declare const request: (path: string, method: string, headers?: any) => Promise<any>;
-declare const getTier: (br: number) => any;
 declare const socket: any;
 const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
 
@@ -15,7 +14,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         return cookie.substr(cookie.indexOf("=") + 1);
     })();
     let lastTick: number = Date.now();
-    let blobs: BlobObject[];
+    let blobs: BlobObject[] = [];
     const objects: GameObject = {
         walls: [],
         items: [],
