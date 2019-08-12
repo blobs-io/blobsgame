@@ -146,6 +146,11 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         width: number;
         height: number;
     }
+    interface Tier {
+        tier?: string;
+        colorCode?: string;
+        emblemFile?: string;
+    }
 
     // -------------
     // Structures
@@ -267,7 +272,8 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 ctx.beginPath();
                 const canvasX: number = canvas.width / 2 - width,
                     canvasY: number = canvas.height / 2 - height;
-                const tier = getTier(this.br || 0);
+                const tier: Tier = getTier(this.br || 0);
+                if (!tier || !tier.tier) return;
                 if (!this.owner) return;
                 if (this.owner === ownBlob.owner) {
                     ctx.fillStyle = `#${tier.colorCode}`;
@@ -801,7 +807,11 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 ownBlob.lastnom = Date.now();
                 if (!details.singleplayer)
                     socket.emit("ffaNomKey");
-                else nom(ownBlob, BlobObject.find(ownBlob.x, ownBlob.y, true));
+                else {
+                    const target: BlobObject | undefined = BlobObject.find(ownBlob.x, ownBlob.y, true);
+                    if (!target) return;
+                    nom(ownBlob, target);
+                }
                 break;
             case "k":
                 if (ownBlob.role === 1 && kickMenu)
@@ -816,7 +826,6 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
 
     const mouseScrollEvent = (...eventd: any[]): void => {
         let [event] = eventd;
-        if (typeof event === "undefined") event = window.event;
         let deltaValue = 0;
         if (event.wheelDelta) {
             deltaValue = event.wheelDelta / 120;
@@ -917,6 +926,131 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             leaderboardElement.appendChild(linebreak);
         }
     }
+    function displayWalls(context: CanvasRenderingContext2D | null = ctx): void  {
+        if (!context) return;
+        for (let i: number = 0; i < objects.walls.length; ++i) {
+            let canvasPosX: number = 0,
+                canvasPosY: number = 0;
+            if (ownBlob.x >= objects.walls[i].x) {
+                canvasPosX = (canvas.width / 2) - (ownBlob.x - objects.walls[i].x);
+            } else if (ownBlob.x < objects.walls[i].x) {
+                canvasPosX = (canvas.width / 2) + (objects.walls[i].x - ownBlob.x);
+            }
+            if (ownBlob.y >= objects.walls[i].y) {
+                canvasPosY = (canvas.height / 2) - (ownBlob.y - objects.walls[i].y);
+            } else if (ownBlob.y < objects.walls[i].y) {
+                canvasPosY = (canvas.height / 2) + (objects.walls[i].y - ownBlob.y);
+            }
+            canvasPosY -= 45;
+            canvasPosX -= 45;
+            context.drawImage(objects.images.brickwall, canvasPosX, canvasPosY, 45, 45);
+        }
+    }
+    function displayCooldown(context: CanvasRenderingContext2D | null = ctx): void {
+        const nomCooldownElement: HTMLElement | null = document.getElementById("nom-cooldown");
+        if (!nomCooldownElement) return;
+        if (document.getElementById("cooldown-timer")) {
+            nomCooldownElement.removeChild(<Node>document.getElementById("cooldown-timer"));
+        }
+
+        const timerElement = document.createElement("span");
+        const nomReady = Date.now() - ownBlob.lastnom > 1500;
+        timerElement.id = "cooldown-timer";
+        timerElement.innerHTML = !nomReady ? `${((1500 - (Date.now() - ownBlob.lastnom)) / 1000).toFixed(1)}s` : "Ready";
+        nomCooldownElement.appendChild(timerElement);
+    }
+    function displayPlayerStats(context: CanvasRenderingContext2D | null = ctx): void {
+        if (!context) return;
+        context.font = "15px Dosis";
+        context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 80, canvas.height);
+    }
+    function drawBorder(context: CanvasRenderingContext2D | null = ctx): void {
+        if (!context) return;
+        context.beginPath();
+        context.strokeStyle = "white";
+        const diffXPos = ownBlob.x + (canvas.width / 2);
+        const diffXNeg = ownBlob.x - (canvas.width / 2);
+        const diffYPos = ownBlob.y + (canvas.height / 2);
+        const diffYNeg = ownBlob.y - (canvas.height / 2);
+        if (diffXPos > mapSize.width) { // right border
+            context.beginPath();
+            context.moveTo(border.right.from.x = (canvas.width - (diffXPos - mapSize.width)), border.right.from.y = (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
+            context.lineTo(border.right.to.x = (canvas.width - (diffXPos - mapSize.width)), border.right.to.y = (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
+            context.closePath();
+            context.stroke();
+        } else if (border.right.from.x !== 0 || border.right.from.y !== 0 || border.right.to.x !== 0 || border.right.to.y !== 0) {
+            border.right.from.x = border.right.from.y = border.right.to.x = border.right.to.y = 0;
+        }
+        if (diffXNeg < 0) { // left border
+            context.beginPath();
+            context.moveTo(border.left.from.x = (-(diffXNeg + 35)), border.left.from.y = (diffYNeg < 0 ? -(diffYNeg + 35) : 0));
+            context.lineTo(border.left.to.x = (-(diffXNeg + 35)), border.left.to.y = (diffYPos > mapSize.height ? canvas.height - (diffYPos - mapSize.height) : canvas.height));
+            context.closePath();
+            context.stroke();
+        } else if (border.left.from.x !== 0 || border.left.from.y !== 0 || border.left.to.x !== 0 || border.left.to.y !== 0) {
+            border.left.from.x = border.left.from.y = border.left.to.x = border.left.to.y = 0;
+        }
+        if (diffYPos > mapSize.height) { // bottom border
+            context.beginPath();
+            context.moveTo(border.bottom.from.x = (diffXNeg < 0 ? -(diffXNeg + 35) : 0), border.bottom.from.y = (canvas.height - (diffYPos - mapSize.height)));
+            context.lineTo(border.bottom.to.x = (diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), border.bottom.to.y = (canvas.height - (diffYPos - mapSize.height)));
+            context.closePath();
+            context.stroke();
+        } else if (border.bottom.from.x !== 0 || border.bottom.from.y !== 0 || border.bottom.to.x !== 0 || border.bottom.to.y !== 0) {
+            border.bottom.from.x = border.bottom.from.y = border.bottom.to.x = border.bottom.to.y = 0;
+        }
+        if (diffYNeg < 0) { // top border
+            context.beginPath();
+            context.moveTo(border.top.from.x = (diffXNeg < 0 ? -(diffXNeg + 35) : 0), border.top.from.y = (-(diffYNeg + 35)));
+            context.lineTo(border.top.to.x = (diffXPos > mapSize.width ? canvas.width - (diffXPos - mapSize.width) : canvas.width), border.top.to.y = (-(diffYNeg + 35)));
+            context.closePath();
+            context.stroke();
+        } else if (border.top.from.x !== 0 || border.top.from.y !== 0 || border.top.to.x !== 0 || border.top.to.y !== 0) {
+            border.top.from.x = border.top.from.y = border.top.to.x = border.top.to.y = 0;
+        }
+    }
+    function getTier(br: number): Tier {
+        let result: Tier = {};
+        if (br >= 0 && br < 1500) {
+            result.tier = "bronze";
+            result.colorCode = "b57156";
+            result.emblemFile = "emblem_bronze.png";
+        } else if (br >= 1500 && br < 3000) {
+            result.tier = "silver";
+            result.colorCode = "dbdbdb";
+            result.emblemFile = "emblem_silver.png";
+        } else if (br >= 3000 && br < 5000) {
+            result.tier = "platinum";
+            result.colorCode = "E5E4E2";
+            result.emblemFile = "emblem_platinum.png";
+        } else if (br >= 5000 && br < 8000) {
+            result.tier = "gold";
+            result.colorCode = "D7AF00";
+            result.emblemFile = "emblem_gold.png";
+        } else if (br >= 8000 && br < 9500) {
+            result.tier = "diamond";
+            result.colorCode = "16f7ef";
+            result.emblemFile = "emblem_diamond.png";
+        } else if (br >= 9500 && br < 10000) {
+            result.tier = "painite";
+            result.colorCode = "16f77f";
+            result.emblemFile = "emblem_painite.png";
+        }
+        return result;
+    }
+    function nom(attackBlob: BlobObject, target: BlobObject): void {
+        if (attackBlob.x < (target.x + 30) && attackBlob.x > (target.x - 30)) {
+            if (attackBlob.y < (target.y + 30) && attackBlob.y > (target.y - 30)) {
+                target.health -= randomNumber(30, 40);
+                if (target.health <= 0) {
+                    socket.emit("singleplayerNomKey", { attackBlob, target }, "ffa");
+                    target.health = 100;
+                }
+            }
+        }
+    }
+
+
 
     // -------------
     // Other
