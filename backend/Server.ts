@@ -61,3 +61,4 @@ base.server.app.use((req, res, next) => {
 base.initializeEvents().catch(() => {});
 base.APIController.listen();
 base.ClanController.listen();
+base.RouteController.listen();
