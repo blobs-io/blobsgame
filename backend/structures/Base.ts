@@ -14,14 +14,8 @@ import Maps from "./Maps";
 import Socket from "./Socket";
 import APIController from "../api/APIController";
 import ClanController from "../clans/ClanController";
+import RouteController from "../routes/RouteController";
 import Captcha from "./Captcha";
-
-// Import Routes
-import rootRoute from "../routes/root";
-import getDatabaseRoute from "../routes/getDatabase";
-import loginRoute from "../routes/login";
-import appRoute from "../routes/app";
-import registerRoute from "../routes/register";
 
 interface Server {
     app: express.Application;
@@ -61,6 +55,7 @@ export default class Base {
     public APIController: APIController;
     public ClanController: ClanController;
     public captchas: Captcha[];
+    public RouteController: RouteController;
 
     constructor(options: BaseOptions) {
         this.server = options.server;
@@ -73,6 +68,7 @@ export default class Base {
         this.maps = new Maps();
         this.APIController = new APIController(this.server.app, this);
         this.ClanController = new ClanController(this.server.app, this);
+        this.RouteController = new RouteController(this.server.app, this);
         this.captchas = [];
 
         const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa");
@@ -110,17 +106,7 @@ export default class Base {
      */
     async initializeRoutes(): Promise<void> {
         const { app } = this.server;
-
         app.use(bodyParser.urlencoded({ extended: true }));
-
-        app.get(rootRoute.route.path,          (req, res) => rootRoute.run(req, res, this));
-        app.get(getDatabaseRoute.route.path,   (req, res) => getDatabaseRoute.run(req, res, this));
-        app.get(loginRoute.route.path,         (req, res) => loginRoute.run(req, res, this));
-        app.get(registerRoute.route.path,      (req, res) => registerRoute.run(req, res, this));
-        app.post(registerRoute.route.path,     (req, res) => registerRoute.run(req, res, this, "post"));
-        app.get(appRoute.route.path,           (req, res) => appRoute.run(req, res, this));
-        app.post(loginRoute.route.path,         (req, res) => loginRoute.run(req, res, this, "post"));
-        app.get("/game", (req, res) => res.send(readFileSync("./public/game/index.html", "utf8")));
 
         // Assets / JS / CSS
         app.use("/assets", express.static("./public/assets"));
