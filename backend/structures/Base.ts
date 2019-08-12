@@ -67,7 +67,7 @@ export default class Base {
         this.WSHandler = new WS(this);
         this.maps = new Maps();
         this.APIController = new APIController(this.server.app, this);
-        this.ClanController = new ClanController(this.server.app, this);
+        this.ClanController = new ClanController(this.server.app, this.db);
         this.RouteController = new RouteController(this.server.app, this);
         this.captchas = [];
 
