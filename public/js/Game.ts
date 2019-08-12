@@ -114,18 +114,22 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         Health = 0
     }
     enum EventType {
-        COORDINATE_CHANGE = "coordinateChange",
-        OBJECTS_HEARTBEAT = "ffaObjectsHeartbeat",
-        HEARTBEAT         = "ffaHeartbeat",
-        UNAUTHORIZED      = "ffaUnauthorized",
-        KICK              = "ffaKick",
-        USER_JOIN         = "ffaUserJoin",
-        HEALTH_UPDATE     = "ffaHealthUpdate",
-        DIRECTION_CHANGE  = "ffaDirectionChanged",
-        LOGIN_FAILED      = "ffaLoginFailed",
-        PLAYER_CREATE     = "ffaPlayerCreate",
-        PLAYER_NOMMED     = "ffaPlayerNommed",
-        PLAYER_DELETE     = "ffaPlayerDelete"
+        COORDINATE_CHANGE  = "coordinateChange",
+        OBJECTS_HEARTBEAT  = "ffaObjectsHeartbeat",
+        HEARTBEAT          = "ffaHeartbeat",
+        UNAUTHORIZED       = "ffaUnauthorized",
+        KICK               = "ffaKick",
+        KICK_PLAYER        = "ffaKickPlayer",
+        USER_JOIN          = "ffaUserJoin",
+        NOM_KEY            = "ffaNomKey",
+        SP_NOM_KEY         = "singlePlayerNomKey",
+        HEALTH_UPDATE      = "ffaHealthUpdate",
+        DIRECTION_CHANGE_C = "ffaDirectionChange",
+        DIRECTION_CHANGE   = "ffaDirectionChanged",
+        LOGIN_FAILED       = "ffaLoginFailed",
+        PLAYER_CREATE      = "ffaPlayerCreate",
+        PLAYER_NOMMED      = "ffaPlayerNommed",
+        PLAYER_DELETE      = "ffaPlayerDelete"
     }
 
     // -------------
@@ -210,7 +214,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     }
     class BlobObject {
         public guest: boolean;
-        public owner: string; //TODO: remove undefined type
+        public owner: string;
         public br: number | undefined;
         public img: HTMLImageElement;
         public direction: number;
@@ -431,7 +435,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         }
 
         // FPS meter
-        if (Date.now() - lastIteration > 200) { // TODO: remove this
+        if (Date.now() - lastIteration > 200) {
             ownBlob.directionChangedAt = Date.now();
             ownBlob.directionChangeCoordinates.x = ownBlob.x;
             ownBlob.directionChangeCoordinates.y = ownBlob.y;
@@ -679,7 +683,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 0; // TODO: Use enum for direction instead of hardcoded number
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob); // TODO: Use enum for event emit
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob); // TODO: Use enum for event emit
             } else if (buttonID === htmlButtonIDs[1]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -688,7 +692,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 2;
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
             } else if (buttonID === htmlButtonIDs[2]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -697,7 +701,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 3;
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
             } else if (buttonID === htmlButtonIDs[3]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -706,7 +710,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 1;
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
             }
         });
     }
@@ -721,7 +725,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 const targetUserElement: HTMLElement | null = document.getElementById("target-name"),
                     targetUserReason: HTMLElement | null = document.getElementById("kick-reason");
                 if (!targetUserElement || !targetUserReason) return;
-                socket.emit("ffaKickPlayer", {
+                socket.emit(EventType.KICK_PLAYER, {
                     // @ts-ignore
                     user: targetUserElement.value,
                     // @ts-ignore
@@ -755,7 +759,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 4;
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
                 break;
             case "w":
                 ownBlob.directionChangedAt = Date.now();
@@ -765,7 +769,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 0;
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
                 break;
             case "d":
                 ownBlob.directionChangedAt = Date.now();
@@ -775,7 +779,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 1;
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
                 break;
             case "s":
                 ownBlob.directionChangedAt = Date.now();
@@ -785,7 +789,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 2;
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
                 break;
             case "a":
                 ownBlob.directionChangedAt = Date.now();
@@ -795,13 +799,13 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 3;
                 if (!details.singleplayer)
-                    socket.emit("ffaDirectionChange", ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
                 break;
             case "n":
                 if (Date.now() - ownBlob.lastnom <= 1500) return;
                 ownBlob.lastnom = Date.now();
                 if (!details.singleplayer)
-                    socket.emit("ffaNomKey");
+                    socket.emit(EventType.NOM_KEY);
                 else {
                     const target: BlobObject | undefined = BlobObject.find(ownBlob.x, ownBlob.y, true);
                     if (!target) return;
@@ -1039,7 +1043,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             if (attackBlob.y < (target.y + 30) && attackBlob.y > (target.y - 30)) {
                 target.health -= randomNumber(30, 40);
                 if (target.health <= 0) {
-                    socket.emit("singleplayerNomKey", { attackBlob, target }, "ffa");
+                    socket.emit(EventType.SP_NOM_KEY, { attackBlob, target }, "ffa");
                     target.health = 100;
                 }
             }
