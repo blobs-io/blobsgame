@@ -29,21 +29,14 @@ export default class AppRoute {
             sessionid: session
         });
 
-        if (req.query.old)
-            readFile("./public/app/index.html", "utf8", (error: any, data: string) => {
-                res.send(data);
-            });
-        else
-            readFile("./public/app/index2.html", "utf8", (error: any, data: string) => {
-                res.send(
-                    data
-                        .replace(/\[!BLOBRATING]/g, user.br)
-                        .replace(/\[!BLOBCOINS]/g, user.blobcoins)
-                        .replace(/\[!DISTANCE]/g, user.distance)
-                        .replace(/\[!ACTIVEBLOB]/g, user.activeBlob)
-                        .replace(/\[!USERBLOBS]/g, user.blobs)
-                        .replace(/\[!PROMOTIONS]/g, JSON.stringify(promotions))
-                );
-            });
+        readFile("./public/app/index.html", "utf8", (error: any, data: string) => {
+            res.send(
+                data
+                    .replace(/\[!BLOBRATING]/g, user.br)
+                    .replace(/\[!BLOBCOINS]/g, user.blobcoins)
+                    .replace(/\[!DISTANCE]/g, user.distance)
+                    .replace(/\[!ACTIVEBLOB]/g, user.activeBlob).replace(/\[!USERBLOBS]/g, user.blobs).replace(/\[!PROMOTIONS]/g, JSON.stringify(promotions))
+            );
+        });
     }
 }
