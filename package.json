@@ -5,7 +5,7 @@
   "main": "backend/Server.js",
   "scripts": {
     "start": "node .",
-    "test": "tsc backend/Server.ts -t es5 --removeComments && tsc public/js/game.ts -t es5 --removeComments"
+    "test": "tsc backend/Server.ts -t es5 --removeComments && tsc public/js/Game.ts -t es5 --removeComments"
   },
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
