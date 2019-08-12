@@ -131,6 +131,12 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         PLAYER_NOMMED      = "ffaPlayerNommed",
         PLAYER_DELETE      = "ffaPlayerDelete"
     }
+    enum Direction {
+        UP = 0,
+        DOWN = 2,
+        LEFT = 3,
+        RIGHT = 1
+    }
 
     // -------------
     // Interfaces
@@ -681,16 +687,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                     x: ownBlob.x,
                     y: ownBlob.y
                 };
-                ownBlob.direction = 0; // TODO: Use enum for direction instead of hardcoded number
+                ownBlob.direction = Direction.UP;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob); // TODO: Use enum for event emit
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
             } else if (buttonID === htmlButtonIDs[1]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
                     x: ownBlob.x,
                     y: ownBlob.y
                 };
-                ownBlob.direction = 2;
+                ownBlob.direction = Direction.DOWN;
                 if (!details.singleplayer)
                     socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
             } else if (buttonID === htmlButtonIDs[2]) {
@@ -699,7 +705,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                     x: ownBlob.x,
                     y: ownBlob.y
                 };
-                ownBlob.direction = 3;
+                ownBlob.direction = Direction.LEFT;
                 if (!details.singleplayer)
                     socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
             } else if (buttonID === htmlButtonIDs[3]) {
@@ -708,7 +714,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                     x: ownBlob.x,
                     y: ownBlob.y
                 };
-                ownBlob.direction = 1;
+                ownBlob.direction = Direction.RIGHT;
                 if (!details.singleplayer)
                     socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
             }
