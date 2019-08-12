@@ -255,5 +255,31 @@ export default class APIController {
                     });
                 });
         });
+        this.app.post("/api/switchBlob", async (req: express.Request, res: express.Response) => {
+            const { blob: newBlob } = req.query;
+            const { session } = req.headers;
+            if (!newBlob) return res.status(400).json({
+                message: "No blob provided. Check blob query."
+            });
+            if (!session) return res.status(400).json({
+                message: "No session ID provided. Check session header."
+            });
+            const socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
+            if (!socket)
+                return res.status(400).json({
+                    message: "Socket not found. Try logging in again and retry."
+                });
+            const dbUser: any = await this.base.db.get("SELECT blobs FROM accounts WHERE username = ?", socket.username);
+            const availableBlobs: string[] = dbUser.blobs.split(",");
+            if (!availableBlobs.includes(newBlob)) return res.status(400).json({
+                message: "You don't own this blob."
+            });
+            this.base.db.run("UPDATE accounts SET activeBlob = ? WHERE username = ?", newBlob, socket.username)
+                .then(() => {
+                    res.json({
+                        message: "Blob has been changed."
+                    });
+                });
+        });
     }
 }
