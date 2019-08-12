@@ -204,7 +204,15 @@
             `;
             document.getElementById("blobs").appendChild(blobElement);
             document.getElementById("choose-" + blob).addEventListener("click", () => {
-                request("/api/switchBlob?blob=" + blob, "POST", { session });
+                request("/api/switchBlob?blob=" + blob, "POST", { session })
+                    .then(({ responseText }) => {
+                        const parsed = JSON.parse(responseText);
+                        alert(parsed.message);
+                    })
+                    .catch(({ responseText }) => {
+                        const parsed = JSON.parse(responseText);
+                        alert(parsed.message);
+                    });
             });
         }
 
