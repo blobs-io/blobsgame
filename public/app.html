@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>blobs.io – menu</title>
+    <meta name="description" content="Be the best blob!">
+    <meta name="author" content="y21">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:image" content="https://cdn.discordapp.com/emojis/458326620076507136.png" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Chakra+Petch:600|Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/favicons/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/favicons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/favicons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/favicons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/favicons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/favicons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/favicons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/favicons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="assets/favicons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicons/favicon-16x16.png">
+    <link rel="manifest" href="assets/favicons/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/favicons/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="css/main-menu.css" />
+</head>
+<body>
+<nav class="blue darken-1">
+    <div class="nav-wrapper">
+        <a href="/app" class="brand-logo">&nbsp;blobs.io</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="/game">Play</a></li>
+            <li><a href="/clans">Clans</a></li>
+            <li><a href="https://reddit.com/r/blobsio">Subreddit</a></li>
+            <li><a id="logout">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+
+<div id="content">
+    <div id="left">
+        <div id="userinfo">
+            <span id="br">Loading...</span><br/>
+            <span id="blobcoins">Loading...</span><br/>
+            <span id="distance">Distance travelled: 97.23K pixels</span><br/>
+            <a id="daily-bonus" class="waves-effect waves-light btn blue lighten-2">Claim Daily Bonus</a>
+        </div>
+        <div id="blobs">
+            <h4>Your Blobs</h4>
+        </div>
+    </div>
+
+    <div id="right">
+        <div id="promotions">
+            <h4>Promotions</h4>
+        </div>
+    </div>
+</div>
+
+<footer class="page-footer blue darken-1">
+    <div class="container">
+        <div class="row">
+            <div class="col l6 s12">
+                <h5 class="white-text">About blobs.io</h5>
+                <p class="grey-text text-lighten-4">blobs.io is a multiplayer game that involves blob characters that “nom” players in order to gain blob rating, which shows how skilled you are at the game.</p>
+            </div>
+            <div class="col l4 offset-l2 s12">
+                <h5 class="white-text">Links</h5>
+                <ul>
+                    <li><a class="grey-text text-lighten-3" href="https://github.com/blobs-io/blobs.io">GitHub repository</a></li>
+                    <li><a class="grey-text text-lighten-3" href="https://discord.gg/379gcnj">Discord server</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            © 2019 blobs.io
+        </div>
+    </div>
+</footer>
+</body>
+<script src="js/request.js"></script>
+<script src="js/functions.js"></script>
+<script src="js/sockets.js"></script>
+<script>
+    document.getElementById("logout").addEventListener("click", () => {
+        document.cookie = "session=null;expires=" + new Date(Date.now() - 1).toUTCString() + ";path=/";
+        document.location.href = "/";
+    });
+    void (function() {
+        const session = document.cookie.split(/; */).find(v => v.startsWith("session=")).split("=")[1];
+        const stats = {
+            br: parseInt("[!BLOBRATING]"),
+            blobcoins: parseInt("[!BLOBCOINS]"),
+            distance: parseFloat("[!DISTANCE]"),
+            blobs: "[!USERBLOBS]".split(","),
+            activeBlob: "[!ACTIVEBLOB]"
+        };
+        const promotions = JSON.parse('[!PROMOTIONS]');
+
+        document.getElementById("br").innerHTML = `${stats.br} BR (${getTier(stats.br).tier})`;
+        document.getElementById("blobcoins").innerHTML = `${stats.blobcoins} Blobcoins`;
+        document.getElementById("distance").innerHTML = `Distance travelled: ${stats.distance.toFixed(2)}K pixels`;
+        for (const blob of stats.blobs) {
+            const blobElement = document.createElement("div");
+            blobElement.className = "card bloblist-entry";
+            blobElement.innerHTML = `
+                <div class="card-content">
+                    <img src="/assets/${blob}.png" width="70" height="70" />
+                </div>
+                <div class="card-action">
+                    <a id="choose-${blob}">Choose</a>
+                </div>
+            `;
+            document.getElementById("blobs").appendChild(blobElement);
+            document.getElementById("choose-" + blob).addEventListener("click", () => {
+                request("/api/switchBlob?blob=" + blob, "POST", { session })
+                    .then(({ responseText }) => {
+                        const parsed = JSON.parse(responseText);
+                        alert(parsed.message);
+                    })
+                    .catch(({ responseText }) => {
+                        const parsed = JSON.parse(responseText);
+                        alert(parsed.message);
+                    });
+            });
+        }
+
+        for (const promotion of promotions) {
+            const promotionElement = document.createElement("span");
+            promotionElement.className = "promotion";
+            promotionElement.innerHTML = `
+                <span class="small material-icons">${promotion.drop === 0 ? "expand_less" : "expand_more"}</span> ${promotion.user} (${promotion.newTier})
+            `;
+            document.getElementById("promotions").appendChild(promotionElement);
+        }
+
+        document.getElementById("daily-bonus").addEventListener("click", () => {
+            request("/api/daily", "POST", { session })
+                .then(res => {
+                    const parsedResponse = JSON.parse(res.responseText);
+                    document.getElementById("blobcoins").innerHTML = `${stats.blobcoins += parsedResponse.bonus} Blobcoins`
+                }).catch((error) => {
+                const parsedError = JSON.parse(error.responseText);
+                alert(parsedError.message);
+            });
+        });
+    })();
+</script>
+</html>
