@@ -142,7 +142,6 @@ export default class RouteController {
         this.app.post("/register", async (req: express.Request, res: express.Response) => {
             if (typeof req.body.username !== "string" || typeof req.body.password !== "string" || typeof req.body["captcha-input"] !== "string")
                 return res.send("Username, password and captcha need to be set."); // TODO: better error
-            // TODO: Remove captcha from base.captchas; no longer required
             if (req.body.username.length < 3 || req.body.username.length > 14)
                 return res.send("Username needs to be between 3 and 14 characters.");
             if (req.body.password.length < 6 || req.body.password.lengt > 40)
