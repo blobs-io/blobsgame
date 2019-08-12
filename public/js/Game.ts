@@ -210,7 +210,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     }
     class BlobObject {
         public guest: boolean;
-        public owner: string | undefined;
+        public owner: string; //TODO: remove undefined type
         public br: number | undefined;
         public img: HTMLImageElement;
         public direction: number;
@@ -223,8 +223,8 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         public role: number;
         public ready: boolean | undefined;
 
-        constructor(br?: number,
-                    owner?: string,
+        constructor(br: number,
+                    owner: string,
                     x: number = window.innerWidth / 2,
                     y: number = window.innerHeight / 2) {
             this.guest = false;
@@ -273,8 +273,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                     canvasY: number = canvas.height / 2 - height;
                 const tier: Tier = getTier(this.br || 0);
                 if (!tier || !tier.tier) return;
-                if (!this.owner) return;
-                if (this.owner === ownBlob.owner) {
+                if (this.owner === ownBlob.owner && this.owner) {
                     ctx.fillStyle = `#${tier.colorCode}`;
                     ctx.font = `${15 * scale}px Dosis`;
                     ctx.drawImage(this.img,
@@ -310,7 +309,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                             20 * scale,
                             20 * scale);
                     }
-                } else {
+                } else if (this.owner) {
                     let blobCanvasX = 0,
                         blobCanvasY = 0;
                     if (ownBlob.x >= this.x) {
@@ -370,7 +369,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                        width: number = 30,
                        height: number = 30): void {
             for (const blob of blobArray) {
-                blob.display(displayUser, displayBr, width, height);
+                blob.display(displayUser, displayBr, width, height).catch(console.error);
             }
         }
 
@@ -423,12 +422,13 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             return this.x < (ownBlob.x + 10) && this.x > (ownBlob.x - 10) && this.y < (ownBlob.y + 10) && this.y > (ownBlob.y - 10);
         }
     }
-
     // -------------
     // Canvas
     // -------------
     function animationFrame(): any {
-        if (windowBlur) return window.requestAnimationFrame(animationFrame);
+        if (windowBlur) {
+            return window.requestAnimationFrame(animationFrame);
+        }
 
         // FPS meter
         if (Date.now() - lastIteration > 200) { // TODO: remove this
@@ -449,7 +449,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             const timestampBefore: number = Date.now();
             request("/api/ping", "GET").then(res => {
                 const request: any = JSON.parse(res.responseText);
-                const diff: number = ping = (Date.now() - timestampBefore);
+                const diff: number = ping = (request.arrived - timestampBefore);
                 const latencyElement: HTMLElement | null = document.getElementById("latency");
                 if (!latencyElement) return;
                 latencyElement.innerHTML = `• Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
@@ -489,6 +489,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
         if (details.singleplayer === false && movable)
             socket.emit(EventType.COORDINATE_CHANGE, { x: ownBlob.x, y: ownBlob.y }, "ffa");
+
 
         clearCanvas(ctx);
         drawBorder(ctx);
@@ -571,7 +572,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             return document.location.href = "/login/";
 
         // Own blob
-        ownBlob.owner = eventd.owner;
+        ownBlob.owner = eventd.username;
         ownBlob.directionChangedAt = Date.now();
         ownBlob.directionChangeCoordinates.x = ownBlob.x = eventd.x;
         ownBlob.directionChangeCoordinates.y = ownBlob.y = eventd.y;
@@ -871,6 +872,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         context.font = "20px Raleway";
         context.fillText("HP", canvas.width - 35, canvas.height - 20);
         context.fillStyle = "white";
+        window.requestAnimationFrame(animationFrame);
     }
     function displayNoNomAreas(context: CanvasRenderingContext2D | null = ctx): void {
         if (!objects.noNomAreas) return;
@@ -1054,12 +1056,12 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     // -------------
     // Other
     // -------------
-    const ownBlob: BlobObject = new BlobObject();
+    const ownBlob: BlobObject = new BlobObject(1000, "");
     ownBlob.ready = false;
     ownBlob
         .setBlob()
         .then(() => {
-            ownBlob.display(true, true);
+            ownBlob.display(true, true).catch(console.error);
         });
     if (/[?&]guest=true/.test(window.location.search)) {
         ownBlob.guest = true;
