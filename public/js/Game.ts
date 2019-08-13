@@ -611,7 +611,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             newBlob.role = currentBlob.role;
             newBlob.direction = currentBlob.direction;
             newBlob.directionChangedAt = currentBlob.directionChangedAt;
-            newBlob.setBlob()
+            newBlob.setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
                 .then(() => newBlob.display());
 
             blobs.push(newBlob);
@@ -645,7 +645,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         newBlob.role = eventd.role;
         newBlob.directionChangedAt = eventd.directionChangedAt;
         newBlob
-            .setBlob()
+            .setBlob(<BlobType>`../assets/${eventd.blob}.png`)
             .then(() => newBlob.display(true, true));
         blobs.push(newBlob);
     });
@@ -663,7 +663,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             if (!target) {
                 const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
                 newBlob
-                    .setBlob()
+                    .setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
                     .then(() => newBlob.display(true, true));
                 if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
                 blobs.push(newBlob);
