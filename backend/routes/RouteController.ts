@@ -71,8 +71,8 @@ export default class RouteController {
         this.app.post("/login", async (req: express.Request, res: express.Response) => {
             const { username, password } = req.body;
             if (!username || !password || typeof username !== "string" || typeof password !== "string")
-                return res.status(401).json({
-                    message: "Please enter a valid username and password."
+                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                    res.send("<script>alert('Please enter your username and password.');</script>" + data);
                 });
 
             const banned: { is: boolean, reason?: string, expires?: number } = {
@@ -90,22 +90,20 @@ export default class RouteController {
                 });
             });
             if (banned.is && banned.expires)
-                return res.status(403).json({
-                    message: "You have been banned.",
-                    reason: banned.reason,
-                    expires: new Date(banned.expires).toLocaleString()
+                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                    res.send("<script>alert('You are banned: " + banned.reason + "\\nExpires: " + new Date(Number(banned.expires)).toLocaleString() + "');</script>" + data);
                 });
 
             base.db.prepare("SELECT * FROM accounts WHERE username = ?")
                 .then((prepare: any) => prepare.get([ username ]))
                 .then(async (result: any) => {
                     if (!result)
-                        return res.status(401).json({
-                            message: "Invalid username or password."
+                        return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                            res.send("<script>alert('Invalid username or password.');</script>" + data);
                         });
                     if (!bcrypt.compareSync(password, result.password))
-                        return res.status(401).json({
-                            message: "Wrong password."
+                        return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                            res.send("<script>alert('Invalid username or password.');</script>" + data);
                         });
 
                     const sessionExists: boolean = await SessionIDManager.exists(base.db, {
@@ -141,19 +139,31 @@ export default class RouteController {
         });
         this.app.post("/register", async (req: express.Request, res: express.Response) => {
             if (typeof req.body.username !== "string" || typeof req.body.password !== "string" || typeof req.body["captcha-input"] !== "string")
-                return res.send("Username, password and captcha need to be set."); // TODO: better error
+                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                    res.send("<script>alert('Please enter a username, password and the given captcha.');</script>" + data);
+                });
             if (req.body.username.length < 3 || req.body.username.length > 14)
-                return res.send("Username needs to be between 3 and 14 characters.");
+                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                    res.send("<script>alert('Username needs to be at least 3 characters long and must not be longer than 14 characters.');</script>" + data);
+                });
             if (req.body.password.length < 6 || req.body.password.lengt > 40)
-                return res.send("Password needs to be between 6 and 40 characters.");
+                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                    res.send("<script>alert('Password needs to be at least 6 characters long and must not be longer than 40 characters.');</script>" + data);
+                });
             if (/[^\w ]+/.test(req.body.username))
-                return res.send("Username does not match pattern. Please only use letters and numbers.");
+                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                    res.send("<script>alert('Username does not match pattern. Please only use numbers and letters.');</script>" + data);
+                });
             if (!base.captchas.some((v: Captcha) => v.captcha === req.body["captcha-input"]))
-                return res.send("Wrong captcha!");
+                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                    res.send("<script>alert('Wrong captcha.');</script>" + data);
+                });
 
             const testQuery: any = await base.db.get("SELECT * FROM accounts WHERE upper(username) = ?", req.body.username.toUpperCase());
             if (testQuery)
-                return res.send("Username is already taken.");
+                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                    res.send("<script>alert('Username is already taken.');</script>" + data);
+                });
 
             const hash: string = bcrypt.hashSync(req.body.password, 10);
 
@@ -167,7 +177,9 @@ export default class RouteController {
                     res.send("Account successfully created! Redirecting in 5 seconds...<script>setTimeout(()=>document.location.href='/',5000);</script>");
                 })
                 .catch((err: any) => {
-                    res.status(500).send("An error occurred on the server while trying to create account: " + err);
+                    return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                        res.send("<script>alert('An server error occurred: " + err + "');</script>" + data);
+                    });
                 });
         });
         this.app.get("/", (req: express.Request, res: express.Response) => {
