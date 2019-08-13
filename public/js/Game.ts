@@ -653,7 +653,6 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         if (!ownBlob || !ownBlob.ready) return;
         for (let i: number = 0; i < eventd.length; ++i) {
             const currentBlob: any = eventd[i];
-            if (currentBlob.owner === ownBlob.owner) continue;
             const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
             if (!target) {
                 const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
@@ -663,8 +662,11 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
                 blobs.push(newBlob);
             } else {
-                target.x = currentBlob.x;
-                target.y = currentBlob.y;
+                if (currentBlob.owner !== ownBlob.owner) {
+                    target.x = currentBlob.x;
+                    target.y = currentBlob.y;
+                }
+                target.health = currentBlob.health;
             }
         }
     });
