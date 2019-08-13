@@ -18,9 +18,6 @@ const base: Base = new Base({
             console.log("WebServer running!");
         }
     },
-    wsServer: new ws.Server({
-        port: 8080
-    }),
     database: sqlite
 });
 
