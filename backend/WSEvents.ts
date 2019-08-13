@@ -27,7 +27,7 @@ export default class {
 
     executeEvent(type: string, data: any, ...args: any[]): any {
         const {io} = this.base;
-        const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === "ffa");
+        const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === args[1]);
         if (type === EventTypes.PLAYER_CREATE) {
             const blob: any = args[0];
 
