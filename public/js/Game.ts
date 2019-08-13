@@ -92,6 +92,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     };
     const details: any = {
         mode: "FFA",
+        id: "ffa",
         singleplayer: false
     };
     let ping: number = 0;
@@ -498,7 +499,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         else if (ownBlob.direction === 3 && movable)
             ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
         if (details.singleplayer === false && movable)
-            socket.emit(EventType.COORDINATE_CHANGE, { x: ownBlob.x, y: ownBlob.y }, "ffa");
+            socket.emit(EventType.COORDINATE_CHANGE, { x: ownBlob.x, y: ownBlob.y }, details.id);
 
 
         clearCanvas(ctx);
@@ -691,7 +692,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = Direction.UP;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
             } else if (buttonID === htmlButtonIDs[1]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -700,7 +701,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = Direction.DOWN;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
             } else if (buttonID === htmlButtonIDs[2]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -709,7 +710,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = Direction.LEFT;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
             } else if (buttonID === htmlButtonIDs[3]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -718,7 +719,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = Direction.RIGHT;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
             }
         });
     }
@@ -738,7 +739,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                     user: targetUserElement.value,
                     // @ts-ignore
                     reason: targetUserReason.value
-                });
+                }, details.id);
             });
         }
         const closeMenu: HTMLElement | null = document.getElementById("closemenu");
@@ -767,7 +768,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 4;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
                 break;
             case "w":
                 ownBlob.directionChangedAt = Date.now();
@@ -777,7 +778,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 0;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
                 break;
             case "d":
                 ownBlob.directionChangedAt = Date.now();
@@ -787,7 +788,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 1;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
                 break;
             case "s":
                 ownBlob.directionChangedAt = Date.now();
@@ -797,7 +798,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 2;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
                 break;
             case "a":
                 ownBlob.directionChangedAt = Date.now();
@@ -807,13 +808,13 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 3;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob);
+                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
                 break;
             case "n":
                 if (Date.now() - ownBlob.lastnom <= 1500) return;
                 ownBlob.lastnom = Date.now();
                 if (!details.singleplayer)
-                    socket.emit(EventType.NOM_KEY);
+                    socket.emit(EventType.NOM_KEY, {}, details.id);
                 else {
                     const target: BlobObject | undefined = BlobObject.find(ownBlob.x, ownBlob.y, true);
                     if (!target) return;
@@ -1051,7 +1052,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             if (attackBlob.y < (target.y + 30) && attackBlob.y > (target.y - 30)) {
                 target.health -= randomNumber(30, 40);
                 if (target.health <= 0) {
-                    socket.emit(EventType.SP_NOM_KEY, { attackBlob, target }, "ffa");
+                    socket.emit(EventType.SP_NOM_KEY, { attackBlob, target }, details.id);
                     target.health = 100;
                 }
             }
@@ -1104,7 +1105,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                         if (/[&?]mode=colors/.test(document.location.search)) {
                             details.mode = "Colors";
                         } else {
-                            socket.emit(EventType.PLAYER_CREATE, sessionid, "ffa");
+                            socket.emit(EventType.PLAYER_CREATE, sessionid, details.id);
                             details.mode = "FFA";
                         }
                         const loadingScreen: HTMLElement | null = document.getElementById("loading-screen");
