@@ -97,6 +97,15 @@
         document.location.href = "/";
     });
     void (function() {
+        function parseDistance(dist) {
+            if (dist > 1000)
+                return (dist / 1000).toFixed(2) + "M";
+            else if (dist > 1) {
+                return dist.toFixed(2) + "K";
+            }
+            else return (dist * 1000).toFixed(0);
+        }
+
         const session = document.cookie.split(/; */).find(v => v.startsWith("session=")).split("=")[1];
         const stats = {
             br: parseInt("[!BLOBRATING]"),
@@ -109,7 +118,7 @@
 
         document.getElementById("br").innerHTML = `${stats.br} BR (${getTier(stats.br).tier})`;
         document.getElementById("blobcoins").innerHTML = `${stats.blobcoins} Blobcoins`;
-        document.getElementById("distance").innerHTML = `Distance travelled: ${stats.distance.toFixed(2)}K pixels`;
+        document.getElementById("distance").innerHTML = `Distance travelled: ${parseDistance(stats.distance)} pixels`;
         for (const blob of stats.blobs) {
             const blobElement = document.createElement("div");
             blobElement.className = "card bloblist-entry";
