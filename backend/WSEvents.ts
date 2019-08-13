@@ -25,19 +25,20 @@ export default class {
         this.base = base;
     }
 
-    executeEvent(type: string, data: any, ...args: any[]): any {
+    async executeEvent(type: string, data: any, ...args: any[]): Promise<any> {
         const {io} = this.base;
         const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === args[1]);
         if (type === EventTypes.PLAYER_CREATE) {
-            const blob: any = args[0];
+            const session: any = args[0];
 
             if (!room) return;
 
             if (room.players.length >= 100) io.to(data.id).emit(EventTypes.PLAYER_KICK, "Too many players online (100)!");
 
-            if (typeof blob !== "string") return;
+            if (typeof session !== "string") return;
 
-            let socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === blob);
+            let socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
+            let blob: string;
 
             if (!socket) {
 
@@ -52,14 +53,18 @@ export default class {
                     role: -1,
                     guest: true
                 };
-            } else socket.guest = false;
-
+                blob = "blobowo";
+            } else {
+                const user: any = await this.base.db.get("SELECT activeBlob FROM accounts WHERE username = ?", socket.username);
+                blob = user.activeBlob;
+                socket.guest = false;
+            }
 
 
             const newblob: Player = new Player(this.base);
 
             newblob.anticheat = new AntiCheat();
-
+            newblob.blob = blob;
             newblob.directionChangeCoordinates.x = newblob.x = Math.floor(Math.random() * 600);
             newblob.directionChangeCoordinates.y = newblob.y = Math.floor(Math.random() * 600);
             newblob.role = socket.role;
@@ -83,6 +88,7 @@ export default class {
                 role: socket.role,
                 x: newblob.directionChangeCoordinates.x,
                 y: newblob.directionChangeCoordinates.y,
+                blob,
                 users: room.players
             });
 
