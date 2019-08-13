@@ -26,7 +26,6 @@ interface Server {
 
 interface BaseOptions {
     server: Server;
-    wsServer: ws.Server;
     database?: any;
 }
 
@@ -38,7 +37,6 @@ interface Maintenance {
 export default class Base {
     static algorithm: string = process.platform === "linux" ? "./b {ownbr} {opponentbr} --br" : "b {ownbr} {opponentbr} --br";
     public server: Server;
-    public wsServer: ws.Server;
     public db: any;
     public dbToken: string;
     public dbPath: string | undefined;
@@ -60,7 +58,6 @@ export default class Base {
     constructor(options: BaseOptions) {
         this.server = options.server;
         this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
-        this.wsServer = options.wsServer;
         this.db = options.database;
         this.socket = socket;
         this.sockets = [];
