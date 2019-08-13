@@ -131,6 +131,9 @@ export default class Base {
         setInterval(() => {
             const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa");
             if (!room) return;
+            for (let i: number = 0; i < room.players.length; ++i) {
+                room.players[i].regenerate(true);
+            }
             io.sockets.emit("coordinateChange", room.players);
         }, 20);
     }
