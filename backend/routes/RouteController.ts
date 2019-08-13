@@ -139,29 +139,29 @@ export default class RouteController {
         });
         this.app.post("/register", async (req: express.Request, res: express.Response) => {
             if (typeof req.body.username !== "string" || typeof req.body.password !== "string" || typeof req.body["captcha-input"] !== "string")
-                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                return readFile("./public/register.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('Please enter a username, password and the given captcha.');</script>" + data);
                 });
             if (req.body.username.length < 3 || req.body.username.length > 14)
-                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                return readFile("./public/register.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('Username needs to be at least 3 characters long and must not be longer than 14 characters.');</script>" + data);
                 });
             if (req.body.password.length < 6 || req.body.password.lengt > 40)
-                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                return readFile("./public/register.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('Password needs to be at least 6 characters long and must not be longer than 40 characters.');</script>" + data);
                 });
             if (/[^\w ]+/.test(req.body.username))
-                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                return readFile("./public/register.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('Username does not match pattern. Please only use numbers and letters.');</script>" + data);
                 });
             if (!base.captchas.some((v: Captcha) => v.captcha === req.body["captcha-input"]))
-                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                return readFile("./public/register.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('Wrong captcha.');</script>" + data);
                 });
 
             const testQuery: any = await base.db.get("SELECT * FROM accounts WHERE upper(username) = ?", req.body.username.toUpperCase());
             if (testQuery)
-                return readFile("./public/login.html", "utf8", (err: any, data: any) => {
+                return readFile("./public/register.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('Username is already taken.');</script>" + data);
                 });
 
@@ -177,8 +177,8 @@ export default class RouteController {
                     res.send("Account successfully created! Redirecting in 5 seconds...<script>setTimeout(()=>document.location.href='/',5000);</script>");
                 })
                 .catch((err: any) => {
-                    return readFile("./public/login.html", "utf8", (err: any, data: any) => {
-                        res.send("<script>alert('An server error occurred: " + err + "');</script>" + data);
+                    return readFile("./public/register.html", "utf8", (err: any, data: any) => {
+                        res.send("<script>alert('A server error occurred: " + err + "');</script>" + data);
                     });
                 });
         });
