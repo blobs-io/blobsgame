@@ -115,7 +115,9 @@ export default class APIController {
         });
         this.app.get("/api/players", (req: express.Request, res: express.Response) => {
             this.base.db.all("SELECT username, br, createdAt, role, wins, losses FROM accounts ORDER BY br DESC LIMIT 25")
-                .then(res.json);
+                .then((result: any) => {
+                    res.json(result);
+                });
         });
         this.app.get("/api/verify", async (req: express.Request, res: express.Response) => {
             if (typeof req.headers.code === "undefined") {
