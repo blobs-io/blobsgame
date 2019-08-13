@@ -1,6 +1,7 @@
 # blobs.io
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f8355022c37c4c2f9c675f64b4378c88)](https://app.codacy.com/app/y21/blobs.io?utm_source=github.com&utm_medium=referral&utm_content=blobs-io/blobs.io&utm_campaign=Badge_Grade_Dashboard)
+[![Build Status](https://travis-ci.org/blobs-io/blobs.io.svg?branch=master)](https://travis-ci.org/blobs-io/blobs.io)
 
 The official repository for the blobs.io website<br/>
 **Note:** This game is still in development. It may not work yet. <br />
