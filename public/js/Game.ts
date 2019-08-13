@@ -233,11 +233,14 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         public y: number;
         public role: number;
         public ready: boolean | undefined;
+        public blob: BlobType;
 
         constructor(br: number,
                     owner: string,
                     x: number = window.innerWidth / 2,
-                    y: number = window.innerHeight / 2) {
+                    y: number = window.innerHeight / 2,
+                    blob: BlobType = BlobType.Blobowo) {
+            this.blob = blob;
             this.guest = false;
             this.owner = owner;
             this.br = br;
@@ -584,12 +587,14 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
 
         // Own blob
         ownBlob.owner = eventd.username;
+        ownBlob.blob = eventd.blob;
         ownBlob.directionChangedAt = Date.now();
         ownBlob.directionChangeCoordinates.x = ownBlob.x = eventd.x;
         ownBlob.directionChangeCoordinates.y = ownBlob.y = eventd.y;
         ownBlob.br = eventd.br;
         ownBlob.ready = true;
         ownBlob.role = eventd.role;
+        ownBlob.setBlob(<BlobType>`../assets/${eventd.blob}.png`).catch(console.log);
         blobs.push(ownBlob);
 
         if (details.singleplayer)
