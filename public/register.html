@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>blobs.io – register</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" media="only screen and (max-width: 1025px)" href="/css/style.small.css" />
+    <meta name="description" content="Be the best blob!">
+    <meta name="author" content="y21">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:image" content="https://cdn.discordapp.com/emojis/458326620076507136.png" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/favicons/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/favicons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/favicons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/favicons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/favicons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/favicons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/favicons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/favicons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="assets/favicons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicons/favicon-16x16.png">
+    <link rel="manifest" href="/assets/favicons/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/assets/favicons/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div id="auth">
+    <form method="POST">
+        <h1>Blobs<span class="green">.</span><span class="blue">io</span></h1>
+        <input type="text" placeholder="Username" name="username" id="user" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="password" placeholder="Password" name="password" id="pass" /><br/>
+        <div id="captcha">
+            <canvas width="250" height="100" id="captcha-canvas">
+                Please use a browser that supports the canvas tag
+            </canvas><br/>
+            <input type="text" maxlength="16" placeholder="Answer" name="captcha-input" id="captcha-input" style="
+    text-align: center;
+">
+        </div>
+        <input type="submit" value="Register" id="register-btn" />
+        <span class="reg-label">Already have an account? <a href="../login">Login</a></span>
+    </form>
+</div>
+<center><input type="submit" value="Play as guest" id="guest-btn" style="
+    background-color: #27ae60;
+    "></center>
+<a href="https://github.com/blobs-io/blobs.io" id="peek"></a>
+<span class="peek-label">Peek into the source</span>
+</body>
+<script src="/js/request.js"></script>
+<script src="/js/particles.js"></script>
+<script>
+    initParticles();
+    (function() {
+        const server = document.location.href.match(/https?:\/\/[^\/]+/)[0];
+        const context = document.getElementById("captcha-canvas").getContext("2d");
+        context.fillStyle = "white";
+        context.font = "20px Arial";
+        context.fillText("Requesting captcha...", 6, 20);
+
+        request("/api/captcha/request", "GET").then(v => {
+            const response = JSON.parse(v.responseText);
+            console.log(server + response.url);
+            const image = new Image();
+            image.src = server + response.url;
+            image.onload = () => {
+                context.drawImage(image, 0, 0, 250, 100);
+            };
+        }).catch(err => {
+            console.log("An error occurred while trying to request a captcha: " + err.toString());
+        });
+    })();
+</script>
+</html>

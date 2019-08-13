@@ -1,0 +1,68 @@
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Dosis:600|Raleway" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/css/game.css" />
+    <link rel="stylesheet" type="text/css" media="only screen and (max-width: 1025px)" href="/css/game.small.css" />
+    <link rel="stylesheet" type="text/css" href="/css/loading.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+<body>
+<div id="kick-menu">
+    <span id="closemenu">Close</span>
+    <h2 align="center" class="heading white">Kick User</h2>
+    <input type="text" id="target-name" placeholder="Username" />
+    <input type="text" id="kick-reason" placeholder="Reason" />
+    <button id="kickbtn">Kick</button>
+</div>
+<div id="game">
+    <div id="nom-hist">
+    </div>
+    <div id="leaderboard"></div>
+    <div id="nom-cooldown">
+        <img src="/assets/blobnom.png" width="20" height="20" id="nom-image" />
+    </div>
+    <span id="fps-meter">60 FPS</span>
+    <span id="latency">• Calculating ping ...</span>
+    <div id="dpad-controls">
+        <img src="/assets/mobile_buttons/mobile_up.png" id="btnup" width="75" height="75" class="dpad-btn btnmid" />
+        <img src="/assets/mobile_buttons/mobile_left.png" id="btnleft" width="75" height="75" class="dpad-btn" />
+        <img src="/assets/mobile_buttons/mobile_right.png" id="btnright" width="75" height="75" class="dpad-btn btnright" />
+        <img src="/assets/mobile_buttons/mobile_down.png" id="btndown" width="75" height="75" class="dpad-btn btnmid" />
+    </div>
+    <img src="/assets/mobile_buttons/mobile_nom.png" width="75" height="75" id="nom-btn-mobile">
+    <canvas width=600 height=600></canvas>
+</div>
+<div id="loading-screen">
+    <canvas id="particles"></canvas>
+    <div id="loading-wrap">
+        <div id="headline">
+            <h1 class="heading">Free For All</h1>
+        </div>
+        <div id="players">
+            <h1 class="heading centered">Online</h1>
+
+        </div>
+        <div id="tip">
+            <h1 class="heading centered">Tip</h1>
+            Gain blob rating to get to a higher tier. Tiers usually have a range of about 2000.<br/>
+            <p><span style="color: #b57156">Bronze</span> (0 - 1499 BR)</p>
+            <p style="margin-top: -10px"><span style="color: #dbdbdb">Silver</span> (1500 - 2999 BR)</p>
+            <p style="margin-top: -10px"><span style="color: #E5E4E2">Platinum</span> (3000 - 4999 BR)</p>
+            <p style="margin-top: -10px"><span style="color: #D7AF00">Gold</span> (5000 - 7999 BR)</p>
+            <p style="margin-top: -10px"><span style="color: #16f7ef">Diamond</span> (8000 - 9499 BR)</p>
+            <p style="margin-top: -10px"><span style="color: #16f77f">Painite</span> (9500 - 9999 BR)</p>
+        </div>
+        <div id="loading-bar" style="text-align: center">
+            <div id="bar-inside"></div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="/js/sockets.js"></script>
+<script src="/js/request.js"></script>
+<script src="/js/particles.js"></script>
+<script src="/js/Game.js"></script>
+<script>
+    initParticles();
+</script>
+</html>
