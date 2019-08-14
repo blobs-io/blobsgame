@@ -198,5 +198,13 @@ export default class RouteController {
                 res.send(r);
             });
         });
+        this.app.get("/sources", (req: express.Request, res: express.Response) => {
+            readFile("./public/sources.html", "utf8", (e, r) => {
+                if (e) return res.status(500).json({
+                    message: "An error occurred on the server (could not read file)"
+                });
+                res.send(r);
+            });
+        });
     }
 }
