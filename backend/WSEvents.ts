@@ -15,8 +15,20 @@ const EventTypes: any = {
     DIRECTIONCHANGE: "ffaDirectionChange",
     NOMKEY: "ffaNomKey",
     PLAYER_KICK_C: "ffaKickPlayer",
-    SESSIONDELETE: "sessionDelete"
+    SESSIONDELETE: "sessionDelete",
+    HEARTBEAT: "heartbeat"
 };
+enum OPCODE {
+    HELLO = 1,
+    HEARTBEAT = 2,
+    EVENT = 3,
+    CLOSE = 4
+}
+interface EventData {
+    op: OPCODE,
+    d: any,
+    t: string
+}
 
 export default class {
     public base: Base;
@@ -256,6 +268,101 @@ export default class {
             }).then(() => {
                 io.to(data.id).emit("sessionDelete");
             }).catch(console.log);
+        }
+    }
+
+    async exec(conn: any, id: string, data: any) {
+        let parsed: EventData;
+        try {
+            parsed = JSON.parse(data);
+        } catch(e) {
+            return;
+        }
+        const { op, d } = parsed;
+        if (typeof op !== "number" || typeof d !== "object") return;
+        // TODO: Handle more events...
+        if (op === OPCODE.HELLO) {
+            const session: any = d.session;
+            const room: Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room);
+
+            if (!room) return;
+            if (room.players.length >= 100)
+                return conn.send(JSON.stringify({
+                    op: OPCODE.EVENT,
+                    d: {
+                        message: "Too many players online (100)"
+                    },
+                    t: EventTypes.PLAYER_KICK
+                }));
+
+            if (typeof session !== "string") return;
+
+            let socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
+            let blob: string;
+
+            if (!socket) {
+                if (room.players.some((v: Player) => v.id === id))
+                    return conn.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        d: {
+                            message: "Only one socket per client allowed"
+                        },
+                        t: EventTypes.PLAYER_KICK
+                    }));
+                let guestID: string = Math.floor((Math.random() * 9999) + 1).toString();
+                while (this.base.sockets.some((v: Socket) => v.username === `Guest${guestID}`)) {
+                    guestID = Math.floor((Math.random() * 9999) + 1).toString();
+                }
+                socket = {
+                    username: "Guest" + guestID,
+                    br: 0,
+                    role: -1,
+                    guest: true
+                };
+                blob = "blobowo";
+            } else {
+                const user: any = await this.base.db.get("SELECT activeBlob FROM accounts WHERE username = ?", socket.username);
+                blob = user.activeBlob;
+                socket.guest = false;
+            }
+
+
+            const newblob: Player = new Player(this.base);
+
+            newblob.anticheat = new AntiCheat();
+            newblob.blob = blob;
+            newblob.directionChangeCoordinates.x = newblob.x = Math.floor(Math.random() * 600);
+            newblob.directionChangeCoordinates.y = newblob.y = Math.floor(Math.random() * 600);
+            newblob.role = socket.role;
+            newblob.owner = socket.username;
+            newblob.br = socket.br;
+            newblob.id = id;
+            newblob.guest = socket.guest;
+
+            newblob.maximumCoordinates = {
+                width: room.map.map.mapSize.width,
+                height: room.map.map.mapSize.height
+            };
+
+
+            room.players.push(newblob);
+
+            conn.send(JSON.stringify({
+                op: OPCODE.EVENT,
+                d: {
+                    user: {
+                        username: socket.username,
+                        br: socket.br,
+                        role: socket.role,
+                        x: newblob.directionChangeCoordinates.x,
+                        y: newblob.directionChangeCoordinates.y,
+                        blob
+                    },
+                    users: room.players,
+                    objects: room.map.map.objects
+                },
+                t: EventTypes.HEARTBEAT
+            }));
         }
     }
 }
