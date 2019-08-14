@@ -1,6 +1,7 @@
 declare const io: Function;
 declare const request: (path: string, method: string, headers?: any) => Promise<any>;
 declare const socket: any;
+declare const server: string;
 const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
 
 (() => {
@@ -13,6 +14,9 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         const cookie = document.cookie.split(/; */).find((v: string) => v.startsWith("session=")) || "";
         return cookie.substr(cookie.indexOf("=") + 1);
     })();
+    const ws: WebSocket = new WebSocket(
+        server.replace(/^https?/, "ws").replace(/(:\d{1,5})?$/, ":15304")
+    );
     let lastTick: number = Date.now();
     let blobs: BlobObject[] = [];
     const objects: GameObject = {
@@ -114,10 +118,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     enum ItemType {
         Health = 0
     }
+    enum OPCODE {
+        HELLO = 1,
+        HEARTBEAT = 2,
+        EVENT = 3,
+        CLOSE = 4
+    }
     enum EventType {
         COORDINATE_CHANGE  = "coordinateChange",
         OBJECTS_HEARTBEAT  = "ffaObjectsHeartbeat",
-        HEARTBEAT          = "ffaHeartbeat",
+        HEARTBEAT          = "heartbeat",
         UNAUTHORIZED       = "ffaUnauthorized",
         KICK               = "ffaKick",
         KICK_PLAYER        = "ffaKickPlayer",
@@ -436,6 +446,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             return this.x < (ownBlob.x + 10) && this.x > (ownBlob.x - 10) && this.y < (ownBlob.y + 10) && this.y > (ownBlob.y - 10);
         }
     }
+
     // -------------
     // Canvas
     // -------------
@@ -563,6 +574,49 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         setTimeout(() => {
             nomHistoryDiv.removeChild(nomEntryDiv);
         }, 3500);
+    });
+
+    // TODO: Add event listener for other events
+    ws.addEventListener("message", ({ data }) => {
+        const { op, t: eventType, d: eventData } = JSON.parse(data);
+        if (op === OPCODE.EVENT) {
+            if (eventType === EventType.HEARTBEAT) {
+                if (eventData.user.role === -1 && !/[?&]guest=true/.test(window.location.search))
+                    return document.location.href = "/login/";
+
+                // Own blob
+                ownBlob.owner = eventData.user.username;
+                ownBlob.blob = eventData.user.blob;
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates.x = ownBlob.x = eventData.user.x;
+                ownBlob.directionChangeCoordinates.y = ownBlob.y = eventData.user.y;
+                ownBlob.br = eventData.user.br;
+                ownBlob.ready = true;
+                ownBlob.role = eventData.user.role;
+                ownBlob.setBlob(<BlobType>`../assets/${eventData.user.blob}.png`).catch(console.log);
+                blobs.push(ownBlob);
+
+                if (details.singleplayer)
+                    eventData.users = [];
+                for (let i: number = 0; i < eventData.users.length; ++i) {
+                    const currentBlob: any = eventData.users[i];
+                    if (currentBlob.owner === ownBlob.owner ||
+                        blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) continue;
+                    const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner);
+                    newBlob.directionChangeCoordinates = {
+                        x: currentBlob.x,
+                        y: currentBlob.y
+                    };
+                    newBlob.role = currentBlob.role;
+                    newBlob.direction = currentBlob.direction;
+                    newBlob.directionChangedAt = currentBlob.directionChangedAt;
+                    newBlob.setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
+                        .then(() => newBlob.display());
+
+                    blobs.push(newBlob);
+                }
+            }
+        }
     });
     socket.on(EventType.PLAYER_DELETE, (eventd: any) => {
         if (details.singleplayer) return;
@@ -1063,6 +1117,13 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             }
         }
     }
+    function sendOnReady(wsc: WebSocket, data: string) {
+        if (wsc.readyState === WebSocket.OPEN) {
+            wsc.send(data);
+        } else if (wsc.readyState === WebSocket.CONNECTING) {
+            wsc.onopen = (): any => wsc.send(data);
+        }
+    }
 
 
 
@@ -1110,7 +1171,14 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                         if (/[&?]mode=colors/.test(document.location.search)) {
                             details.mode = "Colors";
                         } else {
-                            socket.emit(EventType.PLAYER_CREATE, sessionid, details.id);
+                            sendOnReady(ws,
+                                JSON.stringify({
+                                    op: OPCODE.HELLO,
+                                    d: {
+                                        session: sessionid,
+                                        room: details.id
+                                    }
+                            }));
                             details.mode = "FFA";
                         }
                         const loadingScreen: HTMLElement | null = document.getElementById("loading-screen");
