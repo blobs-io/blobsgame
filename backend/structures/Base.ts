@@ -56,11 +56,13 @@ export default class Base {
     public ClanController: ClanController;
     public captchas: Captcha[];
     public RouteController: RouteController;
+    public wsSockets: any[];
 
     constructor(options: BaseOptions) {
         this.server = options.server;
         this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
         this.wsServer = options.wsServer;
+        this.wsSockets = [];
         this.db = options.database;
         this.socket = socket;
         this.sockets = [];
@@ -118,14 +120,15 @@ export default class Base {
         if (this.maintenance.enabled) throw new Error(this.maintenance.reason || "Maintenance");
         const { io } = this;
 
-        io.on("connection", (data: any) => {
-            data.on("disconnect", (...args: any[]) => this.WSHandler.executeEvent("disconnect", data, ...args));
-            data.on("ffaPlayerCreate", (...args: any[]) => this.WSHandler.executeEvent("ffaPlayerCreate", data, ...args));
-            data.on("coordinateChange", (...args: any[]) => this.WSHandler.executeEvent("coordinateChange", data, ...args));
-            data.on("ffaDirectionChange", (...args: any[]) => this.WSHandler.executeEvent("ffaDirectionChange", data, ...args));
-            data.on("ffaNomKey", (...args: any[]) => this.WSHandler.executeEvent("ffaNomKey", data, ...args));
-            data.on("ffaKickPlayer", (...args: any[]) => this.WSHandler.executeEvent("ffaKickPlayer", data, ...args));
-            data.on("sessionDelete", (...args: any[]) => this.WSHandler.executeEvent("sessionDelete", data, ...args));
+        this.wsServer.on("connection", (conn: any) => {
+            let socketID: string = SessionIDManager.generateSessionID(16);
+            while(this.wsSockets.some((v: any) => v.id === socketID))
+                socketID = SessionIDManager.generateSessionID(16);
+
+            this.wsSockets.push({
+                conn, id: socketID
+            });
+            conn.on("message", (data: any) => this.WSHandler.exec(conn, socketID, data));
         });
 
         setInterval(() => {
