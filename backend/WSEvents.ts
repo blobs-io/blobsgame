@@ -27,7 +27,7 @@ export default class {
 
     async executeEvent(type: string, data: any, ...args: any[]): Promise<any> {
         const {io} = this.base;
-        const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === args[1]);
+        let room: Room | undefined = this.base.rooms.find((v: Room) => v.id === args[1]);
         if (type === EventTypes.PLAYER_CREATE) {
             const session: any = args[0];
 
@@ -96,6 +96,7 @@ export default class {
 
         }
         else if (type === EventTypes.DISCONNECT) {
+            room = this.base.rooms.find((r: Room) => r.players.some((p: Player) => p.id === data.id));
             if (!room) return;
             const player: Player | undefined = room.players.find((v: Player) => v.id === data.id);
             if (player) {
