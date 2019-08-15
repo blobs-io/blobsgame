@@ -513,8 +513,15 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         else if (ownBlob.direction === 3 && movable)
             ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
         if (details.singleplayer === false && movable)
-            socket.emit(EventType.COORDINATE_CHANGE, { x: ownBlob.x, y: ownBlob.y }, details.id);
-
+            ws.send(JSON.stringify({
+                op: OPCODE.EVENT,
+                t: EventType.COORDINATE_CHANGE,
+                d: {
+                    x: ownBlob.x,
+                    y: ownBlob.y,
+                    room: details.id
+                }
+            }));
 
         clearCanvas(ctx);
         drawBorder(ctx);
@@ -614,6 +621,40 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                         .then(() => newBlob.display());
 
                     blobs.push(newBlob);
+                }
+
+                // Heartbeat
+                setInterval(() => {
+                    ws.send(JSON.stringify({
+                        op: OPCODE.HEARTBEAT,
+                        d: {
+                            room: details.id
+                        }
+                    }));
+                }, eventData.interval);
+            }
+            else if (eventType === EventType.COORDINATE_CHANGE) {
+                if (!ownBlob || !ownBlob.ready) return;
+                for (let i: number = 0; i < eventData.players.length; ++i) {
+                    const currentBlob: any = eventData.players[i];
+                    const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
+                    if (!target) {
+                        console.log(1);
+                        const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
+                        newBlob
+                            .setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
+                            .then(() => newBlob.display(true, true));
+                        if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
+                        blobs.push(newBlob);
+                    } else {
+                        if (currentBlob.owner !== ownBlob.owner) {
+                            console.log("x " + target.x, "x new: " + currentBlob.x);
+                            console.log("y " + target.y, "y new: " + currentBlob.y);
+                            target.x = currentBlob.x;
+                            target.y = currentBlob.y;
+                        }
+                        target.health = currentBlob.health;
+                    }
                 }
             }
         }
