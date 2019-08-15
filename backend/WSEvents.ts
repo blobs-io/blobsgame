@@ -1,13 +1,14 @@
 import Base from "./structures/Base";
 import Room from "./structures/Room";
-import Socket from "./structures/Socket"
+import Socket, {wsSocket} from "./structures/Socket"
 import Player from "./structures/Player";
 import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
 import * as SessionIDManager from "./structures/SessionIDManager";
+import * as ws from "ws";
 
-const EventTypes: any = {
+export const EventTypes: any = {
     PLAYER_CREATE: "ffaPlayerCreate",
     PLAYER_KICK: "ffaKick",
     DISCONNECT: "disconnect",
@@ -18,20 +19,24 @@ const EventTypes: any = {
     SESSIONDELETE: "sessionDelete",
     HEARTBEAT: "heartbeat"
 };
-enum OPCODE {
+
+export enum OPCODE {
     HELLO = 1,
     HEARTBEAT = 2,
     EVENT = 3,
     CLOSE = 4
 }
-interface EventData {
+
+export interface EventData {
     op: OPCODE,
     d: any,
     t: string
 }
 
-export default class {
+export default class WSHandler {
     public base: Base;
+    static interval: number = 3000;
+    static intervalLimit: number = 5000;
 
     constructor(base: Base) {
         this.base = base;
@@ -124,13 +129,13 @@ export default class {
             if (!room) return;
             let previousPlayer: Player | undefined = room.players.find((v: Player) => v.id === data.id);
             if (!previousPlayer || !previousPlayer.x || !previousPlayer.y) return;
-            if (Math.abs(eventd.x - previousPlayer.x) > 50) {
+            if (Math.abs(eventd.x - previousPlayer.x) > 50 && previousPlayer.anticheat) {
                 previousPlayer.anticheat.penalize(1, Math.abs(eventd.x - previousPlayer.x));
             }
-            if (Math.abs(eventd.y - previousPlayer.y) > 50) {
+            if (Math.abs(eventd.y - previousPlayer.y) > 50 && previousPlayer.anticheat) {
                 previousPlayer.anticheat.penalize(1, Math.abs(eventd.y - previousPlayer.y));
             }
-            if (previousPlayer.anticheat.flags >= 0x14) {
+            if (previousPlayer.anticheat && previousPlayer.anticheat.flags >= 0x14) {
                 io.to(data.id).emit("ffaKick", "Too many flags.");
                 data.disconnect();
             }
@@ -271,16 +276,15 @@ export default class {
         }
     }
 
-    async exec(conn: any, id: string, data: any) {
+    async exec(conn: any, id: string, data: any): Promise<any> {
         let parsed: EventData;
         try {
             parsed = JSON.parse(data);
         } catch(e) {
             return;
         }
-        const { op, d } = parsed;
+        const { op, d, t } = parsed;
         if (typeof op !== "number" || typeof d !== "object") return;
-        // TODO: Handle more events...
         if (op === OPCODE.HELLO) {
             const session: any = d.session;
             const room: Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room);
@@ -359,10 +363,57 @@ export default class {
                         blob
                     },
                     users: room.players,
-                    objects: room.map.map.objects
+                    objects: room.map.map.objects,
+                    interval: WSHandler.interval
                 },
                 t: EventTypes.HEARTBEAT
             }));
         }
+        else if (op === OPCODE.HEARTBEAT) {
+            if (!d || !d.room) return;
+            const room: Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room);
+            if (!room) return;
+            const player: Player | undefined = room.players.find((p: Player) => p.id === id);
+            if (!player) return;
+
+            player.lastHeartbeat = Date.now();
+        }
+        else if (op === OPCODE.EVENT) {
+            if (t === EventTypes.COORDINATECHANGE) {
+                if (typeof d.x !== "number" || typeof d.y !== "number") return;
+                const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === d.room);
+                if (!room) return;
+                let previousPlayer: Player | undefined = room.players.find((v: Player) => v.id === id);
+                if (!previousPlayer || !previousPlayer.x || !previousPlayer.y || !previousPlayer.anticheat) return;
+                if (Math.abs(d.x - previousPlayer.x) > 50) {
+                    previousPlayer.anticheat.penalize(1, Math.abs(d.x - previousPlayer.x));
+                }
+                if (Math.abs(d.y - previousPlayer.y) > 50) {
+                    previousPlayer.anticheat.penalize(1, Math.abs(d.y - previousPlayer.y));
+                }
+                if (previousPlayer.anticheat.flags >= 0x14) {
+                    conn.send(JSON.stringify({
+                        op: OPCODE.CLOSE,
+                        d: {
+                            message: "Too many flags"
+                        }
+                    }));
+                    WSHandler.disconnectSocket(<wsSocket>this.base.wsSockets.find(v => v.id === id), room);
+                    return;
+                }
+
+                if (d.x < 0 || isNaN(d.x)) d.x = 0;
+                if (d.y < 0 || isNaN(d.y)) d.y = 0;
+                if (d.x > 2000) d.x = 2000;
+                if (d.y > 2000) d.y = 2000;
+                previousPlayer.x = d.x;
+                previousPlayer.y = d.y;
+            }
+        }
+    }
+
+    static disconnectSocket(socket: wsSocket, room: Room, code?: number) {
+        socket.conn.close(code);
+        room.players.splice(room.players.findIndex((p: Player) => p.id === socket.id), 1);
     }
 }
