@@ -4,18 +4,19 @@ import * as ws from "ws";
 import * as socket from "socket.io";
 import * as http from "http";
 import bodyParser = require("body-parser");
-import { readFileSync } from "fs";
 
 // Import structures
 import * as SessionIDManager from "./SessionIDManager";
 import WS from "../WSEvents";
 import Room from "./Room";
 import Maps from "./Maps";
-import Socket from "./Socket";
+import * as Socket from "./Socket";
 import APIController from "../api/APIController";
 import ClanController from "../clans/ClanController";
 import RouteController from "../routes/RouteController";
 import Captcha from "./Captcha";
+import Player from "./Player";
+import * as WSEvents from "../WSEvents";
 
 interface Server {
     app: express.Application;
@@ -51,12 +52,12 @@ export default class Base {
     public WSHandler: WS;
     public rooms: Room[];
     public maps: Maps;
-    public sockets: Socket[];
+    public sockets: Socket.default[];
     public APIController: APIController;
     public ClanController: ClanController;
     public captchas: Captcha[];
     public RouteController: RouteController;
-    public wsSockets: any[];
+    public wsSockets: Socket.wsSocket[];
 
     constructor(options: BaseOptions) {
         this.server = options.server;
@@ -120,7 +121,7 @@ export default class Base {
         if (this.maintenance.enabled) throw new Error(this.maintenance.reason || "Maintenance");
         const { io } = this;
 
-        this.wsServer.on("connection", (conn: any) => {
+        this.wsServer.on("connection", (conn: ws) => {
             let socketID: string = SessionIDManager.generateSessionID(16);
             while(this.wsSockets.some((v: any) => v.id === socketID))
                 socketID = SessionIDManager.generateSessionID(16);
@@ -135,9 +136,28 @@ export default class Base {
             const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa");
             if (!room) return;
             for (let i: number = 0; i < room.players.length; ++i) {
-                room.players[i].regenerate(true);
+                const player: Player = room.players[i];
+                const socket: Socket.wsSocket | undefined = this.wsSockets.find((s: Socket.wsSocket) => s.id === player.id);
+                if (!socket) return;
+                if (Date.now() - player.lastHeartbeat > WSEvents.default.intervalLimit) {
+                    socket.conn.send(JSON.stringify({
+                        op: WSEvents.OPCODE.CLOSE,
+                        d: {
+                            message: "Missing heartbeats"
+                        }
+                    }));
+                    WSEvents.default.disconnectSocket(socket, room);
+                    continue;
+                }
+                player.regenerate(true);
+                socket.conn.send(JSON.stringify({
+                    op: WSEvents.OPCODE.EVENT,
+                    t: WSEvents.EventTypes.COORDINATECHANGE,
+                    d: {
+                        players: room.players
+                    }
+                }));
             }
-            io.sockets.emit("coordinateChange", room.players);
         }, 20);
     }
 }
