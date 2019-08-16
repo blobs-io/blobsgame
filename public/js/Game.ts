@@ -532,50 +532,6 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     // -------------
     // Events
     // -------------
-    socket.on(EventType.PLAYER_NOMMED, (eventd: any) => {
-        const loser: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.loser.owner);
-        const winner: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.winner.owner);
-        if (!loser || !winner) return;
-        loser.br = eventd.loser.br;
-        winner.br = eventd.winner.br;
-        loser.directionChangeCoordinates.x = eventd.loser.directionChangeCoordinates.x;
-        loser.directionChangeCoordinates.y = eventd.loser.directionChangeCoordinates.y;
-        loser.directionChangedAt = eventd.loser.directionChangedAt;
-        loser.health = 100;
-        displayLeaderboard();
-
-        const nomHistoryDiv: HTMLElement | null = document.getElementById("nom-hist");
-        const nomEntryDiv: HTMLElement = document.createElement("div");
-        nomEntryDiv.className = "nom-hist-entry";
-        const nomUser: HTMLElement = document.createElement("span");
-        const targetUser: HTMLElement = document.createElement("span");
-        nomUser.className = "nom-user nom-entry";
-        nomUser.innerHTML = `${eventd.winner.owner} (+${eventd.result})`;
-        const newBRLabel: HTMLElement = document.createElement("span");
-        const newBRLabelLoser: HTMLElement = document.createElement("span");
-        newBRLabel.className = "new-br";
-        newBRLabel.innerHTML = eventd.winner.br + " BR";
-        const linebreakWinner: HTMLElement = document.createElement("br");
-        targetUser.className = "target-user nom-entry";
-        targetUser.innerHTML = `${eventd.loser.owner} (-${eventd.result})`;
-        newBRLabelLoser.className = "new-br";
-        newBRLabelLoser.innerHTML = eventd.loser.br + " BR";
-        const linebreakLoser: HTMLElement = document.createElement("br");
-        if (!nomHistoryDiv) return;
-        nomHistoryDiv.appendChild(nomEntryDiv);
-        nomEntryDiv.appendChild(nomUser);
-        nomEntryDiv.appendChild(newBRLabel);
-        nomEntryDiv.appendChild(linebreakWinner);
-        nomEntryDiv.appendChild(targetUser);
-        nomEntryDiv.appendChild(newBRLabelLoser);
-        nomEntryDiv.appendChild(linebreakLoser);
-
-        setTimeout(() => {
-            nomHistoryDiv.removeChild(nomEntryDiv);
-        }, 3500);
-    });
-
-    // TODO: Add event listener for other events
     ws.addEventListener("message", ({ data }) => {
         const { op, t: eventType, d: eventData } = JSON.parse(data);
         if (op === OPCODE.EVENT) {
