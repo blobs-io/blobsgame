@@ -663,11 +663,10 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                     }
                 }
             }
+            else if (eventType === EventType.KICK) {
+                alert("You have been kicked.\nReason: " + (eventData.message || "-"));
+            }
         }
-    });
-    socket.on(EventType.KICK, (eventd: string) => {
-        alert("You have been kicked.\nReason: " + (eventd || "-"));
-        document.location.href = "/login/";
     });
     socket.on(EventType.DIRECTION_CHANGE, (eventd: any) => {
         if (details.singleplayer || eventd.owner === ownBlob.owner) return;
