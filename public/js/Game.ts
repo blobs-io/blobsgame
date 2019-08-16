@@ -639,7 +639,6 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                     const currentBlob: any = eventData.players[i];
                     const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
                     if (!target) {
-                        console.log(1);
                         const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
                         newBlob
                             .setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
@@ -656,63 +655,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                         target.health = currentBlob.health;
                     }
                 }
+
+                for (let i: number = 0; i < blobs.length; ++i) {
+                    const blob: number = eventData.players.findIndex((v: BlobObject) => v.owner === blobs[i].owner);
+                    if (blob === -1) {
+                        blobs.splice(blobs.findIndex((v: BlobObject) => v.owner === blobs[i].owner), 1);
+                    }
+                }
             }
         }
     });
-    socket.on(EventType.PLAYER_DELETE, (eventd: any) => {
-        if (details.singleplayer) return;
-        blobs.splice(blobs.findIndex((v: BlobObject) => v.owner === eventd), 1);
-    });
-    socket.on(EventType.LOGIN_FAILED, alert);
-    socket.on(EventType.OBJECTS_HEARTBEAT, (eventd: any) => {
-        for (let i: number = 0; i < eventd.walls.length; ++i) {
-            const wall: WallObject = new WallObject(eventd.walls[i].x, eventd.walls[i].y);
-            wall.type = eventd.walls[i].type;
-            objects.walls.push(wall);
-        }
-        objects.noNomAreas = [];
-        for (let i: number = 0; i < eventd.noNomArea.length; ++i) {
-            const area: NoNomArea = new NoNomArea(eventd.noNomArea[i].startsAt, eventd.noNomArea[i].endsAt);
-            objects.noNomAreas.push(area);
-        }
-    });
-    socket.on(EventType.HEARTBEAT, (eventd: any) => {
-        if (eventd.role === -1 && !/[?&]guest=true/.test(window.location.search))
-            return document.location.href = "/login/";
-
-        // Own blob
-        ownBlob.owner = eventd.username;
-        ownBlob.blob = eventd.blob;
-        ownBlob.directionChangedAt = Date.now();
-        ownBlob.directionChangeCoordinates.x = ownBlob.x = eventd.x;
-        ownBlob.directionChangeCoordinates.y = ownBlob.y = eventd.y;
-        ownBlob.br = eventd.br;
-        ownBlob.ready = true;
-        ownBlob.role = eventd.role;
-        ownBlob.setBlob(<BlobType>`../assets/${eventd.blob}.png`).catch(console.log);
-        blobs.push(ownBlob);
-
-        if (details.singleplayer)
-            eventd.users = [];
-        for (let i: number = 0; i < eventd.users.length; ++i) {
-            const currentBlob: any = eventd.users[i];
-            if (currentBlob.owner === ownBlob.owner ||
-                blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) continue;
-            const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner);
-            newBlob.directionChangeCoordinates = {
-                x: currentBlob.x,
-                y: currentBlob.y
-            };
-            newBlob.role = currentBlob.role;
-            newBlob.direction = currentBlob.direction;
-            newBlob.directionChangedAt = currentBlob.directionChangedAt;
-            newBlob.setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
-                .then(() => newBlob.display());
-
-            blobs.push(newBlob);
-        }
-    });
-    socket.on(EventType.UNAUTHORIZED, () => document.location.href = "/login");
     socket.on(EventType.KICK, (eventd: string) => {
         alert("You have been kicked.\nReason: " + (eventd || "-"));
         document.location.href = "/login/";
@@ -1204,7 +1156,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         let itr: number = 0, val: number = 0;
         const interval: number = window.setInterval(() => {
             if (Date.now() - lastTick >= 440) {
-                if ((itr++ < 5 || !socket.connected) && val < 100) {
+                if ((itr++ < 5) && val < 100) {
                     bar.style.width = (val += Math.floor(Math.random() * 5)) + "%";
                 } else {
                     bar.style.width = "100%";
