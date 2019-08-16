@@ -5,17 +5,16 @@ import Player from "./structures/Player";
 import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
-import * as SessionIDManager from "./structures/SessionIDManager";
 
-export const EventTypes: any = {
-    PLAYER_KICK: "kick",
-    COORDINATECHANGE: "coordinateChange",
-    DIRECTIONCHANGE: "directionChange",
-    NOMKEY: "nomKey",
-    PLAYER_NOMMED: "playerNommed",
-    PLAYER_KICK_C: "kickPlayer",
-    HEARTBEAT: "heartbeat"
-};
+export enum EventTypes {
+    PLAYER_KICK = "kick",
+    COORDINATECHANGE = "coordinateChange",
+    DIRECTIONCHANGE = "directionChange",
+    NOMKEY = "nomKey",
+    PLAYER_NOMMED = "playerNommed",
+    PLAYER_KICK_C = "kickPlayer",
+    HEARTBEAT = "heartbeat"
+}
 
 export enum OPCODE {
     HELLO = 1,
