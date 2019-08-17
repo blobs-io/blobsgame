@@ -3,6 +3,7 @@ declare const request: (path: string, method: string, headers?: any) => Promise<
 declare const socket: any;
 declare const server: string;
 const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
+const useSecureWS: boolean = false;
 
 (() => {
     // -------------
@@ -15,7 +16,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         return cookie.substr(cookie.indexOf("=") + 1);
     })();
     const ws: WebSocket = new WebSocket(
-        server.replace(/^https?/, "ws").replace(/(:\d{1,5})?$/, ":15304")
+        server.replace(/^https?/, "ws" + (useSecureWS ? "s" : ""))
     );
     let lastTick: number = Date.now();
     let blobs: BlobObject[] = [];
