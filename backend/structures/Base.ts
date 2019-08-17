@@ -26,7 +26,6 @@ interface Server {
 
 interface BaseOptions {
     server: Server;
-    wsServer: ws.Server;
     database?: any;
 }
 
@@ -59,7 +58,9 @@ export default class Base {
     constructor(options: BaseOptions) {
         this.server = options.server;
         this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
-        this.wsServer = options.wsServer;
+        this.wsServer = new ws.Server({
+            server: this._server
+        });
         this.wsSockets = [];
         this.db = options.database;
         this.sockets = [];
