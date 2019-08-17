@@ -18,6 +18,7 @@ export default class ClanController {
             );
         });
         this.app.get("/clans/view/:clan", async (req: express.Request, res: express.Response) => {
+            if (Array.isArray(req.params)) return;
             if (!req.params.clan) return res.send("Please specify a clan");
             const clan: Clan | undefined = await this.db.get("SELECT * FROM clans WHERE name=?", req.params.clan);
             if (!clan) return res.send("Clan was not found");

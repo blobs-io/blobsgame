@@ -1,7 +1,6 @@
 // Import packages
 import * as express from "express";
 import * as ws from "ws";
-import * as socket from "socket.io";
 import * as http from "http";
 import bodyParser = require("body-parser");
 
@@ -27,7 +26,6 @@ interface Server {
 
 interface BaseOptions {
     server: Server;
-    wsServer: ws.Server;
     database?: any;
 }
 
@@ -46,8 +44,6 @@ export default class Base {
     public maintenance: Maintenance = {
         enabled: false
     };
-    public socket: any;
-    public io: socket.Server;
     public _server: http.Server;
     public WSHandler: WS;
     public rooms: Room[];
@@ -62,10 +58,11 @@ export default class Base {
     constructor(options: BaseOptions) {
         this.server = options.server;
         this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
-        this.wsServer = options.wsServer;
+        this.wsServer = new ws.Server({
+            server: this._server
+        });
         this.wsSockets = [];
         this.db = options.database;
-        this.socket = socket;
         this.sockets = [];
         this.WSHandler = new WS(this);
         this.maps = new Maps();
@@ -76,8 +73,6 @@ export default class Base {
 
         const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa");
         this.rooms = [ ffaRoom ];
-
-        this.io = this.socket(this._server);
         this.dbToken = SessionIDManager.generateSessionID(24);
     }
 
@@ -119,7 +114,6 @@ export default class Base {
 
     async initializeEvents(): Promise<void> {
         if (this.maintenance.enabled) throw new Error(this.maintenance.reason || "Maintenance");
-        const { io } = this;
 
         this.wsServer.on("connection", (conn: ws) => {
             let socketID: string = SessionIDManager.generateSessionID(16);
