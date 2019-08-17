@@ -18,9 +18,6 @@ const base: Base = new Base({
             console.log("WebServer running!");
         }
     },
-    wsServer: new ws.Server({
-        port: 15304
-    }),
     database: sqlite
 });
 
@@ -59,6 +56,10 @@ base.server.app.use((req, res, next) => {
 
 // Listen to events / endpoints
 base.initializeEvents().catch(() => {});
-base.APIController.listen();
-base.ClanController.listen();
-base.RouteController.listen();
+try {
+    base.APIController.listen();
+    base.ClanController.listen();
+    base.RouteController.listen();
+} catch(e) {
+    console.log(e.stack);
+}

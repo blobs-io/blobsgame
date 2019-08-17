@@ -1,21 +1,21 @@
 // Import packages
 import * as express from "express";
 import * as ws from "ws";
-import * as socket from "socket.io";
 import * as http from "http";
 import bodyParser = require("body-parser");
-import { readFileSync } from "fs";
 
 // Import structures
 import * as SessionIDManager from "./SessionIDManager";
 import WS from "../WSEvents";
 import Room from "./Room";
 import Maps from "./Maps";
-import Socket from "./Socket";
+import * as Socket from "./Socket";
 import APIController from "../api/APIController";
 import ClanController from "../clans/ClanController";
 import RouteController from "../routes/RouteController";
 import Captcha from "./Captcha";
+import Player from "./Player";
+import * as WSEvents from "../WSEvents";
 
 interface Server {
     app: express.Application;
@@ -26,7 +26,6 @@ interface Server {
 
 interface BaseOptions {
     server: Server;
-    wsServer: ws.Server;
     database?: any;
 }
 
@@ -45,24 +44,25 @@ export default class Base {
     public maintenance: Maintenance = {
         enabled: false
     };
-    public socket: any;
-    public io: socket.Server;
     public _server: http.Server;
     public WSHandler: WS;
     public rooms: Room[];
     public maps: Maps;
-    public sockets: Socket[];
+    public sockets: Socket.default[];
     public APIController: APIController;
     public ClanController: ClanController;
     public captchas: Captcha[];
     public RouteController: RouteController;
+    public wsSockets: Socket.wsSocket[];
 
     constructor(options: BaseOptions) {
         this.server = options.server;
         this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
-        this.wsServer = options.wsServer;
+        this.wsServer = new ws.Server({
+            server: this._server
+        });
+        this.wsSockets = [];
         this.db = options.database;
-        this.socket = socket;
         this.sockets = [];
         this.WSHandler = new WS(this);
         this.maps = new Maps();
@@ -73,8 +73,6 @@ export default class Base {
 
         const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa");
         this.rooms = [ ffaRoom ];
-
-        this.io = this.socket(this._server);
         this.dbToken = SessionIDManager.generateSessionID(24);
     }
 
@@ -116,25 +114,44 @@ export default class Base {
 
     async initializeEvents(): Promise<void> {
         if (this.maintenance.enabled) throw new Error(this.maintenance.reason || "Maintenance");
-        const { io } = this;
 
-        io.on("connection", (data: any) => {
-            data.on("disconnect", (...args: any[]) => this.WSHandler.executeEvent("disconnect", data, ...args));
-            data.on("ffaPlayerCreate", (...args: any[]) => this.WSHandler.executeEvent("ffaPlayerCreate", data, ...args));
-            data.on("coordinateChange", (...args: any[]) => this.WSHandler.executeEvent("coordinateChange", data, ...args));
-            data.on("ffaDirectionChange", (...args: any[]) => this.WSHandler.executeEvent("ffaDirectionChange", data, ...args));
-            data.on("ffaNomKey", (...args: any[]) => this.WSHandler.executeEvent("ffaNomKey", data, ...args));
-            data.on("ffaKickPlayer", (...args: any[]) => this.WSHandler.executeEvent("ffaKickPlayer", data, ...args));
-            data.on("sessionDelete", (...args: any[]) => this.WSHandler.executeEvent("sessionDelete", data, ...args));
+        this.wsServer.on("connection", (conn: ws) => {
+            let socketID: string = SessionIDManager.generateSessionID(16);
+            while(this.wsSockets.some((v: any) => v.id === socketID))
+                socketID = SessionIDManager.generateSessionID(16);
+
+            this.wsSockets.push({
+                conn, id: socketID
+            });
+            conn.on("message", (data: any) => this.WSHandler.exec(conn, socketID, data));
         });
 
         setInterval(() => {
             const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa");
             if (!room) return;
             for (let i: number = 0; i < room.players.length; ++i) {
-                room.players[i].regenerate(true);
+                const player: Player = room.players[i];
+                const socket: Socket.wsSocket | undefined = this.wsSockets.find((s: Socket.wsSocket) => s.id === player.id);
+                if (!socket) return;
+                if (Date.now() - player.lastHeartbeat > WSEvents.default.intervalLimit) {
+                    socket.conn.send(JSON.stringify({
+                        op: WSEvents.OPCODE.CLOSE,
+                        d: {
+                            message: "Missing heartbeats"
+                        }
+                    }));
+                    WSEvents.default.disconnectSocket(socket, room);
+                    continue;
+                }
+                player.regenerate(true);
+                socket.conn.send(JSON.stringify({
+                    op: WSEvents.OPCODE.EVENT,
+                    t: WSEvents.EventTypes.COORDINATECHANGE,
+                    d: {
+                        players: room.players
+                    }
+                }));
             }
-            io.sockets.emit("coordinateChange", room.players);
         }, 20);
     }
 }

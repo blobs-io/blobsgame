@@ -19,6 +19,7 @@ export default class APIController {
 
     listen(): void {
         this.app.get("/api/clans/:name", (req: express.Request, res: express.Response) => {
+            if (Array.isArray(req.params)) return;
             if (req.params.name === "list") {
                 this.base.db.all("SELECT members, cr, name FROM clans ORDER BY cr DESC LIMIT 10")
                     .then((v: any) => {
@@ -34,6 +35,7 @@ export default class APIController {
             }
         });
         this.app.get("/api/executeSQL/:method", async (req: express.Request, res: express.Response) => {
+            if (Array.isArray(req.params)) return;
             if (typeof req.headers.sessionid !== "string" || typeof req.headers.query !== "string") {
                 res.status(400);
                 res.json({
@@ -92,6 +94,7 @@ export default class APIController {
             })
         });
         this.app.get("/api/player/:username", async (req: express.Request, res: express.Response) => {
+            if (Array.isArray(req.params)) return;
             if (typeof req.params.username === "undefined") {
                 res.status(400);
                 res.json({
@@ -191,12 +194,15 @@ export default class APIController {
                 });
             }
         });
-        this.app.get("/api/captcha/~/:id", (req: express.Request, res: express.Response) => {
+        this.app.get("/api/captcha/~/:id", (req: (express.Request), res: express.Response) => {
+            if (Array.isArray(req.params)) return;
+            const captchaID = req.params.id;
             new Jimp(160, 32, 0x000000, (err: any, image: any) => {
+                if (Array.isArray(req.params)) return;
                 if (err) return res.status(500).json({
                     message: "An error occurred while creating the image: " + err
                 });
-                const requested: Captcha | undefined = this.base.captchas.find((v: Captcha) => v.id === req.params.id);
+                const requested: Captcha | undefined = this.base.captchas.find((v: Captcha) => v.id === captchaID);
                 if (!requested) return res.status(400).json({
                     message: "Requested captcha not found"
                 });

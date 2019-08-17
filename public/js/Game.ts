@@ -1,7 +1,9 @@
 declare const io: Function;
 declare const request: (path: string, method: string, headers?: any) => Promise<any>;
 declare const socket: any;
+declare const server: string;
 const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
+const useSecureWS: boolean = false;
 
 (() => {
     // -------------
@@ -13,6 +15,9 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         const cookie = document.cookie.split(/; */).find((v: string) => v.startsWith("session=")) || "";
         return cookie.substr(cookie.indexOf("=") + 1);
     })();
+    const ws: WebSocket = new WebSocket(
+        server.replace(/^https?/, "ws" + (useSecureWS ? "s" : ""))
+    );
     let lastTick: number = Date.now();
     let blobs: BlobObject[] = [];
     const objects: GameObject = {
@@ -114,23 +119,21 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     enum ItemType {
         Health = 0
     }
+    enum OPCODE {
+        HELLO = 1,
+        HEARTBEAT = 2,
+        EVENT = 3,
+        CLOSE = 4
+    }
     enum EventType {
         COORDINATE_CHANGE  = "coordinateChange",
-        OBJECTS_HEARTBEAT  = "ffaObjectsHeartbeat",
-        HEARTBEAT          = "ffaHeartbeat",
-        UNAUTHORIZED       = "ffaUnauthorized",
-        KICK               = "ffaKick",
-        KICK_PLAYER        = "ffaKickPlayer",
-        USER_JOIN          = "ffaUserJoin",
-        NOM_KEY            = "ffaNomKey",
+        HEARTBEAT          = "heartbeat",
+        KICK               = "kick",
+        KICK_PLAYER        = "kickPlayer",
+        NOM_KEY            = "nomKey",
         SP_NOM_KEY         = "singlePlayerNomKey",
-        HEALTH_UPDATE      = "ffaHealthUpdate",
-        DIRECTION_CHANGE_C = "ffaDirectionChange",
-        DIRECTION_CHANGE   = "ffaDirectionChanged",
-        LOGIN_FAILED       = "ffaLoginFailed",
-        PLAYER_CREATE      = "ffaPlayerCreate",
-        PLAYER_NOMMED      = "ffaPlayerNommed",
-        PLAYER_DELETE      = "ffaPlayerDelete"
+        DIRECTION_CHANGE_C = "directionChange",
+        PLAYER_NOMMED      = "playerNommed",
     }
     enum Direction {
         UP = 0,
@@ -436,6 +439,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             return this.x < (ownBlob.x + 10) && this.x > (ownBlob.x - 10) && this.y < (ownBlob.y + 10) && this.y > (ownBlob.y - 10);
         }
     }
+
     // -------------
     // Canvas
     // -------------
@@ -502,8 +506,15 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         else if (ownBlob.direction === 3 && movable)
             ownBlob.x = ownBlob.directionChangeCoordinates.x - (1.025 * ((Date.now() - ownBlob.directionChangedAt) / 10));
         if (details.singleplayer === false && movable)
-            socket.emit(EventType.COORDINATE_CHANGE, { x: ownBlob.x, y: ownBlob.y }, details.id);
-
+            ws.send(JSON.stringify({
+                op: OPCODE.EVENT,
+                t: EventType.COORDINATE_CHANGE,
+                d: {
+                    x: ownBlob.x,
+                    y: ownBlob.y,
+                    room: details.id
+                }
+            }));
 
         clearCanvas(ctx);
         drawBorder(ctx);
@@ -522,157 +533,92 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
     // -------------
     // Events
     // -------------
-    socket.on(EventType.PLAYER_NOMMED, (eventd: any) => {
-        const loser: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.loser.owner);
-        const winner: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.winner.owner);
-        if (!loser || !winner) return;
-        loser.br = eventd.loser.br;
-        winner.br = eventd.winner.br;
-        loser.directionChangeCoordinates.x = eventd.loser.directionChangeCoordinates.x;
-        loser.directionChangeCoordinates.y = eventd.loser.directionChangeCoordinates.y;
-        loser.directionChangedAt = eventd.loser.directionChangedAt;
-        loser.health = 100;
-        displayLeaderboard();
+    ws.addEventListener("message", ({ data }) => {
+        const { op, t: eventType, d: eventData } = JSON.parse(data);
+        if (op === OPCODE.EVENT) {
+            if (eventType === EventType.HEARTBEAT) {
+                if (eventData.user.role === -1 && !/[?&]guest=true/.test(window.location.search))
+                    return document.location.href = "/login/";
 
-        const nomHistoryDiv: HTMLElement | null = document.getElementById("nom-hist");
-        const nomEntryDiv: HTMLElement = document.createElement("div");
-        nomEntryDiv.className = "nom-hist-entry";
-        const nomUser: HTMLElement = document.createElement("span");
-        const targetUser: HTMLElement = document.createElement("span");
-        nomUser.className = "nom-user nom-entry";
-        nomUser.innerHTML = `${eventd.winner.owner} (+${eventd.result})`;
-        const newBRLabel: HTMLElement = document.createElement("span");
-        const newBRLabelLoser: HTMLElement = document.createElement("span");
-        newBRLabel.className = "new-br";
-        newBRLabel.innerHTML = eventd.winner.br + " BR";
-        const linebreakWinner: HTMLElement = document.createElement("br");
-        targetUser.className = "target-user nom-entry";
-        targetUser.innerHTML = `${eventd.loser.owner} (-${eventd.result})`;
-        newBRLabelLoser.className = "new-br";
-        newBRLabelLoser.innerHTML = eventd.loser.br + " BR";
-        const linebreakLoser: HTMLElement = document.createElement("br");
-        if (!nomHistoryDiv) return;
-        nomHistoryDiv.appendChild(nomEntryDiv);
-        nomEntryDiv.appendChild(nomUser);
-        nomEntryDiv.appendChild(newBRLabel);
-        nomEntryDiv.appendChild(linebreakWinner);
-        nomEntryDiv.appendChild(targetUser);
-        nomEntryDiv.appendChild(newBRLabelLoser);
-        nomEntryDiv.appendChild(linebreakLoser);
+                // Own blob
+                ownBlob.owner = eventData.user.username;
+                ownBlob.blob = eventData.user.blob;
+                ownBlob.directionChangedAt = Date.now();
+                ownBlob.directionChangeCoordinates.x = ownBlob.x = eventData.user.x;
+                ownBlob.directionChangeCoordinates.y = ownBlob.y = eventData.user.y;
+                ownBlob.br = eventData.user.br;
+                ownBlob.ready = true;
+                ownBlob.role = eventData.user.role;
+                ownBlob.setBlob(<BlobType>`../assets/${eventData.user.blob}.png`).catch(console.log);
+                blobs.push(ownBlob);
 
-        setTimeout(() => {
-            nomHistoryDiv.removeChild(nomEntryDiv);
-        }, 3500);
-    });
-    socket.on(EventType.PLAYER_DELETE, (eventd: any) => {
-        if (details.singleplayer) return;
-        blobs.splice(blobs.findIndex((v: BlobObject) => v.owner === eventd), 1);
-    });
-    socket.on(EventType.LOGIN_FAILED, alert);
-    socket.on(EventType.OBJECTS_HEARTBEAT, (eventd: any) => {
-        for (let i: number = 0; i < eventd.walls.length; ++i) {
-            const wall: WallObject = new WallObject(eventd.walls[i].x, eventd.walls[i].y);
-            wall.type = eventd.walls[i].type;
-            objects.walls.push(wall);
-        }
-        objects.noNomAreas = [];
-        for (let i: number = 0; i < eventd.noNomArea.length; ++i) {
-            const area: NoNomArea = new NoNomArea(eventd.noNomArea[i].startsAt, eventd.noNomArea[i].endsAt);
-            objects.noNomAreas.push(area);
-        }
-    });
-    socket.on(EventType.HEARTBEAT, (eventd: any) => {
-        if (eventd.role === -1 && !/[?&]guest=true/.test(window.location.search))
-            return document.location.href = "/login/";
+                if (details.singleplayer)
+                    eventData.users = [];
+                for (let i: number = 0; i < eventData.users.length; ++i) {
+                    const currentBlob: any = eventData.users[i];
+                    if (currentBlob.owner === ownBlob.owner ||
+                        blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) continue;
+                    const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner);
+                    newBlob.directionChangeCoordinates = {
+                        x: currentBlob.x,
+                        y: currentBlob.y
+                    };
+                    newBlob.role = currentBlob.role;
+                    newBlob.direction = currentBlob.direction;
+                    newBlob.directionChangedAt = currentBlob.directionChangedAt;
+                    newBlob.setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
+                        .then(() => newBlob.display());
 
-        // Own blob
-        ownBlob.owner = eventd.username;
-        ownBlob.blob = eventd.blob;
-        ownBlob.directionChangedAt = Date.now();
-        ownBlob.directionChangeCoordinates.x = ownBlob.x = eventd.x;
-        ownBlob.directionChangeCoordinates.y = ownBlob.y = eventd.y;
-        ownBlob.br = eventd.br;
-        ownBlob.ready = true;
-        ownBlob.role = eventd.role;
-        ownBlob.setBlob(<BlobType>`../assets/${eventd.blob}.png`).catch(console.log);
-        blobs.push(ownBlob);
-
-        if (details.singleplayer)
-            eventd.users = [];
-        for (let i: number = 0; i < eventd.users.length; ++i) {
-            const currentBlob: any = eventd.users[i];
-            if (currentBlob.owner === ownBlob.owner ||
-                blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) continue;
-            const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner);
-            newBlob.directionChangeCoordinates = {
-                x: currentBlob.x,
-                y: currentBlob.y
-            };
-            newBlob.role = currentBlob.role;
-            newBlob.direction = currentBlob.direction;
-            newBlob.directionChangedAt = currentBlob.directionChangedAt;
-            newBlob.setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
-                .then(() => newBlob.display());
-
-            blobs.push(newBlob);
-        }
-    });
-    socket.on(EventType.UNAUTHORIZED, () => document.location.href = "/login");
-    socket.on(EventType.KICK, (eventd: string) => {
-        alert("You have been kicked.\nReason: " + (eventd || "-"));
-        document.location.href = "/login/";
-    });
-    socket.on(EventType.DIRECTION_CHANGE, (eventd: any) => {
-        if (details.singleplayer || eventd.owner === ownBlob.owner) return;
-        const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.owner);
-        if (!target) return;
-        target.direction = eventd.direction;
-        target.directionChangedAt = Date.now();
-        target.directionChangeCoordinates = {
-            x: target.x,
-            y: target.y
-        };
-    });
-    socket.on(EventType.USER_JOIN, (eventd: any) => {
-        if (details.singleplayer ||
-            eventd.owner === ownBlob.owner ||
-            blobs.some((v: BlobObject) => v.owner === eventd.owner)) return;
-        const newBlob: BlobObject = new BlobObject(eventd.br, eventd.owner);
-        newBlob.directionChangeCoordinates = {
-            x: eventd.x,
-            y: eventd.y
-        };
-        newBlob.role = eventd.role;
-        newBlob.directionChangedAt = eventd.directionChangedAt;
-        newBlob
-            .setBlob(<BlobType>`../assets/${eventd.blob}.png`)
-            .then(() => newBlob.display(true, true));
-        blobs.push(newBlob);
-    });
-    socket.on(EventType.HEALTH_UPDATE, (eventd: any) => {
-        if (details.singleplayer || typeof eventd.health !== "number") return;
-        const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === eventd.user);
-        if (!target) return;
-        target.health = eventd.health;
-    });
-    socket.on(EventType.COORDINATE_CHANGE, (eventd: any[]) => {
-        if (!ownBlob || !ownBlob.ready) return;
-        for (let i: number = 0; i < eventd.length; ++i) {
-            const currentBlob: any = eventd[i];
-            const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
-            if (!target) {
-                const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
-                newBlob
-                    .setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
-                    .then(() => newBlob.display(true, true));
-                if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
-                blobs.push(newBlob);
-            } else {
-                if (currentBlob.owner !== ownBlob.owner) {
-                    target.x = currentBlob.x;
-                    target.y = currentBlob.y;
+                    blobs.push(newBlob);
                 }
-                target.health = currentBlob.health;
+
+                // Heartbeat
+                setInterval(() => {
+                    ws.send(JSON.stringify({
+                        op: OPCODE.HEARTBEAT,
+                        d: {
+                            room: details.id
+                        }
+                    }));
+                }, eventData.interval);
+            }
+            else if (eventType === EventType.COORDINATE_CHANGE) {
+                if (!ownBlob || !ownBlob.ready) return;
+                for (let i: number = 0; i < eventData.players.length; ++i) {
+                    const currentBlob: any = eventData.players[i];
+                    const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
+                    if (!target) {
+                        const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
+                        newBlob.direction = currentBlob.direction;
+                        newBlob.directionChangedAt = currentBlob.directionChangedAt;
+                        newBlob.directionChangeCoordinates = currentBlob.directionChangeCoordinates;
+                        newBlob.health = currentBlob.health;
+                        newBlob
+                            .setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
+                            .then(() => newBlob.display(true, true));
+                        if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
+                        blobs.push(newBlob);
+                    } else {
+                        if (currentBlob.owner !== ownBlob.owner) {
+                            target.direction = currentBlob.direction;
+                            target.directionChangedAt = currentBlob.directionChangedAt;
+                            target.directionChangeCoordinates = currentBlob.directionChangeCoordinates;
+                            target.x = currentBlob.x;
+                            target.y = currentBlob.y;
+                        }
+                        target.health = currentBlob.health;
+                    }
+                }
+
+                for (let i: number = 0; i < blobs.length; ++i) {
+                    const blob: number = eventData.players.findIndex((v: BlobObject) => v.owner === blobs[i].owner);
+                    if (blob === -1) {
+                        blobs.splice(blobs.findIndex((v: BlobObject) => v.owner === blobs[i].owner), 1);
+                    }
+                }
+            }
+            else if (eventType === EventType.KICK) {
+                alert("You have been kicked.\nReason: " + (eventData.message || "-"));
             }
         }
     });
@@ -697,7 +643,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = Direction.UP;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
             } else if (buttonID === htmlButtonIDs[1]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -706,7 +661,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = Direction.DOWN;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
             } else if (buttonID === htmlButtonIDs[2]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -715,7 +679,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = Direction.LEFT;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
             } else if (buttonID === htmlButtonIDs[3]) {
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates = {
@@ -724,7 +697,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = Direction.RIGHT;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
             }
         });
     }
@@ -739,12 +721,17 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 const targetUserElement: HTMLElement | null = document.getElementById("target-name"),
                     targetUserReason: HTMLElement | null = document.getElementById("kick-reason");
                 if (!targetUserElement || !targetUserReason) return;
-                socket.emit(EventType.KICK_PLAYER, {
-                    // @ts-ignore
-                    user: targetUserElement.value,
-                    // @ts-ignore
-                    reason: targetUserReason.value
-                }, details.id);
+                ws.send(JSON.stringify({
+                    op: OPCODE.EVENT,
+                    t: EventType.KICK_PLAYER,
+                    d: {
+                        // @ts-ignore
+                        user: targetUserElement.value,
+                        // @ts-ignore
+                        reason: targetUserReason.value,
+                        room: details.id
+                    }
+                }));
             });
         }
         const closeMenu: HTMLElement | null = document.getElementById("closemenu");
@@ -773,7 +760,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 4;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
                 break;
             case "w":
                 ownBlob.directionChangedAt = Date.now();
@@ -783,7 +779,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 0;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
                 break;
             case "d":
                 ownBlob.directionChangedAt = Date.now();
@@ -793,7 +798,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 1;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
                 break;
             case "s":
                 ownBlob.directionChangedAt = Date.now();
@@ -803,7 +817,16 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 2;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
                 break;
             case "a":
                 ownBlob.directionChangedAt = Date.now();
@@ -813,13 +836,28 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                 };
                 ownBlob.direction = 3;
                 if (!details.singleplayer)
-                    socket.emit(EventType.DIRECTION_CHANGE_C, ownBlob, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.DIRECTION_CHANGE_C,
+                        d: {
+                            direction: ownBlob.direction,
+                            directionChangedAt: ownBlob.directionChangedAt,
+                            directionChangeCoordinates: ownBlob.directionChangeCoordinates,
+                            room: details.id
+                        }
+                    }));
                 break;
             case "n":
                 if (Date.now() - ownBlob.lastnom <= 1500) return;
                 ownBlob.lastnom = Date.now();
                 if (!details.singleplayer)
-                    socket.emit(EventType.NOM_KEY, {}, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.NOM_KEY,
+                        d: {
+                            room: details.id
+                        },
+                    }));
                 else {
                     const target: BlobObject | undefined = BlobObject.find(ownBlob.x, ownBlob.y, true);
                     if (!target) return;
@@ -1057,10 +1095,25 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
             if (attackBlob.y < (target.y + 30) && attackBlob.y > (target.y - 30)) {
                 target.health -= randomNumber(30, 40);
                 if (target.health <= 0) {
-                    socket.emit(EventType.SP_NOM_KEY, { attackBlob, target }, details.id);
+                    ws.send(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventType.SP_NOM_KEY,
+                        d: {
+                            attackBlob,
+                            target,
+                            room: details.id
+                        }
+                    }));
                     target.health = 100;
                 }
             }
+        }
+    }
+    function sendOnReady(wsc: WebSocket, data: string) {
+        if (wsc.readyState === WebSocket.OPEN) {
+            wsc.send(data);
+        } else if (wsc.readyState === WebSocket.CONNECTING) {
+            wsc.onopen = (): any => wsc.send(data);
         }
     }
 
@@ -1102,7 +1155,7 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
         let itr: number = 0, val: number = 0;
         const interval: number = window.setInterval(() => {
             if (Date.now() - lastTick >= 440) {
-                if ((itr++ < 5 || !socket.connected) && val < 100) {
+                if ((itr++ < 5) && val < 100) {
                     bar.style.width = (val += Math.floor(Math.random() * 5)) + "%";
                 } else {
                     bar.style.width = "100%";
@@ -1110,7 +1163,14 @@ const randomNumber: Function = (min: number, max: number): number => Math.floor(
                         if (/[&?]mode=colors/.test(document.location.search)) {
                             details.mode = "Colors";
                         } else {
-                            socket.emit(EventType.PLAYER_CREATE, sessionid, details.id);
+                            sendOnReady(ws,
+                                JSON.stringify({
+                                    op: OPCODE.HELLO,
+                                    d: {
+                                        session: sessionid,
+                                        room: details.id
+                                    }
+                            }));
                             details.mode = "FFA";
                         }
                         const loadingScreen: HTMLElement | null = document.getElementById("loading-screen");

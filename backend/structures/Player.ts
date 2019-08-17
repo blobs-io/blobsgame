@@ -1,5 +1,6 @@
 import Base from "./Base";
 import Room from "./Room";
+import AntiCheat from "./AntiCheat";
 
 export default class Player {
     static regeneration: any = {
@@ -19,11 +20,12 @@ export default class Player {
     public distance: number;
     public maximumCoordinates: {width?: number, height?: number};
     public health: number;
-    public anticheat: any;
+    public anticheat: AntiCheat | undefined;
     public x: number | undefined;
     public y: number | undefined;
     public base: Base | undefined;
     public lastRegeneration: number | undefined;
+    public lastHeartbeat: number;
 
     constructor(base: Base, x?: number, y?: number, owner?: string, role: number = 0, blob: string = "blobowo") {
         this.owner = owner;
@@ -40,6 +42,7 @@ export default class Player {
         this.health = 100;
         this.x = x;
         this.y = y;
+        this.lastHeartbeat = Date.now();
 
         Object.defineProperties(this, {
             anticheat: {
