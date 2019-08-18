@@ -206,5 +206,21 @@ export default class RouteController {
                 res.send(r);
             });
         });
+        this.app.get("/verify", async (req: express.Request, res: express.Response) => {
+            const { session } = req.cookies;
+            if (!session)
+                return res.send("<script>document.location.href='/login';</script>");
+
+            const dbSession: any = await SessionIDManager.getSession(base.db, {
+                type: "session",
+                value: session
+            });
+
+            readFile("./public/verify.html", "utf8", (error: any, data: string) => {
+                res.send(
+                    data.replace(/\[!USERNAME]/g, dbSession.username)
+                );
+            });
+        });
     }
 }
