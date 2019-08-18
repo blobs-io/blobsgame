@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>blobs.io – menu</title>
+    <meta name="description" content="Be the best blob!">
+    <meta name="author" content="y21">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:image" content="https://cdn.discordapp.com/emojis/458326620076507136.png" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Chakra+Petch:600|Material+Icons" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/favicons/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/favicons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/favicons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/favicons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/favicons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/favicons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/favicons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/favicons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="assets/favicons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicons/favicon-16x16.png">
+    <link rel="manifest" href="assets/favicons/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="assets/favicons/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="css/main-menu.css" />
+</head>
+<body>
+<nav class="blue darken-1">
+    <div class="nav-wrapper">
+        <a href="/app" class="brand-logo">&nbsp;blobs.io</a>
+    </div>
+</nav>
+
+
+<div id="content">
+    <div class="center">
+        <h3>Discord Account Verification</h3>
+        <div class="warning" style="font-size: 13px;">
+            <b>Important: </b> Don't give this code to anyone and treat it like it was your password.
+        </div>
+        If you are on the blobs.io Discord server, you can synchronize your Discord account with your blobs.io account to receive a Tier role.<br/>
+        <h5>How it works</h5>
+            1. Join the <a href="https://discord.gg/379gcnj">blobs.io Discord server</a> <br/>
+            2. Copy the code below <br/>
+            3. Check if the blobs.io Discord bot is online (should be in the members list on the right side) <br/>
+            4. If it is, send <i>b!verify &lt;code&gt;</i> in the #account-verification channel <br/>
+            5. Check your roles on the Discord server. The bot should have assigned you roles.
+
+        <h4 id="code">Fetching code...</h4>
+    </div>
+</div>
+</body>
+<script src="js/request.js"></script>
+<script src="js/functions.js"></script>
+<script>
+    const session = document.cookie.split(/; */).find(v => v.startsWith("session=")).split("=")[1];
+    const displayCode = d => document.getElementById("code").innerHTML = d;
+    request("/api/verify", "GET", { sessionid: session })
+        .then(v => displayCode(JSON.parse(v.responseText).code))
+    .catch(() => {
+       request("/api/verify?request=true", "GET", { sessionid: session })
+           .then(v => displayCode(JSON.parse(v.responseText).code))
+           .catch(console.log);
+    });
+</script>
+</html>
