@@ -34,7 +34,10 @@
     <div class="nav-wrapper">
         <a href="/app" class="brand-logo">&nbsp;blobs.io</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="/game">Play</a></li>
+            <li><a class="dropdown-trigger" data-target="play-dropdown">Play</a></li>
+            <ul id="play-dropdown" class="dropdown-content">
+                <li><a href="/game" class="light-blue-text">FFA 1 (0/50)</a></li>
+            </ul>
             <li><a href="/clans">Clans</a></li>
             <li><a href="/verify">Verify</a></li>
             <li><a href="https://reddit.com/r/blobsio">Subreddit</a></li>
@@ -91,6 +94,11 @@
 <script src="js/functions.js"></script>
 <script src="js/sockets.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
+            hover: true
+        });
+    });
     document.getElementById("logout").addEventListener("click", () => {
         document.cookie = "session=null;expires=" + new Date(Date.now() - 1).toUTCString() + ";path=/";
         document.location.href = "/";

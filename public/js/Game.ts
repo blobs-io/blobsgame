@@ -79,11 +79,6 @@ const useSecureWS: boolean = false;
             image.src = "../../assets/emblems/emblem_diamond.png";
             return image;
         })(),
-        painite: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_painite.png";
-            return image;
-        })(),
         guest: (() => {
             const image = new Image();
             image.src = "../../assets/emblems/emblem_guest-or-unknown.png";
@@ -1063,30 +1058,26 @@ const useSecureWS: boolean = false;
     }
     function getTier(br: number): Tier {
         let result: Tier = {};
-        if (br >= 0 && br < 1500) {
+        if (br >= 0 && br < 2000) {
             result.tier = "bronze";
             result.colorCode = "b57156";
             result.emblemFile = "emblem_bronze.png";
-        } else if (br >= 1500 && br < 3000) {
+        } else if (br >= 2000 && br < 4000) {
             result.tier = "silver";
             result.colorCode = "dbdbdb";
             result.emblemFile = "emblem_silver.png";
-        } else if (br >= 3000 && br < 5000) {
+        } else if (br >= 4000 && br < 6000) {
             result.tier = "platinum";
             result.colorCode = "E5E4E2";
             result.emblemFile = "emblem_platinum.png";
-        } else if (br >= 5000 && br < 8000) {
+        } else if (br >= 6000 && br < 9000) {
             result.tier = "gold";
             result.colorCode = "D7AF00";
             result.emblemFile = "emblem_gold.png";
-        } else if (br >= 8000 && br < 9500) {
+        } else if (br >= 9000) {
             result.tier = "diamond";
             result.colorCode = "16f7ef";
             result.emblemFile = "emblem_diamond.png";
-        } else if (br >= 9500 && br < 10000) {
-            result.tier = "painite";
-            result.colorCode = "16f77f";
-            result.emblemFile = "emblem_painite.png";
         }
         return result;
     }
