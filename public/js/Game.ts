@@ -3,6 +3,7 @@ declare const request: (path: string, method: string, headers?: any) => Promise<
 declare const socket: any;
 declare const server: string;
 const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
+const getParameterByName: Function = (param: string): string => (document.location.search.match(new RegExp(`[?&]${param}=([^&]*)`)) || [])[1];
 const useSecureWS: boolean = false;
 
 (() => {
@@ -91,14 +92,19 @@ const useSecureWS: boolean = false;
         })(),
     };
     const details: any = {
-        mode: "FFA",
-        id: "ffa",
+        mode: getParameterByName("mode"),
+        id: getParameterByName("id"),
         singleplayer: false
     };
     let ping: number = 0;
     let windowBlur: boolean = false;
     canvas.width = window.innerWidth - 30;
     canvas.height = window.innerHeight - 30;
+
+    if (!details.mode || !details.id) {
+        document.write("Unsupported gamemode or game ID not found.");
+        return;
+    }
 
     // -------------
     // Enums
@@ -1130,7 +1136,7 @@ const useSecureWS: boolean = false;
     (async(): Promise<any> => {
         const bar = document.getElementById("bar-inside");
         if (!bar) return;
-        request("/api/ffa/players", "GET", {}).then((res: any) => {
+        request("/api/players/" + details.id, "GET", {}).then((res: any) => {
             const data: any = JSON.parse(res.responseText);
             for(const player of data) {
                 const tier: any = getTier(player.br || 0);
@@ -1151,19 +1157,14 @@ const useSecureWS: boolean = false;
                 } else {
                     bar.style.width = "100%";
                     setTimeout(() => {
-                        if (/[&?]mode=colors/.test(document.location.search)) {
-                            details.mode = "Colors";
-                        } else {
-                            sendOnReady(ws,
-                                JSON.stringify({
-                                    op: OPCODE.HELLO,
-                                    d: {
-                                        session: sessionid,
-                                        room: details.id
-                                    }
-                            }));
-                            details.mode = "FFA";
-                        }
+                        sendOnReady(ws,
+                            JSON.stringify({
+                                op: OPCODE.HELLO,
+                                d: {
+                                    session: sessionid,
+                                    room: details.id
+                                }})
+                        );
                         const loadingScreen: HTMLElement | null = document.getElementById("loading-screen");
                         const gameCanvas: HTMLElement | null = document.getElementById("game");
                         if (loadingScreen)
