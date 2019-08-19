@@ -131,7 +131,7 @@ export default class Base {
 
         setInterval(() => {
             for (let roomIndex: number = 0; roomIndex < this.rooms.length; ++roomIndex) {
-                const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa" + roomIndex);
+                const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa" + (roomIndex + 1));
                 if (!room) return;
                 for (let i: number = 0; i < room.players.length; ++i) {
                     const player: Player = room.players[i];
