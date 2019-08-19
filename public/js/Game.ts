@@ -912,7 +912,7 @@ const useSecureWS: boolean = false;
     }
     function displayHP(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
-        context.font = "50px Raleway";
+        context.font = "30px Dosis";
 
         if (ownBlob.health >= 80) context.fillStyle = "#2ecc71";
         else if (ownBlob.health >= 50) context.fillStyle = "#f39c12";
@@ -920,8 +920,8 @@ const useSecureWS: boolean = false;
         else if (ownBlob.health >= 10) context.fillStyle = "#e74c3c";
         else context.fillStyle = "#c0392b";
 
-        context.fillText(ownBlob.health.toString(), canvas.width - 120, canvas.height - 20);
-        context.font = "20px Raleway";
+        context.fillText(ownBlob.health.toString(), canvas.width - 80, canvas.height - 20);
+        context.font = "13px Dosis";
         context.fillText("HP", canvas.width - 35, canvas.height - 20);
         context.fillStyle = "white";
         window.requestAnimationFrame(animationFrame);
