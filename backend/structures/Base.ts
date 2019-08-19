@@ -70,9 +70,12 @@ export default class Base {
         this.ClanController = new ClanController(this.server.app, this.db);
         this.RouteController = new RouteController(this.server.app, this);
         this.captchas = [];
+        this.rooms = [];
 
-        const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa");
-        this.rooms = [ ffaRoom ];
+        for (let i: number = 0; i < 3; ++i) {
+            const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa" + (i + 1));
+            this.rooms.push(ffaRoom);
+        }
         this.dbToken = SessionIDManager.generateSessionID(24);
     }
 
@@ -127,30 +130,32 @@ export default class Base {
         });
 
         setInterval(() => {
-            const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa");
-            if (!room) return;
-            for (let i: number = 0; i < room.players.length; ++i) {
-                const player: Player = room.players[i];
-                const socket: Socket.wsSocket | undefined = this.wsSockets.find((s: Socket.wsSocket) => s.id === player.id);
-                if (!socket) return;
-                if (Date.now() - player.lastHeartbeat > WSEvents.default.intervalLimit) {
+            for (let roomIndex: number = 0; roomIndex < this.rooms.length; ++roomIndex) {
+                const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa" + roomIndex);
+                if (!room) return;
+                for (let i: number = 0; i < room.players.length; ++i) {
+                    const player: Player = room.players[i];
+                    const socket: Socket.wsSocket | undefined = this.wsSockets.find((s: Socket.wsSocket) => s.id === player.id);
+                    if (!socket) return;
+                    if (Date.now() - player.lastHeartbeat > WSEvents.default.intervalLimit) {
+                        socket.conn.send(JSON.stringify({
+                            op: WSEvents.OPCODE.CLOSE,
+                            d: {
+                                message: "Missing heartbeats"
+                            }
+                        }));
+                        WSEvents.default.disconnectSocket(socket, room);
+                        continue;
+                    }
+                    player.regenerate(true);
                     socket.conn.send(JSON.stringify({
-                        op: WSEvents.OPCODE.CLOSE,
+                        op: WSEvents.OPCODE.EVENT,
+                        t: WSEvents.EventTypes.COORDINATECHANGE,
                         d: {
-                            message: "Missing heartbeats"
+                            players: room.players
                         }
                     }));
-                    WSEvents.default.disconnectSocket(socket, room);
-                    continue;
                 }
-                player.regenerate(true);
-                socket.conn.send(JSON.stringify({
-                    op: WSEvents.OPCODE.EVENT,
-                    t: WSEvents.EventTypes.COORDINATECHANGE,
-                    d: {
-                        players: room.players
-                    }
-                }));
             }
         }, 20);
     }
