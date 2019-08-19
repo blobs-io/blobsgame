@@ -76,8 +76,10 @@ export default class APIController {
                 result
             });
         });
-        this.app.get("/api/ffa/players", (req: express.Request, res: express.Response) => {
-            const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === "ffa");
+        this.app.get("/api/players/:roomid", (req: express.Request, res: express.Response) => {
+            if (Array.isArray(req.params)) return;
+            const roomID: string = req.params.roomid;
+            const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === roomID);
             if (!room) {
                 res.status(500);
                 res.json({
