@@ -101,10 +101,10 @@ const useSecureWS: boolean = false;
     canvas.width = window.innerWidth - 30;
     canvas.height = window.innerHeight - 30;
 
-    if (!details.mode || !details.id) {
-        document.write("Unsupported gamemode or game ID not found.");
-        return;
-    }
+    if (!details.mode)
+        details.mode = "FFA";
+    if (!details.id)
+        details.id = "ffa1";
 
     // -------------
     // Enums
@@ -1129,7 +1129,6 @@ const useSecureWS: boolean = false;
     if (/[?&]guest=true/.test(window.location.search)) {
         ownBlob.guest = true;
     }
-
 
     // Last part
     console.log("%c You know JavaScript / TypeScript? Contribute to blobs.io! https://github.com/blobs-io/blobs.io", "color: green");
