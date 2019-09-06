@@ -20,7 +20,7 @@
     "bcrypt": "^3.0.2",
     "cookie-parser": "*",
     "express": "^4.16.4",
-    "jimp": "^0.6.4",
+    "jimp": "0.6.4",
     "node-fetch": "^2.3.0",
     "npm": "^6.5.0",
     "sqlite": "^3.0.0",
