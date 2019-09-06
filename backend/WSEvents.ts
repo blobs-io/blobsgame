@@ -49,7 +49,7 @@ export default class WSHandler {
         if (typeof op !== "number" || typeof d !== "object") return;
         if (op === OPCODE.HELLO) {
             const session: any = d.session;
-            const room: Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room);
+            const room: Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room && r.mode === d.mode);
 
             if (!room) return;
             if (room.players.length >= 100)
