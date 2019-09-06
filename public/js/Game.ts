@@ -1161,7 +1161,8 @@ const useSecureWS: boolean = false;
                                 op: OPCODE.HELLO,
                                 d: {
                                     session: sessionid,
-                                    room: details.id
+                                    room: details.id,
+                                    mode: details.mode
                                 }})
                         );
                         const loadingScreen: HTMLElement | null = document.getElementById("loading-screen");
