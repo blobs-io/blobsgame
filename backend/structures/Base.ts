@@ -7,7 +7,7 @@ import bodyParser = require("body-parser");
 // Import structures
 import * as SessionIDManager from "./SessionIDManager";
 import WS from "../WSEvents";
-import Room from "./Room";
+import * as Room from "./Room";
 import Maps from "./Maps";
 import * as Socket from "./Socket";
 import APIController from "../api/APIController";
@@ -46,7 +46,7 @@ export default class Base {
     };
     public _server: http.Server;
     public WSHandler: WS;
-    public rooms: Room[];
+    public rooms: Room.default[];
     public maps: Maps;
     public sockets: Socket.default[];
     public APIController: APIController;
@@ -72,10 +72,16 @@ export default class Base {
         this.captchas = [];
         this.rooms = [];
 
+        // 3 FFA rooms
         for (let i: number = 0; i < 3; ++i) {
-            const ffaRoom: Room = new Room(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa" + (i + 1));
-            this.rooms.push(ffaRoom);
+            this.rooms.push(
+                new Room.default(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa" + (i + 1))
+            );
         }
+        // 1 Elimination room
+        this.rooms.push(
+            new Room.default(this.maps.mapStore.find((v: any) => v.map.name === "default"), "elim1", Room.Mode.ELIMINATION)
+        );
         this.dbToken = SessionIDManager.generateSessionID(24);
     }
 
@@ -131,7 +137,7 @@ export default class Base {
 
         setInterval(() => {
             for (let roomIndex: number = 0; roomIndex < this.rooms.length; ++roomIndex) {
-                const room: Room | undefined = this.rooms.find((v: Room) => v.id === "ffa" + (roomIndex + 1));
+                const room: Room.default | undefined = this.rooms[roomIndex];
                 if (!room) return;
                 for (let i: number = 0; i < room.players.length; ++i) {
                     const player: Player = room.players[i];
