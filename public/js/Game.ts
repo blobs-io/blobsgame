@@ -20,7 +20,6 @@ const useSecureWS: boolean = false;
         server.replace(/^https?/, "ws" + (useSecureWS ? "s" : ""))
     );
     let lastTick: number = Date.now();
-    let blobs: BlobObject[] = [];
     const objects: GameObject = {
         walls: [],
         items: [],
@@ -96,15 +95,12 @@ const useSecureWS: boolean = false;
         id: getParameterByName("id"),
         singleplayer: false
     };
+    const elimination: Elimination = {};
     let ping: number = 0;
     let windowBlur: boolean = false;
     canvas.width = window.innerWidth - 30;
     canvas.height = window.innerHeight - 30;
 
-    if (!details.mode)
-        details.mode = "FFA";
-    if (!details.id)
-        details.id = "ffa1";
 
     // -------------
     // Enums
@@ -142,6 +138,10 @@ const useSecureWS: boolean = false;
         LEFT = 3,
         RIGHT = 1
     }
+    enum EliminationRoomState {
+        WAITING,
+        INGAME
+    }
 
     // -------------
     // Interfaces
@@ -164,6 +164,11 @@ const useSecureWS: boolean = false;
         tier?: string;
         colorCode?: string;
         emblemFile?: string;
+    }
+    interface Elimination {
+        state?: EliminationRoomState;
+        roomCreatedAt?: number;
+        waitingTime?: number;
     }
 
     // -------------
@@ -393,11 +398,11 @@ const useSecureWS: boolean = false;
 
         static find(x: number, y: number, excludeSelf: boolean = false): BlobObject | undefined {
             let obj;
-            for(let i: number = 0; i < blobs.length; ++i) {
-                if (x < (blobs[i].x + 30) && x > (blobs[i].x - 30)) {
-                    if (y < (blobs[i].y + 30) && y > (blobs[i].y - 30) && blobs[i].owner !== ownBlob.owner) {
-                        if (excludeSelf && blobs[i].owner === ownBlob.owner) continue;
-                        obj = blobs[i];
+            for(let i: number = 0; i < room.blobs.length; ++i) {
+                if (x < (room.blobs[i].x + 30) && x > (room.blobs[i].x - 30)) {
+                    if (y < (room.blobs[i].y + 30) && y > (room.blobs[i].y - 30) && room.blobs[i].owner !== ownBlob.owner) {
+                        if (excludeSelf && room.blobs[i].owner === ownBlob.owner) continue;
+                        obj = room.blobs[i];
                         break;
                     }
                 }
@@ -440,6 +445,29 @@ const useSecureWS: boolean = false;
             return this.x < (ownBlob.x + 10) && this.x > (ownBlob.x - 10) && this.y < (ownBlob.y + 10) && this.y > (ownBlob.y - 10);
         }
     }
+    class Room {
+        static Type: any = {
+            FFA: "ffa",
+            ELIMINATION: "elimination"
+        };
+        public type: string;
+        public blobs: BlobObject[];
+        constructor(type: string = Room.Type.FFA, blobs: BlobObject[] = []) {
+            this.type = type;
+            this.blobs = [];
+        }
+    }
+    class EliminationRoom extends Room {
+        constructor(blobs: BlobObject[] = []) {
+            super(Room.Type.ELIMINATION, blobs);
+        }
+    }
+
+    if (!details.mode)
+        details.mode = Room.Type.FFA;
+    if (!details.id)
+        details.id = "ffa1";
+    let room: EliminationRoom | Room;
 
     // -------------
     // Canvas
@@ -525,7 +553,7 @@ const useSecureWS: boolean = false;
         displayNoNomAreas(ctx);
         displayHP(ctx);
         displayMinimap(ctx);
-        BlobObject.display(blobs, true, true);
+        BlobObject.display(room.blobs, true, true);
     }
 
     let lastIteration: number = Date.now();
@@ -541,6 +569,10 @@ const useSecureWS: boolean = false;
                 if (eventData.user.role === -1 && !/[?&]guest=true/.test(window.location.search))
                     return document.location.href = "/login/";
 
+                if (details.mode === Room.Type.ELIMINATION)
+                    room = new EliminationRoom();
+                else room = new Room();
+
                 // Own blob
                 ownBlob.owner = eventData.user.username;
                 ownBlob.blob = eventData.user.blob;
@@ -551,14 +583,14 @@ const useSecureWS: boolean = false;
                 ownBlob.ready = true;
                 ownBlob.role = eventData.user.role;
                 ownBlob.setBlob(<BlobType>`../assets/${eventData.user.blob}.png`).catch(console.log);
-                blobs.push(ownBlob);
+                room.blobs.push(ownBlob);
 
                 if (details.singleplayer)
                     eventData.users = [];
                 for (let i: number = 0; i < eventData.users.length; ++i) {
                     const currentBlob: any = eventData.users[i];
                     if (currentBlob.owner === ownBlob.owner ||
-                        blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) continue;
+                        room.blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) continue;
                     const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner);
                     newBlob.directionChangeCoordinates = {
                         x: currentBlob.x,
@@ -570,7 +602,13 @@ const useSecureWS: boolean = false;
                     newBlob.setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
                         .then(() => newBlob.display());
 
-                    blobs.push(newBlob);
+                    if (details.mode === Room.Type.ELIMINATION) {
+                        elimination.state = EliminationRoomState.WAITING;
+                        elimination.roomCreatedAt = eventData.roomCreatedAt;
+                        elimination.waitingTime = eventData.waitingTime;
+                    }
+
+                    room.blobs.push(newBlob);
                 }
 
                 // Heartbeat
@@ -587,7 +625,7 @@ const useSecureWS: boolean = false;
                 if (!ownBlob || !ownBlob.ready) return;
                 for (let i: number = 0; i < eventData.players.length; ++i) {
                     const currentBlob: any = eventData.players[i];
-                    const target: BlobObject | undefined = blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
+                    const target: BlobObject | undefined = room.blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
                     if (!target) {
                         const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
                         newBlob.direction = currentBlob.direction;
@@ -597,8 +635,8 @@ const useSecureWS: boolean = false;
                         newBlob
                             .setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
                             .then(() => newBlob.display(true, true));
-                        if (blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
-                        blobs.push(newBlob);
+                        if (room.blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
+                        room.blobs.push(newBlob);
                     } else {
                         if (currentBlob.owner !== ownBlob.owner) {
                             target.direction = currentBlob.direction;
@@ -611,10 +649,10 @@ const useSecureWS: boolean = false;
                     }
                 }
 
-                for (let i: number = 0; i < blobs.length; ++i) {
-                    const blob: number = eventData.players.findIndex((v: BlobObject) => v.owner === blobs[i].owner);
+                for (let i: number = 0; i < room.blobs.length; ++i) {
+                    const blob: number = eventData.players.findIndex((v: BlobObject) => v.owner === room.blobs[i].owner);
                     if (blob === -1) {
-                        blobs.splice(blobs.findIndex((v: BlobObject) => v.owner === blobs[i].owner), 1);
+                        room.blobs.splice(room.blobs.findIndex((v: BlobObject) => v.owner === room.blobs[i].owner), 1);
                     }
                 }
             }
@@ -903,10 +941,10 @@ const useSecureWS: boolean = false;
         context.stroke();
         context.fillStyle = "lightgreen";
         context.fillRect(canvas.width - 225 + (65 / (mapSize.width / ownBlob.x)), canvas.height - 75 + (65 / (mapSize.height / ownBlob.y)), 10, 10);
-        for(let i: number = 0; i < blobs.length; ++i) {
-            if (blobs[i].owner != ownBlob.owner) {
+        for(let i: number = 0; i < room.blobs.length; ++i) {
+            if (room.blobs[i].owner != ownBlob.owner) {
                 context.fillStyle = "red";
-                context.fillRect(canvas.width - 225 + (65 / (mapSize.width / blobs[i].x)), canvas.height - 75 + (65 / (mapSize.height / blobs[i].y)), 10, 10);
+                context.fillRect(canvas.width - 225 + (65 / (mapSize.width / room.blobs[i].x)), canvas.height - 75 + (65 / (mapSize.height / room.blobs[i].y)), 10, 10);
             }
         }
     }
@@ -958,7 +996,7 @@ const useSecureWS: boolean = false;
         if (!leaderboardElement) return;
         leaderboardElement.innerHTML = "<h3>Leaderboard</h3>";
         // @ts-ignore
-        const sortedblobs: BlobObject[] = blobs.slice(0, 10).sort((a: BlobObject, b: BlobObject) => b.br - a.br);
+        const sortedblobs: BlobObject[] = room.blobs.slice(0, 10).sort((a: BlobObject, b: BlobObject) => b.br - a.br);
         if (!sortedblobs) return;
         for (let i = 0; i < sortedblobs.length; ++i) {
             const leaderboardEntry = document.createElement("div");
