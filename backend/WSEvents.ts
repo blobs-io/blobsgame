@@ -1,10 +1,11 @@
 import Base from "./structures/Base";
-import Room from "./structures/Room";
+import Room, {Mode} from "./structures/Room";
 import Socket, {wsSocket} from "./structures/Socket"
 import Player from "./structures/Player";
 import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
+import * as EliminationRoom from "./structures/EliminationRoom";
 
 export enum EventTypes {
     PLAYER_KICK = "kick",
@@ -49,7 +50,7 @@ export default class WSHandler {
         if (typeof op !== "number" || typeof d !== "object") return;
         if (op === OPCODE.HELLO) {
             const session: any = d.session;
-            const room: Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room && r.mode === d.mode);
+            const room: EliminationRoom.default | Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room && r.mode === d.mode);
 
             if (!room) return;
             if (room.players.length >= 100)
@@ -126,7 +127,11 @@ export default class WSHandler {
                     },
                     users: room.players,
                     objects: room.map.map.objects,
-                    interval: WSHandler.interval
+                    interval: WSHandler.interval,
+                    waitingTime: room.mode === Mode.ELIMINATION ?
+                        (room.players.length >= EliminationRoom.default.minPlayersStartup
+                            ? EliminationRoom.default.waitingTimeFull : EliminationRoom.default.waitingTime) : null,
+                    roomCreatedAt: room.createdAt
                 },
                 t: EventTypes.HEARTBEAT
             }));
