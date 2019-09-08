@@ -12,25 +12,26 @@ export default class EliminationRoom extends Room.default {
     public state: State;
     public _interval: NodeJS.Timeout;
 
-    constructor(state = State.WAITING) {
-        super(undefined, undefined, Room.Mode.ELIMINATION);
+    constructor(map: any = {}, id: string = Math.random().toString(32).substr(2,6), state = State.WAITING) {
+        super(map, id, Room.Mode.ELIMINATION);
         this.state = state;
+        console.log(this.startsAt);
         this._interval = setInterval(() => {
-            if (this.state === State.WAITING && this.startsAt >= Date.now()) {
-                clearInterval(this._interval);
+            if (this.state === State.WAITING && Date.now() >= this.startsAt) {
                 this.start();
+                clearInterval(this._interval);
             }
         }, 1000);
     }
 
     get startsAt() {
-        return Date.now() + (this.players.length >= EliminationRoom.minPlayersStartup ?
+        return this.createdAt + (this.players.length >= EliminationRoom.minPlayersStartup ?
             EliminationRoom.waitingTimeFull :
             EliminationRoom.waitingTime);
     }
 
     start() {
-
+        console.log("started");
     }
 
 }
