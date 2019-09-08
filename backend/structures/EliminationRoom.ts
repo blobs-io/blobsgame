@@ -1,4 +1,7 @@
 import * as Room from "./Room";
+import {wsSocket} from "./Socket";
+import {EventTypes, OPCODE} from "../WSEvents";
+import Base from "./Base";
 
 export enum State {
     WAITING,
@@ -12,10 +15,9 @@ export default class EliminationRoom extends Room.default {
     public state: State;
     public _interval: NodeJS.Timeout;
 
-    constructor(map: any = {}, id: string = Math.random().toString(32).substr(2,6), state = State.WAITING) {
-        super(map, id, Room.Mode.ELIMINATION);
+    constructor(base: Base, map: any = {}, id: string = Math.random().toString(32).substr(2,6), state = State.WAITING) {
+        super(base, map, id, Room.Mode.ELIMINATION);
         this.state = state;
-        console.log(this.startsAt);
         this._interval = setInterval(() => {
             if (this.state === State.WAITING && Date.now() >= this.startsAt) {
                 this.start();
@@ -31,7 +33,6 @@ export default class EliminationRoom extends Room.default {
     }
 
     start() {
-        console.log("started");
-    }
 
+    }
 }
