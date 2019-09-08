@@ -17,6 +17,7 @@ import Captcha from "./Captcha";
 import Player from "./Player";
 import * as WSEvents from "../WSEvents";
 import EliminationRoom from "./EliminationRoom";
+import {wsSocket} from "./Socket";
 
 interface Server {
     app: express.Application;
@@ -76,12 +77,12 @@ export default class Base {
         // 3 FFA rooms
         for (let i: number = 0; i < 3; ++i) {
             this.rooms.push(
-                new Room.default(this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa" + (i + 1))
+                new Room.default(this, this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa" + (i + 1))
             );
         }
         // 1 Elimination room
         this.rooms.push(
-            new EliminationRoom(this.maps.mapStore.find((v: any) => v.map.name === "default"), "elim1")
+            new EliminationRoom(this, this.maps.mapStore.find((v: any) => v.map.name === "default"), "elim1")
         );
         this.dbToken = SessionIDManager.generateSessionID(24);
     }
@@ -140,29 +141,24 @@ export default class Base {
             for (let roomIndex: number = 0; roomIndex < this.rooms.length; ++roomIndex) {
                 const room: Room.default | undefined = this.rooms[roomIndex];
                 if (!room) return;
-                for (let i: number = 0; i < room.players.length; ++i) {
-                    const player: Player = room.players[i];
-                    const socket: Socket.wsSocket | undefined = this.wsSockets.find((s: Socket.wsSocket) => s.id === player.id);
-                    if (!socket) return;
+                room.broadcast((ws: wsSocket, player: Player) => {
                     if (Date.now() - player.lastHeartbeat > WSEvents.default.intervalLimit) {
-                        socket.conn.send(JSON.stringify({
+                        ws.conn.send(JSON.stringify({
                             op: WSEvents.OPCODE.CLOSE,
                             d: {
                                 message: "Missing heartbeats"
                             }
                         }));
-                        WSEvents.default.disconnectSocket(socket, room);
-                        continue;
                     }
                     player.regenerate(true);
-                    socket.conn.send(JSON.stringify({
+                    ws.conn.send(JSON.stringify({
                         op: WSEvents.OPCODE.EVENT,
                         t: WSEvents.EventTypes.COORDINATECHANGE,
                         d: {
                             players: room.players
                         }
                     }));
-                }
+                });
             }
         }, 20);
     }
