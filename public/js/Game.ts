@@ -461,6 +461,17 @@ const useSecureWS: boolean = false;
         constructor(blobs: BlobObject[] = []) {
             super(Room.Type.ELIMINATION, blobs);
         }
+
+        static showCountdown(context: CanvasRenderingContext2D | null) {
+            if (!context || !(room instanceof EliminationRoom)) return;
+            const remainingTime: number = (elimination.roomCreatedAt + elimination.waitingTime) - Date.now();
+            const remainingTimeString: string = Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
+            context.font = "60px Raleway";
+            context.fillStyle = "white";
+            context.fillText(remainingTimeString, canvas.width / 2 - 270, 50);
+            context.font = "30px Raleway";
+            context.fillText("Waiting for players...", canvas.width / 2 - 140, 100);
+        }
     }
 
     if (!details.mode)
@@ -553,6 +564,9 @@ const useSecureWS: boolean = false;
         displayNoNomAreas(ctx);
         displayHP(ctx);
         displayMinimap(ctx);
+        if (room.type === Room.Type.ELIMINATION && elimination.state === EliminationRoomState.WAITING) {
+            EliminationRoom.showCountdown(ctx);
+        }
         BlobObject.display(room.blobs, true, true);
     }
 
@@ -602,13 +616,13 @@ const useSecureWS: boolean = false;
                     newBlob.setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
                         .then(() => newBlob.display());
 
-                    if (details.mode === Room.Type.ELIMINATION) {
-                        elimination.state = EliminationRoomState.WAITING;
-                        elimination.roomCreatedAt = eventData.roomCreatedAt;
-                        elimination.waitingTime = eventData.waitingTime;
-                    }
-
                     room.blobs.push(newBlob);
+                }
+
+                if (details.mode === Room.Type.ELIMINATION) {
+                    elimination.state = EliminationRoomState.WAITING;
+                    elimination.roomCreatedAt = eventData.roomCreatedAt;
+                    elimination.waitingTime = eventData.waitingTime;
                 }
 
                 // Heartbeat
