@@ -16,6 +16,7 @@ import RouteController from "../routes/RouteController";
 import Captcha from "./Captcha";
 import Player from "./Player";
 import * as WSEvents from "../WSEvents";
+import EliminationRoom from "./EliminationRoom";
 
 interface Server {
     app: express.Application;
@@ -80,7 +81,7 @@ export default class Base {
         }
         // 1 Elimination room
         this.rooms.push(
-            new Room.default(this.maps.mapStore.find((v: any) => v.map.name === "default"), "elim1", Room.Mode.ELIMINATION)
+            new EliminationRoom(this.maps.mapStore.find((v: any) => v.map.name === "default"), "elim1")
         );
         this.dbToken = SessionIDManager.generateSessionID(24);
     }
