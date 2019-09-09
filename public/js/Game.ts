@@ -298,7 +298,7 @@ const useSecureWS: boolean = false;
                 if (!tier || !tier.tier) return;
                 if (this.owner === ownBlob.owner && this.owner) {
                     ctx.fillStyle = `#${tier.colorCode}`;
-                    ctx.font = `${15 * scale}px Dosis`;
+                    ctx.font = `${15 * scale}px Raleway`;
                     ctx.drawImage(this.img,
                         canvasX,
                         canvasY,
@@ -467,10 +467,15 @@ const useSecureWS: boolean = false;
             const remainingTime: number = (elimination.roomCreatedAt + elimination.waitingTime) - Date.now();
             const remainingTimeString: string = Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
             context.font = "60px Raleway";
-            context.fillStyle = "white";
-            context.fillText(remainingTimeString, canvas.width / 2 - 270, 50);
+            if (countdownColor[0] >= 0xff) countdownColor[1] = 1;
+            else if (countdownColor[0] <= 0x30) countdownColor[1] = 0;
+
+            if (countdownColor[1] === 0) countdownColor[0] += 4;
+            else countdownColor[0] -= 4;
+            context.fillStyle = "#" + (countdownColor[0] > 0xff ? 0xff : countdownColor[0]).toString(16) + "0000";
+            context.fillText(remainingTimeString, canvas.width / 2 - 270, canvas.height - 50);
             context.font = "30px Raleway";
-            context.fillText("Waiting for players...", canvas.width / 2 - 140, 100);
+            context.fillText("Waiting for players...", canvas.width / 2 - 140, canvas.height - 100);
         }
     }
 
@@ -571,6 +576,7 @@ const useSecureWS: boolean = false;
     }
 
     let lastIteration: number = Date.now();
+    let countdownColor: number[] = [0x30, 0];
     window.requestAnimationFrame(animationFrame);
 
     // -------------
@@ -964,7 +970,7 @@ const useSecureWS: boolean = false;
     }
     function displayHP(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
-        context.font = "30px Dosis";
+        context.font = "30px Raleway";
 
         if (ownBlob.health >= 80) context.fillStyle = "#2ecc71";
         else if (ownBlob.health >= 50) context.fillStyle = "#f39c12";
@@ -972,9 +978,9 @@ const useSecureWS: boolean = false;
         else if (ownBlob.health >= 10) context.fillStyle = "#e74c3c";
         else context.fillStyle = "#c0392b";
 
-        context.fillText(ownBlob.health.toString(), canvas.width - 80, canvas.height - 20);
-        context.font = "13px Dosis";
-        context.fillText("HP", canvas.width - 35, canvas.height - 20);
+        context.fillText(ownBlob.health.toString(), canvas.width - 90, canvas.height - 30);
+        context.font = "13px Raleway";
+        context.fillText("HP", canvas.width - 40, canvas.height - 30);
         context.fillStyle = "white";
         window.requestAnimationFrame(animationFrame);
     }
@@ -1066,8 +1072,8 @@ const useSecureWS: boolean = false;
     }
     function displayPlayerStats(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
-        context.font = "15px Dosis";
-        context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 80, canvas.height);
+        context.font = "15px Raleway";
+        context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 90, canvas.height - 10);
     }
     function drawBorder(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
