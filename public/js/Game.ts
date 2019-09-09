@@ -515,7 +515,7 @@ const useSecureWS: boolean = false;
                 const diff: number = ping = (request.arrived - timestampBefore);
                 const latencyElement: HTMLElement | null = document.getElementById("latency");
                 if (!latencyElement) return;
-                latencyElement.innerHTML = `• Ping: <span style="color: #${diff < 10 ? '00ff00' : (diff < 30 ? 'ccff99' : (diff < 50 ? 'ffff99': (diff < 100 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
+                latencyElement.innerHTML = `• Ping: <span style="color: #${diff < 100 ? '00ff00' : (diff < 200 ? 'ccff99' : (diff < 250 ? 'ffff99': (diff < 500 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
             });
             lastTick = Date.now();
         }
