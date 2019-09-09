@@ -149,6 +149,7 @@ export default class Base {
                                 message: "Missing heartbeats"
                             }
                         }));
+                        WSEvents.default.disconnectSocket(ws, room);
                     }
                     player.regenerate(true);
                     ws.conn.send(JSON.stringify({
