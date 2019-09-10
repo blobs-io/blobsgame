@@ -151,7 +151,7 @@ export default class WSHandler {
                 const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === d.room);
                 if (!room) return;
                 let previousPlayer: Player | undefined = room.players.find((v: Player) => v.id === id);
-                if (!previousPlayer || !previousPlayer.x || !previousPlayer.y || !previousPlayer.anticheat) return;
+                if (!previousPlayer || !Number.isFinite(previousPlayer.x) || !Number.isFinite(previousPlayer.y) || !previousPlayer.anticheat) return;
                 if (Math.abs(d.x - previousPlayer.x) > 50) {
                     previousPlayer.anticheat.penalize(1, Math.abs(d.x - previousPlayer.x));
                 }
