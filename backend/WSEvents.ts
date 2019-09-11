@@ -12,6 +12,7 @@ export enum EventTypes {
     COORDINATECHANGE = "coordinateChange",
     DIRECTIONCHANGE = "directionChange",
     NOMKEY = "nomKey",
+    STATECHANGE = "stateChange",
     PLAYER_NOMMED = "playerNommed",
     PLAYER_KICK_C = "kickPlayer",
     HEARTBEAT = "heartbeat"
