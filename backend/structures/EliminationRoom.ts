@@ -5,13 +5,14 @@ import Base from "./Base";
 
 export enum State {
     WAITING,
+    COUNTDOWN,
     INGAME
 }
 
 export default class EliminationRoom extends Room.default {
-    static waitingTime: number = 300000;
-    static waitingTimeFull: number = 120000;
-    static minPlayersStartup: number = 4;
+    static waitingTime: number = 120000;
+    static minPlayersStartup: number = 2;
+    public countdownStarted: number = null;
     public state: State;
     public _interval: NodeJS.Timeout;
 
@@ -19,7 +20,7 @@ export default class EliminationRoom extends Room.default {
         super(base, map, id, Room.Mode.ELIMINATION);
         this.state = state;
         this._interval = setInterval(() => {
-            if (this.state === State.WAITING && Date.now() >= this.startsAt) {
+            if (this.state === State.COUNTDOWN && Date.now() >= this.startsAt) {
                 this.start();
                 clearInterval(this._interval);
             }
@@ -27,9 +28,8 @@ export default class EliminationRoom extends Room.default {
     }
 
     get startsAt() {
-        return this.createdAt + (this.players.length >= EliminationRoom.minPlayersStartup ?
-            EliminationRoom.waitingTimeFull :
-            EliminationRoom.waitingTime);
+        if (this.state === State.WAITING) return null;
+        else return this.countdownStarted + EliminationRoom.waitingTime;
     }
 
     start() {
