@@ -127,6 +127,7 @@ const useSecureWS: boolean = false;
         KICK               = "kick",
         KICK_PLAYER        = "kickPlayer",
         NOM_KEY            = "nomKey",
+        STATECHANGE        = "stateChange",
         SP_NOM_KEY         = "singlePlayerNomKey",
         DIRECTION_CHANGE_C = "directionChange",
         PLAYER_NOMMED      = "playerNommed",
@@ -678,6 +679,10 @@ const useSecureWS: boolean = false;
             }
             else if (eventType === EventType.KICK) {
                 alert("You have been kicked.\nReason: " + (eventData.message || "-"));
+            }
+            else if (eventType === EventType.STATECHANGE) {
+                if (room instanceof EliminationRoom && room.state !== eventData.state)
+                    room.state = eventData.state;
             }
         }
     });
