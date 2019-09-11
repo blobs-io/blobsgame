@@ -62,6 +62,15 @@ export default class WSHandler {
                     t: EventTypes.PLAYER_KICK
                 }));
 
+            if (room instanceof EliminationRoom.default && room.state !== EliminationRoom.State.COUNTDOWN && room.state !== EliminationRoom.State.WAITING)
+                return conn.send(JSON.stringify({
+                    op: OPCODE.EVENT,
+                    d: {
+                        message: "Could not join room. Perhaps it's ingame already?"
+                    },
+                    t: EventTypes.PLAYER_KICK
+                }));
+
             if (typeof session !== "string") return;
 
             let socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
@@ -114,7 +123,7 @@ export default class WSHandler {
 
             room.players.push(newblob);
 
-            conn.send(JSON.stringify({
+            const objectSend: any = {
                 op: OPCODE.EVENT,
                 d: {
                     user: {
@@ -128,13 +137,21 @@ export default class WSHandler {
                     users: room.players,
                     objects: room.map.map.objects,
                     interval: WSHandler.interval,
-                    waitingTime: room.mode === Mode.ELIMINATION ?
-                        (room.players.length >= EliminationRoom.default.minPlayersStartup
-                            ? EliminationRoom.default.waitingTimeFull : EliminationRoom.default.waitingTime) : null,
                     roomCreatedAt: room.createdAt
                 },
                 t: EventTypes.HEARTBEAT
-            }));
+            };
+
+            if (room instanceof EliminationRoom.default) {
+                if (room.players.length >= EliminationRoom.default.minPlayersStartup) {
+                    room.state = EliminationRoom.State.COUNTDOWN;
+                }
+                objectSend.d.state = room.state;
+                objectSend.d.waitingTime = EliminationRoom.default.waitingTime;
+                objectSend.d.countdownStarted = room.countdownStarted;
+            }
+
+            conn.send(JSON.stringify(objectSend));
         }
         else if (op === OPCODE.HEARTBEAT) {
             if (!d || !d.room) return;
