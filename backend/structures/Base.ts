@@ -2,22 +2,21 @@
 import * as express from "express";
 import * as ws from "ws";
 import * as http from "http";
-import bodyParser = require("body-parser");
-
 // Import structures
 import * as SessionIDManager from "./SessionIDManager";
-import WS from "../WSEvents";
+import WS, * as WSEvents from "../WSEvents";
+import {EventTypes, OPCODE} from "../WSEvents";
 import * as Room from "./Room";
 import Maps from "./Maps";
 import * as Socket from "./Socket";
+import {wsSocket} from "./Socket";
 import APIController from "../api/APIController";
 import ClanController from "../clans/ClanController";
 import RouteController from "../routes/RouteController";
 import Captcha from "./Captcha";
 import Player from "./Player";
-import * as WSEvents from "../WSEvents";
-import EliminationRoom from "./EliminationRoom";
-import {wsSocket} from "./Socket";
+import EliminationRoom, {State} from "./EliminationRoom";
+import bodyParser = require("body-parser");
 
 interface Server {
     app: express.Application;
@@ -150,6 +149,18 @@ export default class Base {
                             }
                         }));
                         WSEvents.default.disconnectSocket(ws, room);
+                        if (room instanceof EliminationRoom && room.state === State.COUNTDOWN && room.players.length === EliminationRoom.minPlayersStartup - 1) {
+                            room.state = State.WAITING;
+                            //TODO: somehow send countdownStarted to client
+                            room.countdownStarted = null;
+                            room.broadcastSend(JSON.stringify({
+                                op: OPCODE.EVENT,
+                                t: EventTypes.STATECHANGE,
+                                d: {
+                                    state: room.state
+                                }
+                            }));
+                        }
                     }
                     player.regenerate(true);
                     ws.conn.send(JSON.stringify({
