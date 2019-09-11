@@ -36,7 +36,7 @@ export default class Room extends GameMap {
         }
     }
 
-    broadcastSend(str: string) {
+    broadcastSend(str: string): void {
         this.broadcast(ws => ws.conn.send(str));
     }
 }
