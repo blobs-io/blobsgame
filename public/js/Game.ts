@@ -95,7 +95,6 @@ const useSecureWS: boolean = false;
         id: getParameterByName("id"),
         singleplayer: false
     };
-    const elimination: Elimination = {};
     let ping: number = 0;
     let windowBlur: boolean = false;
     canvas.width = window.innerWidth - 30;
@@ -140,6 +139,7 @@ const useSecureWS: boolean = false;
     }
     enum EliminationRoomState {
         WAITING,
+        COUNTDOWN,
         INGAME
     }
 
@@ -164,11 +164,6 @@ const useSecureWS: boolean = false;
         tier?: string;
         colorCode?: string;
         emblemFile?: string;
-    }
-    interface Elimination {
-        state?: EliminationRoomState;
-        roomCreatedAt?: number;
-        waitingTime?: number;
     }
 
     // -------------
@@ -452,19 +447,23 @@ const useSecureWS: boolean = false;
         };
         public type: string;
         public blobs: BlobObject[];
+        public createdAt: number;
         constructor(type: string = Room.Type.FFA, blobs: BlobObject[] = []) {
             this.type = type;
             this.blobs = [];
         }
     }
     class EliminationRoom extends Room {
+        static waitingTime: number;
+        public state: number;
+        public countdownStarted: number;
         constructor(blobs: BlobObject[] = []) {
             super(Room.Type.ELIMINATION, blobs);
         }
 
-        static showCountdown(context: CanvasRenderingContext2D | null) {
+        showCountdown(context: CanvasRenderingContext2D | null) {
             if (!context || !(room instanceof EliminationRoom)) return;
-            const remainingTime: number = (elimination.roomCreatedAt + elimination.waitingTime) - Date.now();
+            const remainingTime: number = (this.createdAt + EliminationRoom.waitingTime) - Date.now();
             const remainingTimeString: string = Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
             context.font = "60px Raleway";
             if (countdownColor[0] >= 0xff) countdownColor[1] = 1;
@@ -569,8 +568,8 @@ const useSecureWS: boolean = false;
         displayNoNomAreas(ctx);
         displayHP(ctx);
         displayMinimap(ctx);
-        if (room.type === Room.Type.ELIMINATION && elimination.state === EliminationRoomState.WAITING) {
-            EliminationRoom.showCountdown(ctx);
+        if (room instanceof EliminationRoom && room.state === EliminationRoomState.COUNTDOWN) {
+            room.showCountdown(ctx);
         }
         BlobObject.display(room.blobs, true, true);
     }
@@ -625,10 +624,11 @@ const useSecureWS: boolean = false;
                     room.blobs.push(newBlob);
                 }
 
-                if (details.mode === Room.Type.ELIMINATION) {
-                    elimination.state = EliminationRoomState.WAITING;
-                    elimination.roomCreatedAt = eventData.roomCreatedAt;
-                    elimination.waitingTime = eventData.waitingTime;
+                if (details.mode === Room.Type.ELIMINATION && room instanceof EliminationRoom) {
+                    room.state = eventData.state;
+                    room.createdAt = eventData.roomCreatedAt;
+                    EliminationRoom.waitingTime = eventData.waitingTime;
+                    room.countdownStarted = eventData.countdownStarted;
                 }
 
                 // Heartbeat
