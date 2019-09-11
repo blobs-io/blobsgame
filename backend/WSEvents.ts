@@ -146,6 +146,13 @@ export default class WSHandler {
             if (room instanceof EliminationRoom.default) {
                 if (room.players.length >= EliminationRoom.default.minPlayersStartup) {
                     room.state = EliminationRoom.State.COUNTDOWN;
+                    room.broadcastSend(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventTypes.STATECHANGE,
+                        d: {
+                            state: room.state
+                        }
+                    }));
                 }
                 objectSend.d.state = room.state;
                 objectSend.d.waitingTime = EliminationRoom.default.waitingTime;
