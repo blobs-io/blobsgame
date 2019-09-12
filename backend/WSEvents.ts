@@ -144,13 +144,15 @@ export default class WSHandler {
             };
 
             if (room instanceof EliminationRoom.default) {
-                if (room.players.length >= EliminationRoom.default.minPlayersStartup) {
+                if (room.players.length >= EliminationRoom.default.minPlayersStartup && room.state === EliminationRoom.State.WAITING) {
                     room.state = EliminationRoom.State.COUNTDOWN;
+                    room.countdownStarted = Date.now();
                     room.broadcastSend(JSON.stringify({
                         op: OPCODE.EVENT,
                         t: EventTypes.STATECHANGE,
                         d: {
-                            state: room.state
+                            state: room.state,
+                            countdownStarted: room.countdownStarted
                         }
                     }));
                 }
