@@ -464,7 +464,7 @@ const useSecureWS: boolean = false;
 
         showCountdown(context: CanvasRenderingContext2D | null) {
             if (!context || !(room instanceof EliminationRoom)) return;
-            const remainingTime: number = (this.createdAt + EliminationRoom.waitingTime) - Date.now();
+            const remainingTime: number = (this.countdownStarted + EliminationRoom.waitingTime) - Date.now();
             const remainingTimeString: string = Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
             context.font = "60px Raleway";
             if (countdownColor[0] >= 0xff) countdownColor[1] = 1;
@@ -473,7 +473,9 @@ const useSecureWS: boolean = false;
             if (countdownColor[1] === 0) countdownColor[0] += 4;
             else countdownColor[0] -= 4;
             context.fillStyle = "#" + (countdownColor[0] > 0xff ? 0xff : countdownColor[0]).toString(16) + "0000";
-            context.fillText(remainingTimeString, canvas.width / 2 - 270, canvas.height - 50);
+            if (room.state === EliminationRoomState.COUNTDOWN) {
+                context.fillText(remainingTimeString, canvas.width / 2 - 270, canvas.height - 50);
+            }
             context.font = "30px Raleway";
             context.fillText("Waiting for players...", canvas.width / 2 - 140, canvas.height - 100);
         }
@@ -569,7 +571,7 @@ const useSecureWS: boolean = false;
         displayNoNomAreas(ctx);
         displayHP(ctx);
         displayMinimap(ctx);
-        if (room instanceof EliminationRoom && room.state === EliminationRoomState.COUNTDOWN) {
+        if (room instanceof EliminationRoom && (room.state === EliminationRoomState.COUNTDOWN || room.state === EliminationRoomState.WAITING)) {
             room.showCountdown(ctx);
         }
         BlobObject.display(room.blobs, true, true);
@@ -681,8 +683,11 @@ const useSecureWS: boolean = false;
                 alert("You have been kicked.\nReason: " + (eventData.message || "-"));
             }
             else if (eventType === EventType.STATECHANGE) {
-                if (room instanceof EliminationRoom && room.state !== eventData.state)
+                console.log(eventType, eventData);
+                if (room instanceof EliminationRoom) {
                     room.state = eventData.state;
+                    room.countdownStarted = eventData.countdownStarted;
+                }
             }
         }
     });
@@ -1193,9 +1198,20 @@ const useSecureWS: boolean = false;
         ownBlob.guest = true;
     }
 
+
+    function modeToString(mode: string): string {
+        if (mode === "ffa") return "Free For All";
+        else if (mode === "elimination") return "Elimination";
+    }
     // Last part
     console.log("%c You know JavaScript / TypeScript? Contribute to blobs.io! https://github.com/blobs-io/blobs.io", "color: green");
     (async(): Promise<any> => {
+        {
+            const headingElement: HTMLCollection = document.getElementsByClassName("heading");
+            if (headingElement && headingElement[1]) {
+                headingElement[1].innerHTML = modeToString(details.mode) || "Unknown Gamemode";
+            }
+        }
         const bar = document.getElementById("bar-inside");
         if (!bar) return;
         request("/api/players/" + details.id, "GET", {}).then((res: any) => {
