@@ -13,7 +13,7 @@ import Logger from "./structures/Logger";
 const base: Base = new Base({
     server: {
         app: express(),
-        port: Number(process.env.PORT) || 3000,
+        port: Number(process.env.PORT) || 80,
         readyCallback: () => {
             console.log("WebServer running!");
         }
