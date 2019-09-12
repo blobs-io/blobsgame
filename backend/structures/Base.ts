@@ -140,6 +140,7 @@ export default class Base {
             for (let roomIndex: number = 0; roomIndex < this.rooms.length; ++roomIndex) {
                 const room: Room.default | undefined = this.rooms[roomIndex];
                 if (!room) return;
+
                 room.broadcast((ws: wsSocket, player: Player) => {
                     if (Date.now() - player.lastHeartbeat > WSEvents.default.intervalLimit) {
                         ws.conn.send(JSON.stringify({
@@ -151,13 +152,13 @@ export default class Base {
                         WSEvents.default.disconnectSocket(ws, room);
                         if (room instanceof EliminationRoom && room.state === State.COUNTDOWN && room.players.length === EliminationRoom.minPlayersStartup - 1) {
                             room.state = State.WAITING;
-                            //TODO: somehow send countdownStarted to client
                             room.countdownStarted = null;
                             room.broadcastSend(JSON.stringify({
                                 op: OPCODE.EVENT,
                                 t: EventTypes.STATECHANGE,
                                 d: {
-                                    state: room.state
+                                    state: room.state,
+                                    countdownStarted: null
                                 }
                             }));
                         }
