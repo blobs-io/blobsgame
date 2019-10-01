@@ -1204,7 +1204,7 @@ const useSecureWS: boolean = false;
         else if (mode === "elimination") return "Elimination";
     }
     // Last part
-    console.log("%c You know JavaScript / TypeScript? Contribute to blobs.io! https://github.com/blobs-io/blobs.io", "color: green");
+    console.log("%c You know JavaScript / TypeScript? Contribute to blobs.live! https://github.com/blobs-io/blobs.live", "color: green");
     (async(): Promise<any> => {
         {
             const headingElement: HTMLCollection = document.getElementsByClassName("heading");
