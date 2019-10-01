@@ -1,7 +1,7 @@
 {
   "name": "blobs-io",
-  "version": "0.1.0",
-  "description": "The blobs.io game",
+  "version": "0.2.0",
+  "description": "The blobs.live game",
   "main": "backend/Server.js",
   "scripts": {
     "start": "node .",
