@@ -1257,4 +1257,11 @@ const useSecureWS: boolean = false;
             }
         }, 5);
     })();
+
+    // Unsupported game type check
+    if (details.mode === Room.Type.ELIMINATION) {
+        alert("Elimination mode is still a WIP!");
+        document.location.href = "/game?guest=true&mode=ffa";
+        return;
+    }
 })();
