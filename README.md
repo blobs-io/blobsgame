@@ -23,4 +23,4 @@ __A:__ The game is playable, but it's lacking features. We are working on it to 
 __A:__ No, there is no way to donate for now. Thank you for caring.
 
 ### I found a bug, where/how do I submit it?
-__A:__ There are plenty of ways to submit issues/bugs. The best one is to create an issue on this repository by clicking the "Issues" tab at the top of this page or [here](https://github.com/blobs-io/blobs.io/issues/new). We will get to it as fast as possible. 
+__A:__ There are plenty of ways to submit issues/bugs. The best one is to create an issue on this repository by clicking the "Issues" tab at the top of this page or [here](https://github.com/blobs-io/blobs.live/issues/new). We will get to it as fast as possible. 
