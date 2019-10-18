@@ -33,7 +33,7 @@ function initParticles(custom_canvas) {
 		clear() {
 			pctx.clearRect(this.x - 10, this.y - 10, 20, 20);
 		}
-	};
+	}
 	
 	function createParticle(x, y) {
 		const tempObj = new Particle(x, y);
