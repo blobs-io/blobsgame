@@ -19,7 +19,6 @@ const useSecureWS: boolean = false;
     const ws: WebSocket = new WebSocket(
         server.replace(/^https?/, "ws" + (useSecureWS ? "s" : ""))
     );
-    let lastTick: number = Date.now();
     const objects: GameObject = {
         walls: [],
         items: [],
@@ -42,7 +41,6 @@ const useSecureWS: boolean = false;
             })()
         }
     };
-    let scale: number = 1;
     const mapSize: MapProp = {
         width: 2000,
         height: 2000
@@ -97,6 +95,9 @@ const useSecureWS: boolean = false;
     };
     let ping: number = 0;
     let windowBlur: boolean = false;
+    let scale: number = 1;
+    let lastTick: number = Date.now();
+    let showWSCloseNotification = true;
     canvas.width = window.innerWidth - 30;
     canvas.height = window.innerHeight - 30;
 
@@ -681,6 +682,7 @@ const useSecureWS: boolean = false;
             }
             else if (eventType === EventType.KICK) {
                 alert("You have been kicked.\nReason: " + (eventData.message || "-"));
+                showWSCloseNotification = false;
             }
             else if (eventType === EventType.STATECHANGE) {
                 if (room instanceof EliminationRoom) {
@@ -690,7 +692,8 @@ const useSecureWS: boolean = false;
         }
     });
     ws.onclose = () => {
-        alert("Connection closed.");
+        if (showWSCloseNotification)
+            alert("Connection closed.");
     };
 
     // Mobile Controls
