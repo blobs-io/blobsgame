@@ -67,7 +67,7 @@ export default class WSHandler {
                 return conn.send(JSON.stringify({
                     op: OPCODE.EVENT,
                     d: {
-                        message: "Could not join room. Perhaps it's ingame already?"
+                        message: "Room is already in-game"
                     },
                     t: EventTypes.PLAYER_KICK
                 }));
