@@ -976,7 +976,7 @@ const useSecureWS: boolean = false;
         context.fillStyle = "lightgreen";
         context.fillRect(canvas.width - 225 + (65 / (mapSize.width / ownBlob.x)), canvas.height - 75 + (65 / (mapSize.height / ownBlob.y)), 10, 10);
         for(let i: number = 0; i < room.blobs.length; ++i) {
-            if (room.blobs[i].owner != ownBlob.owner) {
+            if (room.blobs[i].owner !== ownBlob.owner) {
                 context.fillStyle = "red";
                 context.fillRect(canvas.width - 225 + (65 / (mapSize.width / room.blobs[i].x)), canvas.height - 75 + (65 / (mapSize.height / room.blobs[i].y)), 10, 10);
             }
