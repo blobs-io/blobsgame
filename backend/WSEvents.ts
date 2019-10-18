@@ -254,7 +254,7 @@ export default class WSHandler {
                 }
             }
             else if (t === EventTypes.NOMKEY) {
-                const room: Room | undefined = this.base.rooms.find((v: Room) => v.id === d.room);
+                const room: Room | EliminationRoom.default | undefined = this.base.rooms.find((v: Room) => v.id === d.room);
                 if (!room) return;
                 const eventd: Player | undefined = room.players.find((v: Player) => v.id === id);
                 if (!eventd) return;
@@ -275,7 +275,19 @@ export default class WSHandler {
                                     if (blobobj.health > 0)
                                         break;
                                     else {
-                                        blobobj.health = 100;
+                                        if (room instanceof EliminationRoom.default) {
+                                            const targetWs: wsSocket = this.base.wsSockets.find((s: wsSocket) => s.id === blobobj.id);
+                                            targetWs.conn.send(JSON.stringify({
+                                                op: OPCODE.EVENT,
+                                                t: EventTypes.PLAYER_KICK,
+                                                d: {
+                                                    message: "You were nommed by " + eventd.owner
+                                                }
+                                            }));
+                                            WSHandler.disconnectSocket(targetWs, room);
+                                            return;
+                                        }
+                                        else blobobj.health = 100;
                                     }
 
                                     const winner: Player | undefined = eventd;
