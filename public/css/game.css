@@ -4,8 +4,7 @@ html {
 }
 
 body {
-	background-image: url('../assets/background.png');
-	background-size: cover;
+	background-color: #1A1A1A;
 }
 
 canvas {
