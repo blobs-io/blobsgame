@@ -683,14 +683,15 @@ const useSecureWS: boolean = false;
                 alert("You have been kicked.\nReason: " + (eventData.message || "-"));
             }
             else if (eventType === EventType.STATECHANGE) {
-                console.log(eventType, eventData);
                 if (room instanceof EliminationRoom) {
                     room.state = eventData.state;
-                    room.countdownStarted = eventData.countdownStarted;
                 }
             }
         }
     });
+    ws.onclose = () => {
+        alert("Connection closed.");
+    };
 
     // Mobile Controls
     const htmlButtonIDs: string[] = [
