@@ -33,7 +33,9 @@ export default class EliminationRoom extends Room.default {
     }
 
     start() {
+        this.state = State.INGAME;
         this.broadcastSend(JSON.stringify({
+            op: OPCODE.EVENT,
             t: EventTypes.STATECHANGE,
             d: {
                 state: this.state
