@@ -32,7 +32,7 @@ export default class EliminationRoom extends Room.default {
         else return this.countdownStarted + EliminationRoom.waitingTime;
     }
 
-    start() {
+    start(): void {
         this.state = State.INGAME;
         this.broadcastSend(JSON.stringify({
             op: OPCODE.EVENT,
