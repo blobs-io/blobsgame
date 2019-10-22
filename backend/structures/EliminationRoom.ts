@@ -1,7 +1,8 @@
 import * as Room from "./Room";
-import {wsSocket} from "./Socket";
+import Socket, {wsSocket} from "./Socket";
 import {EventTypes, OPCODE} from "../WSEvents";
 import Base from "./Base";
+import Player from "./Player";
 
 export enum State {
     WAITING,
@@ -41,5 +42,34 @@ export default class EliminationRoom extends Room.default {
                 state: this.state
             }
         }));
+    }
+
+    isSingle(): boolean {
+        return this.players.length === 1;
+    }
+
+    handleEnd(): void {
+        if (this.isSingle() && this.state === State.INGAME) {
+            const winner: Player = this.players[0];
+            const socket: wsSocket = this.base.wsSockets.find(v => v.id === winner.id);
+
+            if (!winner.guest) {
+                // TODO: don't hardcode values
+                // 1st +250 for now
+                this.base.db.run("UPDATE accounts SET br = br + 250 WHERE username = ?", winner.owner);
+            }
+
+            if (socket) {
+                socket.conn.send(JSON.stringify({
+                    op: OPCODE.EVENT,
+                    t: EventTypes.PLAYER_KICK,
+                    d: {
+                        message: `Room has ended.\nWinner: ${winner.owner}`
+                    }
+                }));
+                socket.conn.close();
+                // TODO: Close room (splice from this.base.rooms and maybe open another one)
+            }
+        }
     }
 }
