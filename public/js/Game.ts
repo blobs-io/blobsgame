@@ -686,6 +686,7 @@ const useSecureWS: boolean = false;
             }
             else if (eventType === EventType.STATECHANGE) {
                 if (room instanceof EliminationRoom) {
+                    room.countdownStarted = eventData.countdownStarted;
                     room.state = eventData.state;
                 }
             }
