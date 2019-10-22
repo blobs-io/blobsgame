@@ -7,6 +7,7 @@ import * as SessionIDManager from "../structures/SessionIDManager";
 import Jimp = require("jimp");
 import Captcha, {CAPTCHA_LIMIT} from "../structures/Captcha";
 import * as DateFormatter from "../utils/DateFormatter";
+import EliminationRoom from "../structures/EliminationRoom";
 
 export default class APIController {
     public base: Base;
@@ -88,6 +89,41 @@ export default class APIController {
                 return;
             }
             res.json(room.players);
+        });
+        this.app.get("/api/rooms", (req: express.Request, res: express.Response) => {
+            const rooms: any[] = this.base.rooms.map((v: Room) => {
+                const retVal: any = {
+                id: v.id,
+                players: v.players.map(p => ({
+                    username: p.owner,
+                    br: p.br,
+                    guest: p.guest
+                })),
+                createdAt: v.createdAt
+                };
+                if (v instanceof EliminationRoom) {
+                    Object.defineProperties(retVal, {
+                        waitingTime: {
+                            value: EliminationRoom.waitingTime,
+                            enumerable: true
+                        },
+                        minPlayersStartup: {
+                            value: EliminationRoom.minPlayersStartup,
+                            enumerable: true
+                        },
+                        countdownStarted: {
+                            value: v.countdownStarted,
+                            enumerable: true
+                        },
+                        state: {
+                            value: v.state,
+                            enumerable: true
+                        }
+                    });
+                }
+                return retVal;
+            });
+            res.json(rooms);
         });
         this.app.get("/api/ping", (req: express.Request, res: express.Response) => {
             const arrived: number = Date.now();
