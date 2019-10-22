@@ -68,7 +68,7 @@ export default class EliminationRoom extends Room.default {
                     }
                 }));
                 socket.conn.close();
-                // TODO: Close room (splice from this.base.rooms and maybe open another one)
+                this.base.rooms.splice(this.base.rooms.findIndex(v => v.id === this.id), 1);
             }
         }
     }
