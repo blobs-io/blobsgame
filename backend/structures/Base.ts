@@ -96,14 +96,65 @@ export default class Base {
         const { db } = this;
         this.dbPath = path;
         await db.open(path);
-        await db.run("CREATE TABLE IF NOT EXISTS logs (`name` TEXT, `amount` INTEGER)");
-        await db.run("CREATE TABLE IF NOT EXISTS clans (`name` TEXT, `leader` TEXT, `cr` INTEGER DEFAULT 0, `members` TEXT, `description` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS verifications (`user` TEXT, `code` TEXT, `requestedAt` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS recentPromotions (`user` TEXT, `newTier` TEXT, `drop` INTEGER, `promotedAt` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS news (`headline` TEXT, `content` TEXT, `createdAt` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS accounts (`username` TEXT, `password` TEXT, `br` INTEGER, `createdAt` TEXT, `role` INTEGER, `blobcoins` INTEGER, `lastDailyUsage` TEXT, `distance` INTEGER, blobs `TEXT`, `activeBlob` TEXT, `clan` TEXT, `wins` INTEGER, `losses` INTEGER)");
-        await db.run("CREATE TABLE IF NOT EXISTS sessionids (`username` TEXT, `sessionid` TEXT, `expires` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS bans (`username` TEXT, `reason` TEXT, `bannedAt` TEXT, `expires` TEXT, `moderator` TEXT)");
+        
+        // Create tables in database
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS logs (
+                \`name\` TEXT,
+                \`amount\` INTEGER
+            );
+            CREATE TABLE IF NOT EXISTS clans (
+                \`name\` TEXT,
+                \`leader\` TEXT,
+                \`cr\` INTEGER DEFAULT 0,
+                \`members\` TEXT,
+                \`description\` TEXT
+            );
+            CREATE TABLE IF NOT EXISTS verifications (
+                \`user\` TEXT, 
+                \`code\` TEXT, 
+                \`requestedAt\` TEXT
+            );
+            CREATE TABLE IF NOT EXISTS recentPromotions (
+                \`user\` TEXT, 
+                \`newTier\` TEXT, 
+                \`drop\` INTEGER, 
+                \`promotedAt\` TEXT
+            );
+            CREATE TABLE IF NOT EXISTS news (
+                \`headline\` TEXT,
+                \`content\` TEXT,
+                \`createdAt\` TEXT
+            );
+            CREATE TABLE IF NOT EXISTS accounts (
+                \`username\` TEXT,
+                \`password\` TEXT, 
+                \`br\` INTEGER, 
+                \`createdAt\` TEXT, 
+                \`role\` INTEGER, 
+                \`blobcoins\` INTEGER, 
+                \`lastDailyUsage\` TEXT, 
+                \`distance\` INTEGER, 
+                \`blobs\` TEXT,
+                \`activeBlob\` TEXT, 
+                \`clan\` TEXT, 
+                \`wins\` INTEGER, 
+                \`losses\` INTEGER
+            );
+            CREATE TABLE IF NOT EXISTS sessionids (
+                \`username\` TEXT, 
+                \`sessionid\` TEXT, 
+                \`expires\` TEXT
+            );
+            CREATE TABLE IF NOT EXISTS bans (
+                \`username\` TEXT,
+                \`reason\` TEXT,
+                \`bannedAt\` TEXT,
+                \`expires\` TEXT,
+                \`moderator\` TEXT
+            );
+        `);
+
         await db.get("SELECT count(*) FROM accounts").then(console.log.bind(null, "Accounts: "));
     }
 
