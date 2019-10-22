@@ -353,8 +353,10 @@ export default class WSHandler {
         }
     }
 
-    static disconnectSocket(socket: wsSocket, room: Room, code?: number) {
+    static disconnectSocket(socket: wsSocket, room: Room, code?: number, handle: boolean = true) {
         socket.conn.close(code);
         room.players.splice(room.players.findIndex((p: Player) => p.id === socket.id), 1);
+        if (room instanceof EliminationRoom.default)
+            room.handleEnd();
     }
 }
