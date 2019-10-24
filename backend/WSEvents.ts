@@ -18,6 +18,17 @@ export enum EventTypes {
     HEARTBEAT = "heartbeat"
 }
 
+export enum KickTypes {
+    ROOM_FULL = "roomFull",
+    ROOM_INGAME = "roomIngame",
+    TOO_MANY_SOCKETS = "tooManySockets",
+    CLIENT_MOD = "clientMod",
+    MOD_KICK = "modKick",
+    ELIMINATED = "eliminated",
+    WIN = "win",
+    ROOM_END = "roomEnd"
+}
+
 export enum OPCODE {
     HELLO = 1,
     HEARTBEAT = 2,
@@ -58,6 +69,7 @@ export default class WSHandler {
                 return conn.send(JSON.stringify({
                     op: OPCODE.EVENT,
                     d: {
+                        type: KickTypes.ROOM_FULL,
                         message: "Too many players online (100)"
                     },
                     t: EventTypes.PLAYER_KICK
@@ -67,6 +79,7 @@ export default class WSHandler {
                 return conn.send(JSON.stringify({
                     op: OPCODE.EVENT,
                     d: {
+                        type: KickTypes.ROOM_INGAME,
                         message: "Room is already in-game"
                     },
                     t: EventTypes.PLAYER_KICK
@@ -82,6 +95,7 @@ export default class WSHandler {
                     return conn.send(JSON.stringify({
                         op: OPCODE.EVENT,
                         d: {
+                            type: KickTypes.TOO_MANY_SOCKETS,
                             message: "Only one socket per client allowed"
                         },
                         t: EventTypes.PLAYER_KICK
@@ -232,6 +246,7 @@ export default class WSHandler {
                         op: OPCODE.EVENT,
                         t: EventTypes.PLAYER_KICK,
                         d: {
+                            type: KickTypes.CLIENT_MOD,
                             message: "Insufficient permissions."
                         }
                     }));
@@ -247,6 +262,7 @@ export default class WSHandler {
                         op: OPCODE.EVENT,
                         t: EventTypes.PLAYER_KICK,
                         d: {
+                            type: KickTypes.MOD_KICK,
                             message: d.reason
                         }
                     }));
@@ -281,6 +297,7 @@ export default class WSHandler {
                                                 op: OPCODE.EVENT,
                                                 t: EventTypes.PLAYER_KICK,
                                                 d: {
+                                                    type: KickTypes.ELIMINATED,
                                                     message: "You were nommed by " + eventd.owner
                                                 }
                                             }));
