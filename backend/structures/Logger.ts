@@ -35,8 +35,11 @@ interface RequestsTableEntry {
 export default class Logger {
     // All requests
     public requests: Requests;
+    // All requests since process was started
     public sessionRequests: Requests;
+    // Discord authentication
     public discordAuth: DiscordAuthentication | undefined;
+    // A reference to a base object
     public base: Base;
 
     constructor(base: Base, discordAuth?: DiscordAuthentication, requests: Requests = {
@@ -44,6 +47,7 @@ export default class Logger {
         htmlOnly: 0,
         ffa: 0
     }) {
+        // Store local variables 
         this.requests = requests;
         this.sessionRequests = {
             total: 0,
@@ -60,7 +64,7 @@ export default class Logger {
      * @param {function} callback The callback function
      * @param {number} ms Milliseconds
      */
-    setInterval(callback: ((...data: Array<any>) => any) | undefined, ms: number) {
+    public setInterval(callback: ((...data: Array<any>) => any) | undefined, ms: number) {
         setInterval(() => {
             this.log().then((...data) => {
                 if (typeof callback === "function")
@@ -74,7 +78,7 @@ export default class Logger {
      *
      * @returns {Promise<Response>}
      */
-    async postToDiscord(): Promise<fetch.Response | undefined> {
+    public async postToDiscord(): Promise<fetch.Response | undefined> {
         if (!this.discordAuth) return;
         const data: Array<RequestsTableEntry> = await this.base.db.all("SELECT * FROM logs");
         const form = new FormData();
@@ -92,7 +96,7 @@ export default class Logger {
      *
      * @returns {Promise<Array<RequestsTableEntry>>}
      */
-    async log(): Promise<Array<RequestsTableEntry>> {
+    public async log(): Promise<Array<RequestsTableEntry>> {
         const data: Array<RequestsTableEntry> = await this.base.db.all("SELECT * FROM logs");
         for (const key in this.requests) {
             if (!data.some(v => v.name === key)) {

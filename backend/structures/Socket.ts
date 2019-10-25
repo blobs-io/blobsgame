@@ -1,5 +1,7 @@
+// Imports
 import * as ws from "ws";
 
+// Represents a socket
 export default interface Socket {
     username: string;
     br: number;
@@ -7,6 +9,8 @@ export default interface Socket {
     guest: boolean;
     sessionid?: string;
 }
+
+// Represents a socket
 export interface wsSocket {
     conn: ws;
     id: string;

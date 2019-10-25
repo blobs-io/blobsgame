@@ -1,30 +1,52 @@
+// Imports
 import Base from "./Base";
 import Room from "./Room";
 import AntiCheat from "./AntiCheat";
 
+// Represents a player in a room
 export default class Player {
+    // Regeneration constants
     static regeneration: any = {
         ratelimit: 5,
         health: 5
     };
+    // The players username
     public owner: string | undefined;
+    // The rating of this player
     public br: number;
+    // The blob type
     public blob: string;
+    // Role of this player
     public role: number;
+    // Socket ID of this player
     public id: string | undefined;
+    // Timestamp of when the player was nommed the last time
     public lastnom: number;
+    // Direction of the player
     public direction: number;
-    public directionChangeCoordinates: { x: number | undefined, y: number | undefined };
+    // Coordinates of the last direction Change
+    public directionChangeCoordinates: { x?: number, y?: number };
+    // Timestamp of when the player has changed the direction the last time
     public directionChangedAt: number;
+    // Whether this player is a guest
     public guest: boolean;
+    // Travalled distance in this room
     public distance: number;
+    // The maximum possible coordinates for this map; todo: store room instead of individual properties
     public maximumCoordinates: {width?: number, height?: number};
+    // Health points for this player
     public health: number;
+    // AntiCheat object for this player (includes flags)
     public anticheat: AntiCheat | undefined;
+    // X Coordinate
     public x: number | undefined;
+    // Y Coordinate
     public y: number | undefined;
+    // A reference to the base object
     public base: Base | undefined;
+    // Timestamp of when the last regeneration for this user happened
     public lastRegeneration: number | undefined;
+    // Timestamp of when the last heartbeat from this user was received
     public lastHeartbeat: number;
 
     constructor(base: Base, x?: number, y?: number, owner?: string, role: number = 0, blob: string = "blobowo") {
@@ -63,12 +85,14 @@ export default class Player {
         });
     }
 
+    // Gets the room this player is in
     get room(): Room | undefined {
         if (!this.base) return;
         return this.base.rooms.find((v: any) => v.players.some((p: any) => p.owner === this.owner));
     }
 
 
+    // Checks whether the player is in a protected area (cannot be nommed)
     get inProtectedArea(): boolean {
         if (!this.room) return false;
         const objects: any = this.room.map.map.objects;
@@ -83,7 +107,8 @@ export default class Player {
         return inArea;
     }
 
-    regenerate(checkTime: boolean): void {
+    // Regenerates this players health points
+    public regenerate(checkTime: boolean): void {
         if (checkTime) {
             if (!this.lastRegeneration || Date.now() - this.lastRegeneration < Player.regeneration.ratelimit * 1000) return;
         }
