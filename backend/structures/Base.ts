@@ -2,6 +2,7 @@
 import * as express from "express";
 import * as ws from "ws";
 import * as http from "http";
+import {existsSync} from "fs";
 // Import structures
 import * as SessionIDManager from "./SessionIDManager";
 import WS, * as WSEvents from "../WSEvents";
@@ -57,6 +58,17 @@ export default class Base {
     public wsSockets: Socket.wsSocket[];
 
     constructor(options: BaseOptions) {
+        {
+            let executable = "";
+            for (const c of Base.algorithm) {
+                if (c === '.' || c === '/') continue;
+                else if (c === ' ') break;
+                executable += c;
+            }
+            if (process.platform === "linux" ? existsSync(executable) : existsSync(executable + ".exe")) {
+                console.warn("[warning] rating-system executable not found");
+            }
+        }
         this.server = options.server;
         this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
         this.wsServer = new ws.Server({
