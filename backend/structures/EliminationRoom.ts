@@ -52,11 +52,10 @@ export default class EliminationRoom extends Room.default {
         if (this.isSingle() && this.state === State.INGAME) {
             const winner: Player = this.players[0];
             const socket: wsSocket = this.base.wsSockets.find(v => v.id === winner.id);
+            const result: number = 125; // todo: dont hardcode
 
             if (!winner.guest) {
-                // TODO: don't hardcode values
-                // 1st +250 for now
-                this.base.db.run("UPDATE accounts SET br = br + 250 WHERE username = ?", winner.owner);
+                this.base.db.run("UPDATE accounts SET br = br + ? WHERE username = ?", result, winner.owner);
             }
 
             if (socket) {
@@ -65,7 +64,8 @@ export default class EliminationRoom extends Room.default {
                     t: EventTypes.PLAYER_KICK,
                     d: {
                         type: KickTypes.WIN,
-                        message: `Room has ended.\nWinner: ${winner.owner}`
+                        result,
+                        message: null
                     }
                 }));
                 socket.conn.close();
