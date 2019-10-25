@@ -19,5 +19,8 @@ cd ..
 # compile rating-system to binary in project folder
 g++ -Irating-system/include rating-system/main.cc -o b
 
+# remove repository (only the binary is needed)
+rm -rf rating-system
+
 # move executable file to main folder
 mv b ../
