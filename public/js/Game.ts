@@ -741,8 +741,7 @@ const useSecureWS: boolean = false;
                     break;
                     case KickTypes.ELIMINATED:
                         if (room instanceof EliminationRoom)
-                        // TODO: dont hardcode 2nd parameter
-                            room.showResults(false, 0);
+                            room.showResults(false, eventData.result);
                         showAlert = false;
                     break;
                     case KickTypes.MOD_KICK:
@@ -750,7 +749,7 @@ const useSecureWS: boolean = false;
                     break;
                     case KickTypes.WIN:
                         if (room instanceof EliminationRoom)
-                            room.showResults(true, 0);
+                            room.showResults(true, eventData.result);
                         showAlert = false;
                     break;
                 }
