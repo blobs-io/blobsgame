@@ -299,6 +299,7 @@ export default class WSHandler {
                                                 t: EventTypes.PLAYER_KICK,
                                                 d: {
                                                     type: KickTypes.ELIMINATED,
+                                                    result: 0, // TODO: calculate BR loss (if not guest)
                                                     message: "You were nommed by " + eventd.owner
                                                 }
                                             }));
