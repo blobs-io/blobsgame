@@ -1,25 +1,39 @@
+// Imports
 import Base from "./Base";
 import * as fetch from "node-fetch";
 import FormData = require("form-data");
 
+// Represents data for a webhook
 export interface DiscordAuthentication {
+    // The webhook ID
     id: string;
+    // The webhook token
     token: string;
 }
 
+// Represents a request type
 interface Requests {
+    // Total number of requests across all routes
     total: number;
+    // Total number of requests excluding assets (css, js, ...)
     htmlOnly: number;
+    // Total number of requests to `game`
     ffa: number;
+    // [] operator
     [key: string]: any;
 }
 
+// Represents a database entry for table logs
 interface RequestsTableEntry {
+    // Entry key
     name: string;
+    // Entry value
     amount: number;
 }
 
+// Used for sending logs to Discord using a webhook
 export default class Logger {
+    // All requests
     public requests: Requests;
     public sessionRequests: Requests;
     public discordAuth: DiscordAuthentication | undefined;
