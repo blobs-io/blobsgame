@@ -1,6 +1,6 @@
 # blobs.live
 
-[![Build Status](https://travis-ci.org/blobs-io/blobs.live.svg?branch=master)](https://travis-ci.org/blobs-io/blobs.io)
+[![Build Status](https://travis-ci.org/blobs-io/blobs.live.svg?branch=master)](https://travis-ci.org/blobs-io/blobs.live)
 
 The official repository for the blobs.live game<br/>
 **Note:** This game is still in development. It may not work yet. <br />
