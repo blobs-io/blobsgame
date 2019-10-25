@@ -1,6 +1,6 @@
 import * as Room from "./Room";
 import Socket, {wsSocket} from "./Socket";
-import {EventTypes, OPCODE} from "../WSEvents";
+import {EventTypes, OPCODE, KickTypes} from "../WSEvents";
 import Base from "./Base";
 import Player from "./Player";
 
@@ -64,6 +64,7 @@ export default class EliminationRoom extends Room.default {
                     op: OPCODE.EVENT,
                     t: EventTypes.PLAYER_KICK,
                     d: {
+                        type: KickTypes.WIN,
                         message: `Room has ended.\nWinner: ${winner.owner}`
                     }
                 }));
