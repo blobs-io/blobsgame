@@ -466,7 +466,7 @@ const useSecureWS: boolean = false;
         public createdAt: number;
         constructor(type: string = Room.Type.FFA, blobs: BlobObject[] = []) {
             this.type = type;
-            this.blobs = [];
+            this.blobs = blobs;
         }
     }
     class EliminationRoom extends Room {
