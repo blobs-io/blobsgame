@@ -3,6 +3,8 @@ import * as express from "express";
 import * as ws from "ws";
 import * as http from "http";
 import {existsSync} from "fs";
+import bodyParser = require("body-parser");
+import {exec} from "child_process";
 // Import structures
 import * as SessionIDManager from "./SessionIDManager";
 import WS, * as WSEvents from "../WSEvents";
@@ -17,7 +19,6 @@ import RouteController from "../routes/RouteController";
 import Captcha from "./Captcha";
 import Player from "./Player";
 import EliminationRoom, {State} from "./EliminationRoom";
-import bodyParser = require("body-parser");
 
 interface Server {
     app: express.Application;
@@ -37,6 +38,7 @@ interface Maintenance {
 }
 
 export default class Base {
+    // WARNING: Watch out for this path; make sure it points to a rating-system executable!
     static algorithm: string = process.platform === "linux" ? "./b {ownbr} {opponentbr} --br" : "b {ownbr} {opponentbr} --br";
     public server: Server;
     public wsServer: ws.Server;
@@ -65,8 +67,18 @@ export default class Base {
                 else if (c === ' ') break;
                 executable += c;
             }
-            if (process.platform === "linux" ? existsSync(executable) : existsSync(executable + ".exe")) {
-                console.warn("[warning] rating-system executable not found");
+            const platformExec = process.platform === "linux" ? executable : executable + ".exe";
+            if (!existsSync(platformExec)) {
+                console.warn("[warn] rating-system executable not found");
+                if (process.platform === "linux") {
+                    exec(`${platformExec} > /dev/null`, (err, res) => {
+                        if (err) console.error("[err] ./scripts/get-rs.sh returned non-zero exit code. Is it executable?");
+                        else {
+                            console.log("compiled rating-system source code");
+                        }
+                    });
+                } else
+                    console.warn("[warn] operating system is not linux, therefore get-rs.sh script cannot be executed. Please compile rating-system source code manually.");
             }
         }
         this.server = options.server;
