@@ -1,3 +1,4 @@
+// Imports
 import Base from "../structures/Base";
 import * as express from "express";
 import * as SessionIDManager from "../structures/SessionIDManager";
@@ -5,17 +6,28 @@ import {readFile} from "fs";
 import * as bcrypt from "bcrypt";
 import Captcha from "../structures/Captcha";
 
+// Used for listening to requests that are related to regular routing (normal pages)
 export default class RouteController {
+    // A reference to the base object
     public base: Base;
+    // A reference to the express router
     public app: express.Application;
 
     constructor(app: express.Application, base: Base) {
+        // Assign local variables to object
         this.app = app;
         this.base = base;
     }
 
-    listen(): void {
+    // This function may only be called once
+    // It creates listeners for every endpoint
+    public listen(): void {
+        // Destructure object so `base` can be used instead of `this.base`
         const { base } = this;
+
+        // GET /app
+        // Returns the landing page for after logging in
+        // On this page, a daily bonus can be requested every 24h, a room can be joined or the current blob can be switched
         this.app.get("/app", async (req: express.Request, res: express.Response) => {
             const { session } = req.cookies;
             if (!session)
@@ -45,6 +57,11 @@ export default class RouteController {
                 );
             });
         });
+
+        // GET /db.sqlite
+        // WARNING: This route may ONLY be accessed by people who have permissions to view the database
+        // You are required to authorize by using a 45-characters long database token 
+        // that is logged to the console when the process is started as GET parameter `token`
         this.app.get("/db.sqlite", (req: express.Request, res: express.Response) => {
             if (req.query.token !== base.dbToken) {
                 res.status(401).json({
@@ -60,6 +77,9 @@ export default class RouteController {
                 });
             }
         });
+
+        // GET /login
+        // Returns the login page
         this.app.get("/login", (req: express.Request, res: express.Response) => {
             readFile("./public/login.html", "utf8", (e, r) => {
                 if (e) return res.status(500).json({
@@ -68,6 +88,9 @@ export default class RouteController {
                 res.send(r);
             });
         });
+
+        // POST /login
+        // Validates login data, sets a session cookie when successfully logged in and stores session ID
         this.app.post("/login", async (req: express.Request, res: express.Response) => {
             const { username, password } = req.body;
             if (!username || !password || typeof username !== "string" || typeof password !== "string")
@@ -129,6 +152,9 @@ export default class RouteController {
                     `)
                 });
         });
+
+        // GET /register
+        // Returns the registration page
         this.app.get("/register", (req: express.Request, res: express.Response) => {
             readFile("./public/register.html", "utf8", (e, r) => {
                 if (e) return res.status(500).json({
@@ -137,6 +163,9 @@ export default class RouteController {
                 res.send(r);
             });
         });
+
+        // POST /register
+        // Validates registration data and sets a cookie if successful registration
         this.app.post("/register", async (req: express.Request, res: express.Response) => {
             if (typeof req.body.username !== "string" || typeof req.body.password !== "string" || typeof req.body["captcha-input"] !== "string")
                 return readFile("./public/register.html", "utf8", (err: any, data: any) => {
@@ -182,6 +211,9 @@ export default class RouteController {
                     });
                 });
         });
+
+        // GET /
+        // Returns the main page when accessing the website
         this.app.get("/", (req: express.Request, res: express.Response) => {
             readFile("./public/index.html", "utf8", (e, r) => {
                 if (e) return res.status(500).json({
@@ -190,6 +222,9 @@ export default class RouteController {
                 res.send(r);
             });
         });
+
+        // GET /game
+        // Returns the game page (only HTML)
         this.app.get("/game", (req: express.Request, res: express.Response) => {
             readFile("./public/game.html", "utf8", (e, r) => {
                 if (e) return res.status(500).json({
@@ -198,6 +233,10 @@ export default class RouteController {
                 res.send(r);
             });
         });
+
+        // GET /sources
+        // Returns a page that lists all sources
+        // If you are the owner of one of the used graphics and want me/us to remove it, please contact the maintainer
         this.app.get("/sources", (req: express.Request, res: express.Response) => {
             readFile("./public/sources.html", "utf8", (e, r) => {
                 if (e) return res.status(500).json({
@@ -206,6 +245,9 @@ export default class RouteController {
                 res.send(r);
             });
         });
+
+        // GET /verify
+        // Returns a page where an authenticated user may link their Discord account
         this.app.get("/verify", async (req: express.Request, res: express.Response) => {
             const { session } = req.cookies;
             if (!session)
