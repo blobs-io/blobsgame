@@ -4,6 +4,10 @@ declare const socket: any;
 declare const server: string;
 const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
 const getParameterByName: Function = (param: string): string => (document.location.search.match(new RegExp(`[?&]${param}=([^&]*)`)) || [])[1];
+const formatDiff: Function = (time: any) => {
+    const remainingTime: number = time - Date.now();
+    return Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
+};
 const useSecureWS: boolean = false;
 
 (() => {
@@ -132,6 +136,16 @@ const useSecureWS: boolean = false;
         SP_NOM_KEY         = "singlePlayerNomKey",
         DIRECTION_CHANGE_C = "directionChange",
         PLAYER_NOMMED      = "playerNommed",
+    }
+    enum KickTypes {
+        ROOM_FULL = "roomFull",
+        ROOM_INGAME = "roomIngame",
+        TOO_MANY_SOCKETS = "tooManySockets",
+        CLIENT_MOD = "clientMod",
+        MOD_KICK = "modKick",
+        ELIMINATED = "eliminated",
+        WIN = "win",
+        ROOM_END = "roomEnd"
     }
     enum Direction {
         UP = 0,
@@ -463,10 +477,11 @@ const useSecureWS: boolean = false;
             super(Room.Type.ELIMINATION, blobs);
         }
 
-        showCountdown(context: CanvasRenderingContext2D | null) {
+        showCountdown(context: CanvasRenderingContext2D | null): void {
             if (!context || !(room instanceof EliminationRoom)) return;
-            const remainingTime: number = (this.countdownStarted + EliminationRoom.waitingTime) - Date.now();
-            const remainingTimeString: string = Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
+            //const remainingTime: number = (this.countdownStarted + EliminationRoom.waitingTime) - Date.now();
+            //const remainingTimeString: string = Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
+            const remainingTimeString: string = formatDiff(this.countdownStarted + EliminationRoom.waitingTime);
             context.font = "60px Raleway";
             if (countdownColor[0] >= 0xff) countdownColor[1] = 1;
             else if (countdownColor[0] <= 0x30) countdownColor[1] = 0;
@@ -479,6 +494,41 @@ const useSecureWS: boolean = false;
             }
             context.font = "30px Raleway";
             context.fillText("Waiting for players...", canvas.width / 2 - 140, canvas.height - 100);
+        }
+
+        showResults(win: boolean): void {
+            const scrDiv = document.createElement("div"),
+                  messageElement = document.createElement("span"),
+                  statsElement = document.createElement("div"),
+                  timeAliveElement = document.createElement("span"),
+                  timeAliveValueElement = document.createElement("span"),
+                  positionElement = document.createElement("span"),
+                  positionValueElement = document.createElement("span");
+            scrDiv.id = "scr";
+            messageElement.style.fontSize = "24px";
+            messageElement.style.display = "block";
+            messageElement.style.textAlign = "center";
+            statsElement.id = "stats";
+            timeAliveElement.className = positionElement.className = "big-font";
+            timeAliveValueElement.className = positionValueElement.className = "medium-font";
+            timeAliveElement.innerText = "Time alive: ";
+            timeAliveValueElement.innerText = formatDiff(Date.now() + (Date.now() - this.createdAt));
+            positionValueElement.innerText = "#" + this.blobs.length;
+            statsElement.innerHTML += "<hr/>Rating change: +0";
+
+            if (win) {
+                messageElement.innerText = "You won!";
+            } else {
+                messageElement.innerText = "You have been nommed!";
+            }
+
+            scrDiv.appendChild(messageElement);
+            scrDiv.appendChild(statsElement);
+            statsElement.appendChild(timeAliveElement);
+            statsElement.appendChild(timeAliveValueElement);
+            statsElement.appendChild(positionElement);
+            statsElement.appendChild(positionValueElement);
+            document.body.appendChild(scrDiv);
         }
     }
 
@@ -681,8 +731,29 @@ const useSecureWS: boolean = false;
                 }
             }
             else if (eventType === EventType.KICK) {
-                alert("You have been kicked.\nReason: " + (eventData.message || "-"));
+                let kickReason: string = "You have been kicked.\nReason: " + (eventData.message || ""), showAlert: boolean = true;
+                switch (eventData.type) {
+                    case KickTypes.CLIENT_MOD:
+                        kickReason += "\nThis is probably due to (a) client modification(s). Avoid doing so, as it is against the rules."
+                    break;
+                    case KickTypes.ELIMINATED:
+                        if (room instanceof EliminationRoom)
+                            room.showResults(false);
+                        showAlert = false;
+                    break;
+                    case KickTypes.MOD_KICK:
+                        kickReason += "\nThis is a mod-kick, which means that a moderator has noticed that you have violated the rules and taken action by kicking you from this room.\n";
+                    break;
+                    case KickTypes.WIN:
+                        if (room instanceof EliminationRoom)
+                            room.showResults(true);
+                        showAlert = false;
+                    break;
+                }
+                
+                if (showAlert) alert(kickReason)
                 showWSCloseNotification = false;
+                // todo: remove own blob out of blobs array and disable ownBlob
             }
             else if (eventType === EventType.STATECHANGE) {
                 if (room instanceof EliminationRoom) {
@@ -1264,7 +1335,7 @@ const useSecureWS: boolean = false;
     })();
 
     // Unsupported game type check
-    if (details.mode === Room.Type.ELIMINATION) {
+    if (details.mode === Room.Type.ELIMINATION && false) {
         alert("Elimination mode is still a WIP!");
         document.location.href = "/game?guest=true&mode=ffa";
         return;
