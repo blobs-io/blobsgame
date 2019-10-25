@@ -272,6 +272,7 @@ export default class WSHandler {
             else if (t === EventTypes.NOMKEY) {
                 const room: Room | EliminationRoom.default | undefined = this.base.rooms.find((v: Room) => v.id === d.room);
                 if (!room) return;
+                if (room instanceof EliminationRoom.default && room.state !== EliminationRoom.State.INGAME) return;
                 const eventd: Player | undefined = room.players.find((v: Player) => v.id === id);
                 if (!eventd) return;
                 if (isNaN(<number>eventd.x) || isNaN(<number>eventd.y) || isNaN(eventd.br)) return;
