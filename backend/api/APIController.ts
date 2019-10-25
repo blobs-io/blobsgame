@@ -1,3 +1,4 @@
+// Imports
 import Base from "../structures/Base";
 import * as express from "express";
 import Socket from "../structures/Socket";
@@ -9,16 +10,24 @@ import Captcha, {CAPTCHA_LIMIT} from "../structures/Captcha";
 import * as DateFormatter from "../utils/DateFormatter";
 import EliminationRoom from "../structures/EliminationRoom";
 
+// Used for listening to requests that are related to the API
 export default class APIController {
+    // A reference to the base object
     public base: Base;
+    // A reference to the express router
     public app: express.Application;
 
     constructor(app: express.Application, base: Base) {
+        // Assign local variables to object
         this.app = app;
         this.base = base;
     }
 
-    listen(): void {
+    // This function may only be called once
+    // It creates listeners for every endpoint
+    public listen(): void {
+        // GET Endpoint: /api/clans/:name
+        // Retrieve information about a specific clan
         this.app.get("/api/clans/:name", (req: express.Request, res: express.Response) => {
             if (Array.isArray(req.params)) return;
             if (req.params.name === "list") {
@@ -35,6 +44,13 @@ export default class APIController {
                     });
             }
         });
+        
+        // GET Endpoint: /api/executeSQL/:method
+        // Executes an SQL query and returns it as body
+        // This requires you to authorize and must be called by a user that has 1 as role (administrator)
+        // method param can be: 
+        // run: Executes a query (inserting, updating, ...)
+        // all: Executes a query and returns all occurrences
         this.app.get("/api/executeSQL/:method", async (req: express.Request, res: express.Response) => {
             if (Array.isArray(req.params)) return;
             if (typeof req.headers.sessionid !== "string" || typeof req.headers.query !== "string") {
@@ -66,8 +82,8 @@ export default class APIController {
             } catch(e) {
                 res.status(403);
                 res.json({
-                    message: "An error occured on the server. Perhaps there's a syntax error in your query?",
-                    error: e.toString()
+                    error: e.toString(),
+                    message: "An error occured on the server. Perhaps there's a syntax error in your query?"
                 });
                 return;
             }
@@ -77,6 +93,9 @@ export default class APIController {
                 result
             });
         });
+
+        // GET Endpoint: /api/players/:roomid
+        // Returns an array of all players in a room
         this.app.get("/api/players/:roomid", (req: express.Request, res: express.Response) => {
             if (Array.isArray(req.params)) return;
             const roomID: string = req.params.roomid;
@@ -90,6 +109,10 @@ export default class APIController {
             }
             res.json(room.players);
         });
+
+        // GET Endpoint: /api/rooms
+        // Returns an array of all existing rooms
+        // Rooms are defined in the base object
         this.app.get("/api/rooms", (req: express.Request, res: express.Response) => {
             const rooms: any[] = this.base.rooms.map((v: Room) => {
                 const retVal: any = {
@@ -125,12 +148,20 @@ export default class APIController {
             });
             res.json(rooms);
         });
+
+        // GET Endpoint: /api/ping
+        // Returns the timestamp (milliseconds since 1970-01-01) of when the request was received
+        // This is used to calculate the ping (time it takes for a request to send)
         this.app.get("/api/ping", (req: express.Request, res: express.Response) => {
             const arrived: number = Date.now();
             res.json({
                 arrived
             })
         });
+
+        // GET Endpoint: /api/player/:username
+        // Retrieve information about a specific user
+        // Returns: username, br, createdAt, role
         this.app.get("/api/player/:username", async (req: express.Request, res: express.Response) => {
             if (Array.isArray(req.params)) return;
             if (typeof req.params.username === "undefined") {
@@ -154,12 +185,18 @@ export default class APIController {
                 result
             });
         });
+
+        // GET Endpoint: /api/players
+        // Returns an array of top 25 players, sorted by BR
         this.app.get("/api/players", (req: express.Request, res: express.Response) => {
             this.base.db.all("SELECT username, br, createdAt, role, wins, losses FROM accounts ORDER BY br DESC LIMIT 25")
                 .then((result: any) => {
                     res.json({ result });
                 });
         });
+
+        // GET Endpoint: /api/verify
+        // This is used to link a Discord account to your blobs.live account
         this.app.get("/api/verify", async (req: express.Request, res: express.Response) => {
             if (typeof req.headers.code === "undefined") {
                 if (typeof req.headers.sessionid === "undefined") {
@@ -232,6 +269,10 @@ export default class APIController {
                 });
             }
         });
+
+        // GET Endpoint: /api/captcha/~/:id
+        // Returns the requested captcha (as image/jpeg)
+        // To retrieve an ID, send a GET request to /api/captcha/request
         this.app.get("/api/captcha/~/:id", (req: (express.Request), res: express.Response) => {
             if (Array.isArray(req.params)) return;
             const captchaID = req.params.id;
@@ -255,6 +296,10 @@ export default class APIController {
                 });
             });
         });
+
+        // GET Endpoint: /api/captcha/request
+        // Note: If more than 100 captchas have been requested in a short time, you will have to wait; this is to prevent abuse
+        // Generates an ID that is used to verify as a human when registering
         this.app.get("/api/captcha/request", (req: express.Request, res: express.Response) => {
             if (this.base.captchas.length >= CAPTCHA_LIMIT) return res.status(400).json({
                 message: "Too many captchas. Please try again later."
@@ -274,6 +319,10 @@ export default class APIController {
                 this.base.captchas.splice(this.base.captchas.findIndex((v: Captcha) => v.captcha === captcha), 1);
             }, 300000);
         });
+
+        // POST /api/daily
+        // Note: This may only be requested every 24 hours
+        // Every user is able to request a daily bonus by POSTing to this endpoint
         this.app.post("/api/daily", async (req: express.Request, res: express.Response) => {
             const { session } = req.headers;
             if (!session) return res.status(400).json({
@@ -301,6 +350,10 @@ export default class APIController {
                     });
                 });
         });
+
+        // POST /api/switchBlob
+        // Used to switch blobs
+        // To find a list of blobs, search in public/assets. All static images can be used (assuming the authenticated user has it unlocked)
         this.app.post("/api/switchBlob", async (req: express.Request, res: express.Response) => {
             const { blob: newBlob } = req.query;
             const { session } = req.headers;
