@@ -479,8 +479,6 @@ const useSecureWS: boolean = false;
 
         showCountdown(context: CanvasRenderingContext2D | null): void {
             if (!context || !(room instanceof EliminationRoom)) return;
-            //const remainingTime: number = (this.countdownStarted + EliminationRoom.waitingTime) - Date.now();
-            //const remainingTimeString: string = Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
             const remainingTimeString: string = formatDiff(this.countdownStarted + EliminationRoom.waitingTime);
             context.font = "60px Raleway";
             if (countdownColor[0] >= 0xff) countdownColor[1] = 1;
