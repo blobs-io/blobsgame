@@ -494,14 +494,15 @@ const useSecureWS: boolean = false;
             context.fillText("Waiting for players...", canvas.width / 2 - 140, canvas.height - 100);
         }
 
-        showResults(win: boolean): void {
+        showResults(win: boolean, result: number): void {
             const scrDiv = document.createElement("div"),
                   messageElement = document.createElement("span"),
                   statsElement = document.createElement("div"),
                   timeAliveElement = document.createElement("span"),
                   timeAliveValueElement = document.createElement("span"),
                   positionElement = document.createElement("span"),
-                  positionValueElement = document.createElement("span");
+                  positionValueElement = document.createElement("span"),
+                  ratingChangeElement = document.createElement("p");
             scrDiv.id = "scr";
             messageElement.style.fontSize = "24px";
             messageElement.style.display = "block";
@@ -511,8 +512,10 @@ const useSecureWS: boolean = false;
             timeAliveValueElement.className = positionValueElement.className = "medium-font";
             timeAliveElement.innerText = "Time alive: ";
             timeAliveValueElement.innerText = formatDiff(Date.now() + (Date.now() - this.createdAt));
+            positionElement.innerText = "Position: ";
             positionValueElement.innerText = "#" + this.blobs.length;
-            statsElement.innerHTML += "<hr/>Rating change: +0";
+            ratingChangeElement.innerText = "Rating change: " + (result >= 0 ? "+" + result : result);
+            ratingChangeElement.style.borderTop = "1px solid grey";
 
             if (win) {
                 messageElement.innerText = "You won!";
@@ -524,8 +527,10 @@ const useSecureWS: boolean = false;
             scrDiv.appendChild(statsElement);
             statsElement.appendChild(timeAliveElement);
             statsElement.appendChild(timeAliveValueElement);
+            statsElement.appendChild(document.createElement("br"));
             statsElement.appendChild(positionElement);
             statsElement.appendChild(positionValueElement);
+            statsElement.appendChild(ratingChangeElement);
             document.body.appendChild(scrDiv);
         }
     }
@@ -736,7 +741,8 @@ const useSecureWS: boolean = false;
                     break;
                     case KickTypes.ELIMINATED:
                         if (room instanceof EliminationRoom)
-                            room.showResults(false);
+                        // TODO: dont hardcode 2nd parameter
+                            room.showResults(false, 0);
                         showAlert = false;
                     break;
                     case KickTypes.MOD_KICK:
@@ -744,14 +750,15 @@ const useSecureWS: boolean = false;
                     break;
                     case KickTypes.WIN:
                         if (room instanceof EliminationRoom)
-                            room.showResults(true);
+                            room.showResults(true, 0);
                         showAlert = false;
                     break;
                 }
                 
                 if (showAlert) alert(kickReason)
                 showWSCloseNotification = false;
-                // todo: remove own blob out of blobs array and disable ownBlob
+                ownBlob.ready = false;
+                room.blobs.splice(room.blobs.findIndex(b => b.owner === ownBlob.owner), 1);
             }
             else if (eventType === EventType.STATECHANGE) {
                 if (room instanceof EliminationRoom) {
@@ -1333,7 +1340,7 @@ const useSecureWS: boolean = false;
     })();
 
     // Unsupported game type check
-    if (details.mode === Room.Type.ELIMINATION && false) {
+    if (details.mode === Room.Type.ELIMINATION) {
         alert("Elimination mode is still a WIP!");
         document.location.href = "/game?guest=true&mode=ffa";
         return;
