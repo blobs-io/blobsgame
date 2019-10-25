@@ -2,7 +2,7 @@
 
 
 # clone the rating-system repository
-git clone https://github.com/blobs-io/rating-system
+git clone https://github.com/blobs-io/rating-system --quiet
 
 # navigate into cloned repo
 cd rating-system
