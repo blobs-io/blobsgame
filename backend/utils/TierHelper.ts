@@ -1,14 +1,17 @@
+// Represents a Tier
 export interface Tier {
     tier?: string;
     colorCode?: string;
     emblemFile?: string;
 }
 
+// Represents a Promotion (Tier change)
 export interface Promotion {
     drop: boolean;
     newTier: string;
 }
 
+// Returns a Tier by a given br value
 export function getTier(br: number): Tier {
     let result: Tier = {};
     if (br >= 0 && br < 2000) {
@@ -35,6 +38,7 @@ export function getTier(br: number): Tier {
     return result;
 }
 
+// Returns a promotion if tier has changed
 export function promotedTo(oldbr: number, newbr: number): Promotion | void {
     if (oldbr >= 2000 && newbr < 2000) return {
         drop: true,
