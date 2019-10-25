@@ -1,9 +1,12 @@
+// Imports
 import * as fs from "fs";
 import GameMap from "./GameMap";
 
-
+// Represents a map store
 export default class Maps {
-    public mapStore: any[];
+    // An array of GameMap objects
+    public mapStore: GameMap[];
+    
     constructor(mapPath: string = "./maps") {
         this.mapStore = [];
         for (const map of fs.readdirSync(mapPath).filter(v => v.endsWith(".json"))) {
