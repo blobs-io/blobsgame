@@ -15,7 +15,7 @@ function showOverview(guest) {
         else return "";
     }
     const xml = new XMLHttpRequest();
-    xml.open("GET", "http://localhost/api/rooms", true);
+    xml.open("GET", "/api/rooms", true);
     xml.onload = () => {
         if (xml.readyState === 4 && xml.status === 200) {
             const rooms = JSON.parse(xml.responseText);
