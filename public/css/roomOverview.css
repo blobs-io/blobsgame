@@ -1,0 +1,59 @@
+
+#room-overview {
+	z-index: 999;
+	color: black;
+	font-family: "Raleway", Arial;
+	background-color: rgba(255, 255, 255, 0.95);
+	position: absolute;
+	width: 40%;
+	top: 27%;
+	left: 50%;
+    transform: translateX(-50%);
+    border: 1px solid black;
+	border-radius: 2px;
+}
+.btn {
+	font-family: "Raleway", Arial;
+	padding: 4px 16px 4px 16px;
+	border-radius: 2px;
+	color: white;
+	outline: none;
+	font-size: 16px;
+}
+#close-btn {
+	float: right;
+	margin: 2px 2px;
+	background-color: #e74c3c;
+	border: 1px solid #c0392b;
+}
+.med-text {
+	font-size: 20px;
+	margin-top: 10px;
+	margin-left: 45px;
+	display: block;
+}
+.state-ingame, .state-full {
+	color: red;
+}
+.state-countdown {
+	color: yellow;
+}
+.state-waiting {
+	color: green;
+}
+.join-link {
+	text-decoration: underline;
+}
+.room-name, .player-count {
+	display: block;
+}
+.room-entry {
+	border: 1px solid black;
+	border-radius: 3px;
+	margin-left: 20px;
+	margin-top: 5px;
+	margin-bottom: 15px;
+	width: 130px;
+	padding: 9px;
+	float: left;
+}
