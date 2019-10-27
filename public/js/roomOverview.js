@@ -50,6 +50,7 @@ function showOverview(guest) {
                 stateEl.className = "room-state " + (room.state ? stateToClass(room.state) : "state-waiting");
                 stateEl.innerText = (room.state ? stateToString(room.state) : "Open") + " ".repeat(4);
                 joinLink.href = "/game?mode=" + idtoType(room.id) + "&id=" + room.id + (guest === true ? "&guest=true" : "");
+                joinLink.className = "join-link";
                 joinLink.innerText = "Join";
 
                 roomEntry.appendChild(roomName);
