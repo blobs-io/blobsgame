@@ -6,7 +6,7 @@
 	background-color: rgba(255, 255, 255, 0.95);
 	position: absolute;
 	width: 40%;
-	top: 27%;
+	animation: 0.5s fade-center forwards;
 	left: 50%;
     transform: translateX(-50%);
     border: 1px solid black;
@@ -56,4 +56,13 @@
 	width: 130px;
 	padding: 9px;
 	float: left;
+}
+
+@keyframes fade-center {
+	from {
+		top: 100%;
+	}
+	to {
+		top: 27%;
+	}
 }
