@@ -1,4 +1,4 @@
-function showOverview() {
+function showOverview(guest) {
     function stateToString(state) {
         if (state === 0) return "Waiting...";
         else if (state === 1) return "Countdown";
@@ -49,7 +49,7 @@ function showOverview() {
                 playerCount.innerText = `${room.players.length}/100 players`;
                 stateEl.className = "room-state " + (room.state ? stateToClass(room.state) : "state-waiting");
                 stateEl.innerText = (room.state ? stateToString(room.state) : "Open") + " ".repeat(4);
-                joinLink.href = "/game?mode=" + idtoType(room.id) + "&id=" + room.id + "&guest=true";
+                joinLink.href = "/game?mode=" + idtoType(room.id) + "&id=" + room.id + (guest === true ? "&guest=true" : "");
                 joinLink.innerText = "Join";
 
                 roomEntry.appendChild(roomName);
