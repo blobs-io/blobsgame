@@ -47,6 +47,6 @@
 <script src="/js/roomOverview.js"></script>
 <script>
     initParticles();
-    document.getElementById("guest-btn").onclick = showOverview;
+    document.getElementById("guest-btn").onclick = showOverview.bind(null, true);
 </script>
 </html>
