@@ -28,18 +28,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <link rel="stylesheet" href="css/main-menu.css" />
+    <link rel="stylesheet" href="css/roomOverview.css" />
 </head>
 <body>
 <nav class="blue darken-1">
     <div class="nav-wrapper">
         <a href="/app" class="brand-logo">&nbsp;blobs.live</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a class="dropdown-trigger" data-target="play-dropdown">Play</a></li>
-            <ul id="play-dropdown" class="dropdown-content">
-                <li><a href="/game?id=ffa1&mode=ffa" class="light-blue-text">FFA 1</a></li>
-                <li><a href="/game?id=ffa2&mode=ffa" class="light-blue-text">FFA 2</a></li>
-                <li><a href="/game?id=ffa3&mode=ffa" class="light-blue-text">FFA 3</a></li>
-            </ul>
+            <li><a id="play-btn">Play</a></li>
             <li><a href="/clans">Clans</a></li>
             <li><a href="/verify">Verify</a></li>
             <li><a href="https://reddit.com/r/blobsgame">Subreddit</a></li>
@@ -95,7 +91,9 @@
 <script src="js/request.js"></script>
 <script src="js/functions.js"></script>
 <script src="js/sockets.js"></script>
+<script src="js/roomOverview.js"></script>
 <script>
+    document.getElementById("play-btn").addEventListener("click", showOverview.bind(null, false));
     document.addEventListener('DOMContentLoaded', () => {
         M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
             hover: true
