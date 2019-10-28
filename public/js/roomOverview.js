@@ -9,11 +9,6 @@ function showOverview(guest) {
         else if (state === 1) return "state-countdown";
         else if (state === 2) return "state-ingame";
     }
-    function idtoType(id) {
-        if (id.startsWith("ffa")) return "ffa";
-        else if (id.startsWith("elim")) return "elimination";
-        else return "";
-    }
     const xml = new XMLHttpRequest();
     xml.open("GET", "/api/rooms", true);
     xml.onload = () => {
@@ -38,21 +33,25 @@ function showOverview(guest) {
 
             for (const room of rooms) {
                 const roomEntry = document.createElement("div"),
+                      roomLabel = document.createElement("span"),
                       roomName = document.createElement("span"),
                       playerCount = document.createElement("span"),
                       stateEl = document.createElement("span"),
                       joinLink = document.createElement("a");
                 roomEntry.className = "room-entry";
+                roomLabel.className = "room-label label-" + room.mode;
+                roomLabel.innerText = room.mode.toUpperCase();
                 roomName.className = "room-name";
                 roomName.innerText = room.id.toUpperCase();
                 playerCount.className = "player-count";
                 playerCount.innerText = `${room.players.length}/100 players`;
                 stateEl.className = "room-state " + (room.state ? stateToClass(room.state) : "state-waiting");
                 stateEl.innerText = (room.state ? stateToString(room.state) : "Open") + " ".repeat(4);
-                joinLink.href = "/game?mode=" + idtoType(room.id) + "&id=" + room.id + (guest === true ? "&guest=true" : "");
+                joinLink.href = "/game?mode=" + room.mode + "&id=" + room.id + (guest === true ? "&guest=true" : "");
                 joinLink.className = "join-link";
                 joinLink.innerText = "Join";
 
+                roomEntry.appendChild(roomLabel);
                 roomEntry.appendChild(roomName);
                 roomEntry.appendChild(playerCount);
                 roomEntry.appendChild(stateEl);
