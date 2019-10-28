@@ -9,6 +9,7 @@ import Jimp = require("jimp");
 import Captcha, {CAPTCHA_LIMIT} from "../structures/Captcha";
 import * as DateFormatter from "../utils/DateFormatter";
 import EliminationRoom from "../structures/EliminationRoom";
+import { Role } from "../structures/Player";
 
 // Used for listening to requests that are related to the API
 export default class APIController {
@@ -69,7 +70,7 @@ export default class APIController {
                 });
                 return;
             }
-            if (requester.role !== 1) {
+            if (requester.role !== Role.ADMIN) {
                 res.status(403);
                 res.json({
                     message: "You are not allowed to execute SQL queries."
