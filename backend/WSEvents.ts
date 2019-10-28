@@ -1,7 +1,7 @@
 import Base from "./structures/Base";
 import Room, {Mode} from "./structures/Room";
 import Socket, {wsSocket} from "./structures/Socket"
-import Player from "./structures/Player";
+import Player, { Role } from "./structures/Player";
 import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
@@ -107,7 +107,7 @@ export default class WSHandler {
                 socket = {
                     username: "Guest" + guestID,
                     br: 0,
-                    role: -1,
+                    role: Role.GUEST,
                     guest: true
                 };
                 blob = "blobowo";
@@ -241,7 +241,7 @@ export default class WSHandler {
                 const requester: Player | undefined = room.players.find((v: Player) => v.id === id);
                 if (!requester) return;
                 if (typeof d.user !== "string" || typeof d.reason !== "string") return;
-                if (requester.role !== 1) {
+                if (requester.role !== Role.ADMIN) {
                     conn.send(JSON.stringify({
                         op: OPCODE.EVENT,
                         t: EventTypes.PLAYER_KICK,
