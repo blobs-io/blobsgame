@@ -22,6 +22,9 @@
 .label-ffa {
     background-color: #e67e22;;
 }
+.label-elimination {
+	background-color: #2980b9;
+}
 .btn {
 	font-family: "Raleway", Arial;
 	padding: 4px 16px 4px 16px;
