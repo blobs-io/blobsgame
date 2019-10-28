@@ -117,13 +117,14 @@ export default class APIController {
         this.app.get("/api/rooms", (req: express.Request, res: express.Response) => {
             const rooms: any[] = this.base.rooms.map((v: Room) => {
                 const retVal: any = {
-                id: v.id,
-                players: v.players.map(p => ({
-                    username: p.owner,
-                    br: p.br,
-                    guest: p.guest
-                })),
-                createdAt: v.createdAt
+                    id: v.id,
+                    players: v.players.map(p => ({
+                        username: p.owner,
+                        br: p.br,
+                        guest: p.guest
+                    })),
+                    createdAt: v.createdAt,
+                    mode: v.mode
                 };
                 if (v instanceof EliminationRoom) {
                     Object.defineProperties(retVal, {
