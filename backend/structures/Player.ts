@@ -3,6 +3,12 @@ import Base from "./Base";
 import Room from "./Room";
 import AntiCheat from "./AntiCheat";
 
+export enum Role {
+    GUEST = -1,
+    USER = 0,
+    ADMIN = 1
+}
+
 // Represents a player in a room
 export default class Player {
     // Regeneration constants
