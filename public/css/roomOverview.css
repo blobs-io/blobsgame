@@ -12,6 +12,16 @@
     border: 1px solid black;
 	border-radius: 2px;
 }
+.room-label {
+    background-color: black;
+	display: inline;
+    color: white;
+    padding: 3px 10px 3px 10px;
+    border-radius: 3px;
+}
+.label-ffa {
+    background-color: #e67e22;;
+}
 .btn {
 	font-family: "Raleway", Arial;
 	padding: 4px 16px 4px 16px;
