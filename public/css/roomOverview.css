@@ -54,8 +54,12 @@
 .join-link {
 	text-decoration: underline;
 }
-.room-name, .player-count {
+.room-name {
+	margin-left: 3px;
+}
+.player-count {
 	display: block;
+	margin-top: 3px;
 }
 .room-entry {
 	border: 1px solid black;
@@ -63,7 +67,6 @@
 	margin-left: 20px;
 	margin-top: 5px;
 	margin-bottom: 15px;
-	width: 130px;
 	padding: 9px;
 	float: left;
 }
