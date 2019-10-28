@@ -247,7 +247,10 @@ export default class Base {
                         op: WSEvents.OPCODE.EVENT,
                         t: WSEvents.EventTypes.COORDINATECHANGE,
                         d: {
-                            players: room.players
+                            players: room.players.map(v => ({
+                                ...v,
+                                id: undefined // don't expose ID
+                            }))
                         }
                     }));
                 });
