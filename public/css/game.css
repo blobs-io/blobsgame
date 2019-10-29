@@ -175,7 +175,7 @@ h3 {
 	left: auto;
 	right: auto;
 	width: 200px;
-	height: 150px;
+	height: 190px;
 	border: 1px solid red;
 }
 input {
@@ -189,7 +189,7 @@ input {
 	margin-left: auto;
 	margin-right: auto;
 }
-#kickbtn {
+#kickbtn, #toggle-collision {
 	display: block;
 	margin-top: 5px;
 	width: 80%;
