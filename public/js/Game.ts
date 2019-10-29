@@ -8,7 +8,7 @@ const formatDiff: Function = (time: any) => {
     const remainingTime: number = time - Date.now();
     return Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
 };
-const useSecureWS: boolean = false;
+const useSecureWS: boolean = true;
 
 (() => {
     // -------------
