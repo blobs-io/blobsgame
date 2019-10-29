@@ -254,6 +254,7 @@ const useSecureWS: boolean = false;
         public role: number;
         public ready: boolean | undefined;
         public blob: BlobType;
+        public collision: boolean;
 
         constructor(br: number,
                     owner: string,
@@ -273,6 +274,7 @@ const useSecureWS: boolean = false;
             this.x = x;
             this.y = y;
             this.role = 0;
+            this.collision = true;
         }
 
         get inProtectedArea(): boolean {
@@ -577,22 +579,22 @@ const useSecureWS: boolean = false;
         }
 
         let movable: boolean = true;
-        if (ownBlob.x < 0) {
+        if ((ownBlob.role !== 1 || ownBlob.collision) && ownBlob.x < 0) {
             ownBlob.direction = 4;
             ownBlob.x = 0;
             movable = false;
         }
-        else if (ownBlob.y < 0) {
+        else if ((ownBlob.role !== 1 || ownBlob.collision) && ownBlob.y < 0) {
             ownBlob.direction = 4;
             ownBlob.y = 0;
             movable = false;
         }
-        else if (ownBlob.y > mapSize.height) {
+        else if ((ownBlob.role !== 1 || ownBlob.collision) && ownBlob.y > mapSize.height) {
             ownBlob.direction = 4;
             ownBlob.y = mapSize.height;
             movable = false;
         }
-        else if (ownBlob.x > mapSize.width) {
+        else if ((ownBlob.role !== 1 || ownBlob.collision) && ownBlob.x > mapSize.width) {
             ownBlob.direction = 4;
             ownBlob.x = mapSize.width;
             movable = false;
@@ -888,6 +890,12 @@ const useSecureWS: boolean = false;
             closeMenu.addEventListener("click", () => {
                 if (!kickMenu) return;
                 kickMenu.style.display = "none";
+            });
+        }
+        const toggleCollisionElement: HTMLElement | null = document.getElementById("toggle-collision");
+        if (toggleCollisionElement) {
+            toggleCollisionElement.addEventListener("click", () => {
+                ownBlob.collision = !ownBlob.collision;
             });
         }
     }
