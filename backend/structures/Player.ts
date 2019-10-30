@@ -122,4 +122,9 @@ export default class Player {
         this.health += Player.regeneration.health;
         this.lastRegeneration = Date.now();
     }
+
+    // Updates the distance in database
+    public saveDistance(customDistance: number = this.distance): Promise<any> {
+        return this.base.db.run("UPDATE accounts SET distance = distance + ? WHERE username = ?", customDistance / 1000, this.owner);
+    }
 }
