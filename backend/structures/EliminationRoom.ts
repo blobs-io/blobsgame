@@ -80,6 +80,7 @@ export default class EliminationRoom extends Room.default {
             // Check whether the winner is a guest
             // If they are a guest, don't transfer br
             if (!winner.guest) {
+                winner.saveDistance();
                 this.base.db.run("UPDATE accounts SET br = br + ? WHERE username = ?", result, winner.owner);
             }
 
