@@ -381,9 +381,15 @@ export default class WSHandler {
         }
     }
 
-    static disconnectSocket(socket: wsSocket, room: Room, code?: number, handle: boolean = true) {
+    static disconnectSocket(socket: wsSocket, room: Room, code?: number, handle: boolean = true): void {
         socket.conn.close(code);
-        room.players.splice(room.players.findIndex((p: Player) => p.id === socket.id), 1);
+        const playerIndex: number = room.players.findIndex(p => p.id === socket.id);
+        const player: Player = room.players[playerIndex];
+        if (!player) return;
+        if (!player.guest) {
+            player.saveDistance();
+        }
+        room.players.splice(playerIndex, 1);
         if (room instanceof EliminationRoom.default)
             room.handleEnd();
     }
