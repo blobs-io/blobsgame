@@ -151,6 +151,23 @@ h3 {
 	}
 }
 
+#quit {
+	font-family: "Calibri";
+	position: fixed;
+	bottom: 25px;
+	left: 8px;
+	background-color: #2980b9;
+    border: none;
+    width: 80px;
+    color: white;
+    border-radius: 2px;
+	height: 30px;
+	font-size: 16px;
+}
+#quit:hover {
+	background-color: #3498db;
+}
+
 #fps-meter, #latency {
 	font-family: "Calibri";
 	color: white;
