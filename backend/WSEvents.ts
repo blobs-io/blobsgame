@@ -45,7 +45,7 @@ export interface EventData {
 export default class WSHandler {
     public base: Base;
     static interval: number = 3000;
-    static intervalLimit: number = 5000;
+    static intervalLimit: number = 10000;
 
     constructor(base: Base) {
         this.base = base;
