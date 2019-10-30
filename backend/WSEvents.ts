@@ -373,6 +373,12 @@ export default class WSHandler {
                 }
             }
         }
+        else if (op === OPCODE.CLOSE) {
+            if (!d.room) return;
+            const room: Room | undefined = this.base.rooms.find(v => v.id === d.room);
+            if (!room) return;
+            WSHandler.disconnectSocket(this.base.wsSockets.find(v => v.id === id), room);
+        }
     }
 
     static disconnectSocket(socket: wsSocket, room: Room, code?: number, handle: boolean = true) {
