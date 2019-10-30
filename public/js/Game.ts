@@ -35,7 +35,7 @@ const useSecureWS: boolean = true;
             })(),
             heart: (() => {
                 const image = new Image();
-                image.src = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/heart-icon.png";
+                image.src = "../../assets/emblems/heart.png";
                 return image;
             })(),
             crown: (() => {
