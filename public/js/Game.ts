@@ -770,8 +770,12 @@ const useSecureWS: boolean = true;
         }
     });
     ws.onclose = () => {
-        if (showWSCloseNotification)
+        let timeout: number;
+        if (showWSCloseNotification) {
+            timeout = 0;
             alert("Connection closed.");
+        } else timeout = 10000;
+        setTimeout(() => document.location.href = "/", timeout);
     };
 
     // Mobile Controls
