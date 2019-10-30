@@ -862,6 +862,12 @@ const useSecureWS: boolean = true;
         });
     }
 
+    document.getElementById("quit").addEventListener("click", () => {
+        ws.send(JSON.stringify({
+            op: OPCODE.CLOSE,
+        }));
+    });
+
     // Kick User
     const kickMenu: HTMLElement | null = document.getElementById("kick-menu");
     {
