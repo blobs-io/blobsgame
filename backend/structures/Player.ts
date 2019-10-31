@@ -87,6 +87,11 @@ export default class Player {
                 value: Date.now(),
                 enumerable: false,
                 writable: true
+            },
+            id: {
+                value: null,
+                enumerable: false,
+                writable: true
             }
         });
     }
