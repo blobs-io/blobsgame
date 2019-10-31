@@ -108,7 +108,7 @@ export default class APIController {
                 });
                 return;
             }
-            res.json(room.players.map(v => ({...v, id: undefined})));
+            res.json(room.players);
         });
 
         // GET Endpoint: /api/rooms
