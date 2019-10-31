@@ -242,17 +242,17 @@ export default class Base {
                     // Generates everyones health points every Y milliseconds
                     player.regenerate(true);
 
-                    // Transmit coordinates to all connected WebSockets
-                    ws.conn.send(JSON.stringify({
-                        op: WSEvents.OPCODE.EVENT,
-                        t: WSEvents.EventTypes.COORDINATECHANGE,
-                        d: {
-                            players: room.players.map(v => ({
-                                ...v,
-                                id: undefined // don't expose ID
-                            }))
-                        }
-                    }));
+                    // Transmit coordinates to all connected WebSockets if there are at least 2 players in this room
+                    // Sending coordinates to rooms with only one player is unnecessary because the client doesn't need its own coordinates
+                    if (room.players.length >= 2) {
+                        ws.conn.send(JSON.stringify({
+                            op: WSEvents.OPCODE.EVENT,
+                            t: WSEvents.EventTypes.COORDINATECHANGE,
+                            d: {
+                                players: room.players
+                            }
+                        }));
+                    }
                 });
             }
         }, 20);
