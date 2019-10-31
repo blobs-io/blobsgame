@@ -149,10 +149,7 @@ export default class WSHandler {
                         y: newblob.directionChangeCoordinates.y,
                         blob
                     },
-                    users: room.players.map(v => ({
-                        ...v,
-                        id: undefined // don't expose ID
-                    })),
+                    users: room.players,
                     objects: room.map.map.objects,
                     interval: WSHandler.interval,
                     roomCreatedAt: room.createdAt
