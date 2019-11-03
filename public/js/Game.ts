@@ -2,17 +2,27 @@ declare const io: Function;
 declare const request: (path: string, method: string, headers?: any) => Promise<any>;
 declare const socket: any;
 declare const server: string;
-const randomNumber: Function = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
-const getParameterByName: Function = (param: string): string => (document.location.search.match(new RegExp(`[?&]${param}=([^&]*)`)) || [])[1];
-const formatDiff: Function = (time: any) => {
+
+function randomNumber(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+function getParameterByName(param: string): string {
+    const matches: Array<string> = document.location.search.match(new RegExp(`[?&]${param}=([^&]*)`));
+    return matches ? matches[1] : undefined;
+}
+
+function formatDiff(time: any): string {
     const remainingTime: number = time - Date.now();
     return Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
-};
-const createImage = (src: string) => {
+}
+
+function createImage(src: string): any {
     const img = new Image();
     img.src = src;
     return img;
-};
+}
+
 const useSecureWS: boolean = true;
 
 // Phone controls
