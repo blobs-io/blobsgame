@@ -8,6 +8,11 @@ const formatDiff: Function = (time: any) => {
     const remainingTime: number = time - Date.now();
     return Math.floor(remainingTime / 1000 / 60) + " minutes, " + Math.floor(remainingTime / 1000 % 60) + " seconds";
 };
+const createImage = (src: string) => {
+    const img = new Image();
+    img.src = src;
+    return img;
+};
 const useSecureWS: boolean = true;
 
 // Phone controls
@@ -33,21 +38,10 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         items: [],
         images: {
             blobnom: null,
-            brickwall: (() => {
-                const image = new Image();
-                image.src = "../../assets/brickwall.png";
-                return image;
-            })(),
-            heart: (() => {
-                const image = new Image();
-                image.src = "../../assets/emblems/heart.png";
-                return image;
-            })(),
-            crown: (() => {
-                const image = new Image();
-                image.src = "../../assets/emblems/crown.png";
-                return image;
-            })()
+            brickwall: createImage("../../assets/brickwall.png"),
+            heart: createImage("../../assets/emblems/heart.png"),
+            coin: createImage("../../assets/emblems/emblem_blobcoin.png"),
+            crown: createImage("../../assets/emblems/crown.png")
         }
     };
     const mapSize: MapProp = {
@@ -123,7 +117,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         Blobnom = "../assets/blobnom.png"
     }
     enum ItemType {
-        Health = 0
+        Health = 0,
+        COIN   = 1
     }
     enum OPCODE {
         HELLO = 1,
