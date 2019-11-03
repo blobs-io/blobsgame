@@ -134,15 +134,19 @@ export default class Base {
         this.captchas = [];
         this.rooms = [];
 
-        // 3 rooms for each room type
+        // FFA
         for (let i: number = 0; i < 3; ++i) {
             this.rooms.push(
                 new Room.default(this, this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa" + (i + 1))
             );
+        }
+        // Elimination
+        for (let i: number = 0; i < 3; ++i) {
             this.rooms.push(
                 new EliminationRoom(this, this.maps.mapStore.find((v: any) => v.map.name === "default"), "elim" + (i + 1))
             );
         }
+
 
         // Generates a "session ID", which is used to access the database
         this.dbToken = SessionIDManager.generateSessionID(24);
