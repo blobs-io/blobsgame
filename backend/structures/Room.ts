@@ -4,7 +4,7 @@ import Player from "./Player";
 import {wsSocket} from "./Socket";
 import {EventTypes, OPCODE} from "../WSEvents";
 import Base from "./Base";
-import {Item} from "./Item";
+import {Item, ItemType} from "./Item";
 
 // Available room modes
 export const Mode: any = {
@@ -35,6 +35,7 @@ export default class Room extends GameMap {
         this.players = [];
         this.createdAt = Date.now();
         this.base = base;
+        this.items = [];
     }
 
     // Calculates the number of milliseconds this room has been up for
@@ -54,5 +55,25 @@ export default class Room extends GameMap {
     // Sends a string to every websocket connection
     broadcastSend(str: string): void {
         this.broadcast(ws => ws.conn.send(str));
+    }
+
+    // Adds n random items to the map
+    addItems(n: number): void {
+        for (let i = 0; i < n; ++i) {
+            for (const element of Object.keys(ItemType)) {
+                const item: Item = {
+                    id: element.substr(0, 3) + this.getItemsOfType(ItemType[element]).length,
+                    type: ItemType[element],
+                    x: Math.random() * this.map.map.mapSize.width,
+                    y: Math.random() * this.map.map.mapSize.height
+                };
+                this.items.push(item);
+            }
+        }
+    }
+
+    // Returns all items of a type
+    getItemsOfType(t: number): Array<Item> {
+        return this.items.filter(i => i.type === t);
     }
 }
