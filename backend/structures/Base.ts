@@ -136,9 +136,9 @@ export default class Base {
 
         // FFA
         for (let i: number = 0; i < 3; ++i) {
-            this.rooms.push(
-                new Room.default(this, this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa" + (i + 1))
-            );
+            const room: Room.default = new Room.default(this, this.maps.mapStore.find((v: any) => v.map.name === "default"), "ffa" + (i + 1));
+            room.addItems(15);
+            this.rooms.push(room);
         }
         // Elimination
         for (let i: number = 0; i < 3; ++i) {
