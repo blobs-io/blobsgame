@@ -127,8 +127,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         Blobnom = "../assets/blobnom.png"
     }
     enum ItemType {
-        Health = 0,
-        Coin   = 1
+        HEALTH = 0,
+        COIN   = 1
     }
     enum OPCODE {
         HELLO = 1,
@@ -438,8 +438,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public y: number;
         public id: ItemType;
         constructor(x = randomNumber(0, mapSize.width),
-                    y = randomNumber(0, mapSize.height),
-                    id = ItemType.Health) {
+                    y = randomNumber(0, mapSize.height)) {
             this.x = x;
             this.y = y;
             this.id = id;
