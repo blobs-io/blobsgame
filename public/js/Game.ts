@@ -10,6 +10,11 @@ const formatDiff: Function = (time: any) => {
 };
 const useSecureWS: boolean = true;
 
+// Phone controls
+if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
+    document.getElementById("dpad-controls").style.display = "block";
+}
+
 (() => {
     // -------------
     // General definitions/declarations
