@@ -437,6 +437,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public x: number;
         public y: number;
         public type: ItemType;
+        public id: string;
         constructor(type: ItemType,
                     x = randomNumber(0, mapSize.width),
                     y = randomNumber(0, mapSize.height)) {
