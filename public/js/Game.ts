@@ -128,7 +128,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     }
     enum ItemType {
         Health = 0,
-        COIN   = 1
+        Coin   = 1
     }
     enum OPCODE {
         HELLO = 1,
