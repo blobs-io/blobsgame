@@ -662,6 +662,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     room = new EliminationRoom();
                 else room = new Room();
 
+                console.log(eventData);
+
                 // Own blob
                 ownBlob.owner = eventData.user.username;
                 ownBlob.blob = eventData.user.blob;
