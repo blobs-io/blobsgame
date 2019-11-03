@@ -152,6 +152,7 @@ export default class WSHandler {
                     users: room.players,
                     objects: room.map.map.objects,
                     interval: WSHandler.interval,
+                    items: room.items,
                     roomCreatedAt: room.createdAt
                 },
                 t: EventTypes.HEARTBEAT
@@ -212,7 +213,7 @@ export default class WSHandler {
 
                 if (previousPlayer.role !== Role.ADMIN && (d.x < 0 || isNaN(d.x))) d.x = 0;
                 if (previousPlayer.role !== Role.ADMIN && (d.y < 0 || isNaN(d.y))) d.y = 0;
-                if (previousPlayer.role !== Role.ADMIN && d.x > 2000) d.x = 2000;
+                if (previousPlayer.role !== Role.ADMIN && d.x > 2000) d.x = 2000; // TODO: dont hardcode map width/height; use room.map.map.mapSize.width
                 if (previousPlayer.role !== Role.ADMIN && d.y > 2000) d.y = 2000;
                 previousPlayer.x = d.x;
                 previousPlayer.y = d.y;
