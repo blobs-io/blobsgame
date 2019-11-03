@@ -4,6 +4,7 @@ import Player from "./Player";
 import {wsSocket} from "./Socket";
 import {EventTypes, OPCODE} from "../WSEvents";
 import Base from "./Base";
+import {Item} from "./Item";
 
 // Available room modes
 export const Mode: any = {
@@ -17,6 +18,8 @@ export default class Room extends GameMap {
     public id: string;
     // All players in this room
     public players: Player[];
+    // All items in this room
+    public items: Item[];
     // This rooms mode
     public mode: string;
     // The timestamp of when this room was created
