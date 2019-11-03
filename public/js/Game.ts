@@ -436,12 +436,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     class Item {
         public x: number;
         public y: number;
-        public id: ItemType;
-        constructor(x = randomNumber(0, mapSize.width),
+        public type: ItemType;
+        constructor(type: ItemType,
+                    x = randomNumber(0, mapSize.width),
                     y = randomNumber(0, mapSize.height)) {
             this.x = x;
             this.y = y;
-            this.id = id;
+            this.type = type;
         }
 
         display(): void {
