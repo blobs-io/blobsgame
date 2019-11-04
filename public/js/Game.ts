@@ -788,7 +788,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     room.state = eventData.state;
                 }
             }
-            else if (eventType === EventType.PLAYER_NOMMED && room instanceof EliminationRoom) {
+            else if (eventType === EventType.PLAYER_NOMMED && room.type === Room.Type.FFA) {
+                console.log(eventData);
                 displayLeaderboard();
                 const loser: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.loser.owner);
                 const winner: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.winner.owner);
