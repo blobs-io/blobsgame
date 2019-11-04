@@ -65,41 +65,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         bottom: { from: { x: 0, y: 0,}, to: { x: 0, y: 0 } }
     };
     const emblems: any = {
-        bronze: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_bronze.png";
-            return image;
-        })(),
-        silver: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_silver.png";
-            return image;
-        })(),
-        platinum: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_platinum.png";
-            return image;
-        })(),
-        gold: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_gold.png";
-            return image;
-        })(),
-        diamond: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_diamond.png";
-            return image;
-        })(),
-        guest: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_guest-or-unknown.png";
-            return image;
-        })(),
-        admin: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_admin.png";
-            return image;
-        })(),
+        bronze: createImage("../../assets/emblems/emblem_bronze.png"),
+        silver: createImage("../../assets/emblems/emblem_silver.png"),
+        platinum: createImage("../../assets/emblems/emblem_platinum.png"),
+        gold: createImage("../../assets/emblems/emblem_gold.png"),
+        diamond: createImage("../../assets/emblems/emblem_diamond.png"),
+        guest: createImage("../../assets/emblems/emblem_guest-or-unknown.png"),
+        admin: createImage("../../assets/emblems/emblem_admin.png")
     };
     const details: any = {
         mode: getParameterByName("mode"),
@@ -815,6 +787,52 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     room.countdownStarted = eventData.countdownStarted;
                     room.state = eventData.state;
                 }
+            }
+            else if (eventType === EventType.PLAYER_NOMMED && room instanceof EliminationRoom) {
+                displayLeaderboard();
+                const loser: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.loser.owner);
+                const winner: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.winner.owner);
+
+                if (loser) {
+                    loser.br = eventData.loser.br;
+                    loser.directionChangeCoordinates.x = eventData.loser.directionChangeCoordinates.x;
+                    loser.directionChangeCoordinates.y = eventData.loser.directionChangeCoordinates.y;
+                    loser.directionChangedAt = eventData.loser.directionChangedAt;
+                    loser.health = 100;
+                }
+                if (winner) {
+                    winner.br = eventData.winner.br;
+                }
+
+                // HTML Elements, ...
+                const nomHistoryDiv = document.getElementById("nom-hist");
+                const nomEntryDiv = document.createElement("div");
+                nomEntryDiv.className = "nom-hist-entry";
+                const nomUser = document.createElement("span");
+                const targetUser = document.createElement("span");
+                nomUser.className = "nom-user nom-entry";
+                nomUser.innerHTML = `${winner.owner} (+${eventData.result})`;
+                const newBRLabel = document.createElement("span");
+                const newBRLabelLoser = document.createElement("span");
+                newBRLabel.className = "new-br";
+                newBRLabel.innerHTML = winner.br + " BR";
+                const linebreakWinner = document.createElement("br");
+                targetUser.className = "target-user nom-entry";
+                targetUser.innerHTML = `${loser.owner} (-${eventData.result})`;
+                newBRLabelLoser.className = "new-br";
+                newBRLabelLoser.innerHTML = loser.br + " BR";
+                const linebreakLoser = document.createElement("br");
+                nomHistoryDiv.appendChild(nomEntryDiv);
+                nomEntryDiv.appendChild(nomUser);
+                nomEntryDiv.appendChild(newBRLabel);
+                nomEntryDiv.appendChild(linebreakWinner);
+                nomEntryDiv.appendChild(targetUser);
+                nomEntryDiv.appendChild(newBRLabelLoser);
+                nomEntryDiv.appendChild(linebreakLoser);
+
+                setTimeout(() => {
+                    nomHistoryDiv.removeChild(nomEntryDiv);
+                }, 3500);
             }
         }
     });
