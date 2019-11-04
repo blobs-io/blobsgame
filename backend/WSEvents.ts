@@ -6,6 +6,7 @@ import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
 import * as EliminationRoom from "./structures/EliminationRoom";
+import {Item, ItemHeight, ItemWidth} from "./structures/Item";
 
 export enum EventTypes {
     PLAYER_KICK = "kick",
@@ -15,7 +16,8 @@ export enum EventTypes {
     STATECHANGE = "stateChange",
     PLAYER_NOMMED = "playerNommed",
     PLAYER_KICK_C = "kickPlayer",
-    HEARTBEAT = "heartbeat"
+    HEARTBEAT = "heartbeat",
+    COLLECT_ITEM = "collectItem"
 }
 
 export enum KickTypes {
@@ -369,6 +371,17 @@ export default class WSHandler {
                         }
                     }
                 }
+            }
+            else if (t === EventTypes.COLLECT_ITEM) {
+                if (!d || !d.room) return;
+                const room: Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room);
+                if (!room) return;
+                const player: Player | undefined = room.players.find((p: Player) => p.id === id);
+                if (!player) return;
+                const itemIndex: number = room.items.findIndex(i => i.id === d.item && player.x < (i.x + ItemWidth) && player.x > (i.x - ItemWidth) && player.y < (i.y + ItemHeight) && player.y > (i.y - ItemHeight));
+                if (itemIndex < 0) return;
+                room.items.splice(itemIndex, 1);
+                // todo: tell client that item is gone now
             }
         }
         else if (op === OPCODE.CLOSE) {
