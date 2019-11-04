@@ -213,8 +213,8 @@ export default class WSHandler {
 
                 if (previousPlayer.role !== Role.ADMIN && (d.x < 0 || isNaN(d.x))) d.x = 0;
                 if (previousPlayer.role !== Role.ADMIN && (d.y < 0 || isNaN(d.y))) d.y = 0;
-                if (previousPlayer.role !== Role.ADMIN && d.x > 2000) d.x = 2000; // TODO: dont hardcode map width/height; use room.map.map.mapSize.width
-                if (previousPlayer.role !== Role.ADMIN && d.y > 2000) d.y = 2000;
+                if (previousPlayer.role !== Role.ADMIN && d.x > room.map.map.mapSize.width) d.x = room.map.map.mapSize.width;
+                if (previousPlayer.role !== Role.ADMIN && d.y > room.map.map.mapSize.height) d.y = room.map.map.mapSize.height;
                 previousPlayer.x = d.x;
                 previousPlayer.y = d.y;
             }
@@ -347,8 +347,8 @@ export default class WSHandler {
                                         }
                                     }
 
-                                    loser.directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
-                                    loser.directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
+                                    loser.directionChangeCoordinates.x = Math.floor(Math.random() * room.map.map.mapSize.width);
+                                    loser.directionChangeCoordinates.y = Math.floor(Math.random() * room.map.map.mapSize.height);
                                     loser.directionChangedAt = Date.now();
 
 
