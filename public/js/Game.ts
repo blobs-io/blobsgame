@@ -118,6 +118,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         SP_NOM_KEY         = "singlePlayerNomKey",
         DIRECTION_CHANGE_C = "directionChange",
         PLAYER_NOMMED      = "playerNommed",
+        COLLECT_ITEM       = "collectItem"
     }
     enum KickTypes {
         ROOM_FULL = "roomFull",
@@ -413,6 +414,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public static animationScale: number = 0;
         public static animationState: boolean = true; // 1 = up, 0 = approach original value
         public static animationScaleLimit: number = -15;
+        public static width: number = 20;
+        public static height: number = 20;
         constructor(type: ItemType,
                     x = randomNumber(0, mapSize.width),
                     y = randomNumber(0, mapSize.height)) {
@@ -437,11 +440,11 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             }
             canvasPosY -= 45;
             canvasPosX -= 45;
-            ctx.drawImage(objects.images[this.toString()], canvasPosX, canvasPosY + Item.animationScale, 20, 20);
+            ctx.drawImage(objects.images[this.toString()], canvasPosX, canvasPosY + Item.animationScale, Item.width, Item.height);
         }
 
         get state(): boolean {
-            return this.x < (ownBlob.x + 10) && this.x > (ownBlob.x - 10) && this.y < (ownBlob.y + 10) && this.y > (ownBlob.y - 10);
+            return this.x < (ownBlob.x + (Item.width / 2)) && this.x > (ownBlob.x - (Item.width / 2)) && this.y < (ownBlob.y + (Item.height / 2)) && this.y > (ownBlob.y - (Item.height / 2));
         }
 
         toString(): string {
@@ -1105,6 +1108,18 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             case "k":
                 if (ownBlob.role === 1 && kickMenu)
                     kickMenu.style.display = "block";
+                break;
+            case "c":
+                const selectedItem: Item | undefined = objects.items.find(i => ownBlob.x < (i.x + Item.width) && ownBlob.x > (i.x - Item.width) && ownBlob.y < (i.y + Item.height) && ownBlob.y > (i.y - Item.height));
+                if (!selectedItem) return;
+                ws.send(JSON.stringify({
+                    op: OPCODE.EVENT,
+                    t: EventType.COLLECT_ITEM,
+                    d: {
+                        room: details.id,
+                        item: selectedItem.id
+                    }
+                }));
                 break;
         }
     });
