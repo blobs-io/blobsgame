@@ -23,7 +23,7 @@ function createImage(src: string): any {
     return img;
 }
 
-const useSecureWS: boolean = true;
+const useSecureWS: boolean = !document.location.href.startsWith("http://localhost");
 
 // Phone controls
 if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
@@ -455,18 +455,24 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             } else if (ownBlob.x < this.x) {
                 canvasPosX = (canvas.width / 2) + (this.x - ownBlob.x);
             }
-            if (ownBlob.y >=this.y) {
+            if (ownBlob.y >= this.y) {
                 canvasPosY = (canvas.height / 2) - (ownBlob.y - this.y);
             } else if (ownBlob.y < this.y) {
                 canvasPosY = (canvas.height / 2) + (this.y - ownBlob.y);
             }
             canvasPosY -= 45;
             canvasPosX -= 45;
-            ctx.drawImage(objects.images.heart, canvasPosX, canvasPosY, 20, 20);
+            ctx.drawImage(objects.images[this.toString()], canvasPosX, canvasPosY, 20, 20);
         }
 
         get state(): boolean {
             return this.x < (ownBlob.x + 10) && this.x > (ownBlob.x - 10) && this.y < (ownBlob.y + 10) && this.y > (ownBlob.y - 10);
+        }
+
+        toString(): string {
+            if (this.type === ItemType.COIN) return "coin";
+            else if (this.type === ItemType.HEALTH) return "heart";
+            else throw new ReferenceError("Invalid type");
         }
     }
     class Room {
@@ -638,6 +644,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         displayNoNomAreas(ctx);
         displayHP(ctx);
         displayMinimap(ctx);
+
+        // Show items
+        for (const item of objects.items) {
+            item.display();
+        }
+
+        // Show countdown if room is Elimination Room
         if (room instanceof EliminationRoom && (room.state === EliminationRoomState.COUNTDOWN || room.state === EliminationRoomState.WAITING)) {
             room.showCountdown(ctx);
         }
@@ -663,6 +676,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 else room = new Room();
 
                 console.log(eventData);
+
+                // Items
+                for(const item of eventData.items) {
+                    const itemObj: Item = new Item(item.type, item.x, item.y);
+                    itemObj.id = item.id;
+                    objects.items.push(itemObj);
+                }
 
                 // Own blob
                 ownBlob.owner = eventData.user.username;
