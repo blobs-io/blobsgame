@@ -438,6 +438,9 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public y: number;
         public type: ItemType;
         public id: string;
+        public static animationScale: number = 0;
+        public static animationState: boolean = true; // 1 = up, 0 = approach original value
+        public static animationScaleLimit: number = -15;
         constructor(type: ItemType,
                     x = randomNumber(0, mapSize.width),
                     y = randomNumber(0, mapSize.height)) {
@@ -462,7 +465,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             }
             canvasPosY -= 45;
             canvasPosX -= 45;
-            ctx.drawImage(objects.images[this.toString()], canvasPosX, canvasPosY, 20, 20);
+            ctx.drawImage(objects.images[this.toString()], canvasPosX, canvasPosY + Item.animationScale, 20, 20);
         }
 
         get state(): boolean {
@@ -644,6 +647,19 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         displayNoNomAreas(ctx);
         displayHP(ctx);
         displayMinimap(ctx);
+
+        // Item animation
+        if (Item.animationState) {
+            if (Item.animationScale <= Item.animationScaleLimit)
+                Item.animationState = false;
+            else
+                Item.animationScale -= 0.3;
+        } else {
+            if (Item.animationScale >= 0)
+                Item.animationState = true;
+            else
+                Item.animationScale += 0.3;
+        }
 
         // Show items
         for (const item of objects.items) {
