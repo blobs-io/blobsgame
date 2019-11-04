@@ -353,7 +353,7 @@ export default class WSHandler {
 
 
                                     for (let j: number = 0; j < room.players.length; ++j) {
-                                        const socket: wsSocket | undefined = this.base.wsSockets.find((v: wsSocket) => v.id === room.players[i].id);
+                                        const socket: wsSocket | undefined = this.base.wsSockets.find((v: wsSocket) => v.id === room.players[j].id);
                                         if (!socket) continue;
                                         socket.conn.send(JSON.stringify({
                                             op: OPCODE.EVENT,
