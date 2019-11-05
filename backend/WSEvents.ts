@@ -17,7 +17,8 @@ export enum EventTypes {
     PLAYER_NOMMED = "playerNommed",
     PLAYER_KICK_C = "kickPlayer",
     HEARTBEAT = "heartbeat",
-    COLLECT_ITEM = "collectItem"
+    COLLECT_ITEM = "collectItem",
+    ITEM_UPDATE = "updateItem"
 }
 
 export enum KickTypes {
@@ -380,8 +381,26 @@ export default class WSHandler {
                 if (!player) return;
                 const itemIndex: number = room.items.findIndex(i => i.id === d.item && player.x < (i.x + ItemWidth) && player.x > (i.x - ItemWidth) && player.y < (i.y + ItemHeight) && player.y > (i.y - ItemHeight));
                 if (itemIndex < 0) return;
+                const item: Item = room.items[itemIndex];
                 room.items.splice(itemIndex, 1);
-                // todo: tell client that item is gone now
+
+                // Add new item
+                const newItem: Item = {
+                    id: item.id.replace(/\d+/, room.getItemsOfType(item.type).length.toString()),
+                    type: item.type,
+                    x: Math.floor(Math.random() * room.map.map.mapSize.width),
+                    y: Math.floor(Math.random() * room.map.map.mapSize.height)
+                };
+                room.items.push(newItem);
+
+                room.broadcastSend(JSON.stringify({
+                    op: OPCODE.EVENT,
+                    t: EventTypes.ITEM_UPDATE,
+                    d: {
+                        old: item.id,
+                        new: newItem
+                    }
+                }));
             }
         }
         else if (op === OPCODE.CLOSE) {
