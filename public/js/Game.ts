@@ -118,7 +118,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         SP_NOM_KEY         = "singlePlayerNomKey",
         DIRECTION_CHANGE_C = "directionChange",
         PLAYER_NOMMED      = "playerNommed",
-        COLLECT_ITEM       = "collectItem"
+        COLLECT_ITEM       = "collectItem",
+        ITEM_UPDATE        = "updateItem"
     }
     enum KickTypes {
         ROOM_FULL = "roomFull",
@@ -838,6 +839,19 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     nomHistoryDiv.removeChild(nomEntryDiv);
                 }, 3500);
             }
+            else if (eventType === EventType.ITEM_UPDATE) {
+                console.log(eventData);
+                if (typeof eventData.old === "string") { // removed item
+                    const item: number = objects.items.findIndex(i => i.id === eventData.old);
+                    if (item < 0) return; // item somehow not found
+                    objects.items.splice(item, 1);
+                }
+                if (eventData.new && Object.keys(eventData.new).length > 0) { // new item
+                    const item: Item = new Item(eventData.new.type, eventData.new.x, eventData.new.y);
+                    item.id = eventData.new.id;
+                    objects.items.push(item);
+                }
+            }
         }
     });
     ws.onclose = () => {
@@ -1110,7 +1124,9 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     kickMenu.style.display = "block";
                 break;
             case "c":
+                //TODO: this doesn't work properly yet, sometimes selectedItem is undefined
                 const selectedItem: Item | undefined = objects.items.find(i => ownBlob.x < (i.x + Item.width) && ownBlob.x > (i.x - Item.width) && ownBlob.y < (i.y + Item.height) && ownBlob.y > (i.y - Item.height));
+                console.log(selectedItem);
                 if (!selectedItem) return;
                 ws.send(JSON.stringify({
                     op: OPCODE.EVENT,
