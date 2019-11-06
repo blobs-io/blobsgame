@@ -6,7 +6,7 @@ import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
 import * as EliminationRoom from "./structures/EliminationRoom";
-import {Item, ItemHeight, ItemWidth} from "./structures/Item";
+import {Item, ItemHeight, ItemType, ItemWidth} from "./structures/Item";
 
 export enum EventTypes {
     PLAYER_KICK = "kick",
@@ -18,7 +18,8 @@ export enum EventTypes {
     PLAYER_KICK_C = "kickPlayer",
     HEARTBEAT = "heartbeat",
     COLLECT_ITEM = "collectItem",
-    ITEM_UPDATE = "updateItem"
+    ITEM_UPDATE = "updateItem",
+    STATSCHANGE = "statsChange"
 }
 
 export enum KickTypes {
@@ -91,7 +92,7 @@ export default class WSHandler {
             if (typeof session !== "string") return;
 
             let socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
-            let blob: string;
+            let blob: string, coins: number;
 
             if (!socket) {
                 if (room.players.some((v: Player) => v.id === id))
@@ -114,9 +115,11 @@ export default class WSHandler {
                     guest: true
                 };
                 blob = "blobowo";
+                coins = 0;
             } else {
-                const user: any = await this.base.db.get("SELECT activeBlob FROM accounts WHERE username = ?", socket.username);
+                const user: any = await this.base.db.get("SELECT activeBlob, blobcoins FROM accounts WHERE username = ?", socket.username);
                 blob = user.activeBlob;
+                coins = user.blobcoins;
                 socket.guest = false;
             }
 
@@ -132,6 +135,7 @@ export default class WSHandler {
             newblob.br = socket.br;
             newblob.id = id;
             newblob.guest = socket.guest;
+            newblob.coins = coins;
 
             newblob.maximumCoordinates = {
                 width: room.map.map.mapSize.width,
@@ -393,6 +397,35 @@ export default class WSHandler {
                 };
                 room.items.push(newItem);
 
+                if (item.type === ItemType.HEALTH) {
+                    player.health += Math.floor(Math.random () * 5) + 10;
+                } else if (item.type === ItemType.COIN && !player.guest) { // coins only claimable by actual users (not guests)
+                    const generations: Array<number> = [
+                        Math.random(),
+                        Math.random(),
+                        Math.random()
+                    ];
+                    let value: number = 0;
+                    if (generations[0] > .6) {
+                        value = 5;
+                        if (generations[1] > .7) {
+                            value += 15;
+                            if (generations[2] > .7)
+                                value += 35;
+                        }
+                    } else
+                        value = 3;
+
+                    this.base.db.run("UPDATE accounts SET blobcoins = ? WHERE username = ?", player.coins += value, player.owner);
+                    player.wsSend(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventTypes.STATSCHANGE,
+                        d: {
+                            coins: player.coins
+                        }
+                    }));
+                }
+                
                 room.broadcastSend(JSON.stringify({
                     op: OPCODE.EVENT,
                     t: EventTypes.ITEM_UPDATE,
