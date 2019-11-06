@@ -119,7 +119,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         DIRECTION_CHANGE_C = "directionChange",
         PLAYER_NOMMED      = "playerNommed",
         COLLECT_ITEM       = "collectItem",
-        ITEM_UPDATE        = "updateItem"
+        ITEM_UPDATE        = "updateItem",
+        STATSCHANGE        = "statsChange"
     }
     enum KickTypes {
         ROOM_FULL = "roomFull",
@@ -239,6 +240,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public ready: boolean | undefined;
         public blob: BlobType;
         public collision: boolean;
+        public coins: number;
 
         constructor(br: number,
                     owner: string,
@@ -259,6 +261,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             this.y = y;
             this.role = 0;
             this.collision = true;
+            this.coins = 0;
         }
 
         get inProtectedArea(): boolean {
@@ -850,6 +853,14 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     const item: Item = new Item(eventData.new.type, eventData.new.x, eventData.new.y);
                     item.id = eventData.new.id;
                     objects.items.push(item);
+                }
+            }
+            else if (eventType === EventType.STATSCHANGE) {
+                for (const prop in eventData) {
+                    console.log(prop, eventData[prop]);
+                    if (ownBlob.hasOwnProperty(prop)) {
+                        ownBlob[prop] = eventData[prop]; //todo: implement 'coins' for client as well (server should send coins when connected)
+                    }
                 }
             }
         }
