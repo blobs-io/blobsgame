@@ -154,7 +154,8 @@ export default class WSHandler {
                         role: socket.role,
                         x: newblob.directionChangeCoordinates.x,
                         y: newblob.directionChangeCoordinates.y,
-                        blob
+                        blob,
+                        coins
                     },
                     users: room.players,
                     objects: room.map.map.objects,
