@@ -626,6 +626,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         displayNoNomAreas(ctx);
         displayHP(ctx);
         displayMinimap(ctx);
+        displayCoins(ctx);
 
         // Item animation
         if (Item.animationState) {
@@ -688,6 +689,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 ownBlob.br = eventData.user.br;
                 ownBlob.ready = true;
                 ownBlob.role = eventData.user.role;
+                ownBlob.coins = eventData.user.coins;
                 ownBlob.setBlob(<BlobType>`../assets/${eventData.user.blob}.png`).catch(console.log);
                 room.blobs.push(ownBlob);
 
@@ -796,7 +798,6 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 }
             }
             else if (eventType === EventType.PLAYER_NOMMED && room.type === Room.Type.FFA) {
-                console.log(eventData);
                 displayLeaderboard();
                 const loser: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.loser.owner);
                 const winner: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.winner.owner);
@@ -1340,6 +1341,14 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         } else if (border.top.from.x !== 0 || border.top.from.y !== 0 || border.top.to.x !== 0 || border.top.to.y !== 0) {
             border.top.from.x = border.top.from.y = border.top.to.x = border.top.to.y = 0;
         }
+    }
+    function displayCoins(context: CanvasRenderingContext2D) {
+        context.beginPath();
+        context.font = "19px Raleway";
+        context.fillStyle = "white";
+        context.drawImage(objects.images.coin, canvas.width - 220, 15, 20, 20);
+        context.fillText(ownBlob.coins.toString(), canvas.width - 200, 15);
+        context.closePath();
     }
     function getTier(br: number): Tier {
         let result: Tier = {};
