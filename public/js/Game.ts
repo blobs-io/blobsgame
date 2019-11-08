@@ -1192,7 +1192,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     }
     function displayHP(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
-        context.font = "30px Raleway";
+        context.font = "15px Raleway";
 
         if (ownBlob.health >= 80) context.fillStyle = "#2ecc71";
         else if (ownBlob.health >= 50) context.fillStyle = "#f39c12";
@@ -1200,9 +1200,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         else if (ownBlob.health >= 10) context.fillStyle = "#e74c3c";
         else context.fillStyle = "#c0392b";
 
-        context.fillText(ownBlob.health.toString(), canvas.width - 90, canvas.height - 30);
-        context.font = "13px Raleway";
-        context.fillText("HP", canvas.width - 40, canvas.height - 30);
+        context.fillText("HP: " + ownBlob.health, canvas.width - 100, canvas.height - 10);
         context.fillStyle = "white";
         window.requestAnimationFrame(animationFrame);
     }
@@ -1295,7 +1293,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     function displayPlayerStats(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
         context.font = "15px Raleway";
-        context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 90, canvas.height - 10);
+        context.fillText("X: "+ Math.floor(ownBlob.x), canvas.width - 100, canvas.height - 50);
+        context.fillText("Y: "+ Math.floor(ownBlob.y), canvas.width - 100, canvas.height - 70);
     }
     function drawBorder(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
@@ -1344,10 +1343,9 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     }
     function displayCoins(context: CanvasRenderingContext2D) {
         context.beginPath();
-        context.font = "19px Raleway";
+        context.font = "15px Raleway";
         context.fillStyle = "white";
-        context.drawImage(objects.images.coin, canvas.width - 220, 15, 20, 20);
-        context.fillText(ownBlob.coins.toString(), canvas.width - 200, 15);
+        context.fillText("Coins: " + ownBlob.coins, canvas.width - 100, canvas.height - 30);
         context.closePath();
     }
     function getTier(br: number): Tier {
