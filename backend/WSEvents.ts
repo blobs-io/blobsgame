@@ -400,6 +400,7 @@ export default class WSHandler {
 
                 if (item.type === ItemType.HEALTH) {
                     player.health += Math.floor(Math.random () * 5) + 10;
+                    if (player.health > 100) player.health = 100;
                 } else if (item.type === ItemType.COIN && !player.guest) { // coins only claimable by actual users (not guests)
                     const generations: Array<number> = [
                         Math.random(),
