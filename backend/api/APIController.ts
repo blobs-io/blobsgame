@@ -198,7 +198,7 @@ export default class APIController {
         });
 
         // GET Endpoint: /api/verify
-        // This is used to link a Discord account to your blobs.live account
+        // This is used to link a Discord account to your blobs account
         this.app.get("/api/verify", async (req: express.Request, res: express.Response) => {
             if (typeof req.headers.code === "undefined") {
                 if (typeof req.headers.sessionid === "undefined") {
