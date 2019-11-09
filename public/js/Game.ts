@@ -857,11 +857,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 }
             }
             else if (eventType === EventType.STATSCHANGE) {
-                for (const prop in eventData) {
-                    console.log(prop, eventData[prop]);
-                    if (ownBlob.hasOwnProperty(prop)) {
-                        ownBlob[prop] = eventData[prop]; //todo: implement 'coins' for client as well (server should send coins when connected)
-                    }
+                for (const prop of Object.getOwnPropertyNames(eventData)) {
+                    ownBlob[prop] = eventData[prop];
                 }
             }
         }
