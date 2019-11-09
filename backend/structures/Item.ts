@@ -15,3 +15,5 @@ export interface Item {
     // Unique identifier for this item
     id: string;
 }
+export const ItemWidth: number = 20;
+export const ItemHeight: number = 20;

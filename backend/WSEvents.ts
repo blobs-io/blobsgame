@@ -6,6 +6,7 @@ import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
 import * as EliminationRoom from "./structures/EliminationRoom";
+import {Item, ItemHeight, ItemType, ItemWidth} from "./structures/Item";
 
 export enum EventTypes {
     PLAYER_KICK = "kick",
@@ -15,7 +16,10 @@ export enum EventTypes {
     STATECHANGE = "stateChange",
     PLAYER_NOMMED = "playerNommed",
     PLAYER_KICK_C = "kickPlayer",
-    HEARTBEAT = "heartbeat"
+    HEARTBEAT = "heartbeat",
+    COLLECT_ITEM = "collectItem",
+    ITEM_UPDATE = "updateItem",
+    STATSCHANGE = "statsChange"
 }
 
 export enum KickTypes {
@@ -88,7 +92,7 @@ export default class WSHandler {
             if (typeof session !== "string") return;
 
             let socket: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
-            let blob: string;
+            let blob: string, coins: number;
 
             if (!socket) {
                 if (room.players.some((v: Player) => v.id === id))
@@ -111,9 +115,11 @@ export default class WSHandler {
                     guest: true
                 };
                 blob = "blobowo";
+                coins = 0;
             } else {
-                const user: any = await this.base.db.get("SELECT activeBlob FROM accounts WHERE username = ?", socket.username);
+                const user: any = await this.base.db.get("SELECT activeBlob, blobcoins FROM accounts WHERE username = ?", socket.username);
                 blob = user.activeBlob;
+                coins = user.blobcoins;
                 socket.guest = false;
             }
 
@@ -129,6 +135,7 @@ export default class WSHandler {
             newblob.br = socket.br;
             newblob.id = id;
             newblob.guest = socket.guest;
+            newblob.coins = coins;
 
             newblob.maximumCoordinates = {
                 width: room.map.map.mapSize.width,
@@ -147,7 +154,8 @@ export default class WSHandler {
                         role: socket.role,
                         x: newblob.directionChangeCoordinates.x,
                         y: newblob.directionChangeCoordinates.y,
-                        blob
+                        blob,
+                        coins
                     },
                     users: room.players,
                     objects: room.map.map.objects,
@@ -213,8 +221,8 @@ export default class WSHandler {
 
                 if (previousPlayer.role !== Role.ADMIN && (d.x < 0 || isNaN(d.x))) d.x = 0;
                 if (previousPlayer.role !== Role.ADMIN && (d.y < 0 || isNaN(d.y))) d.y = 0;
-                if (previousPlayer.role !== Role.ADMIN && d.x > 2000) d.x = 2000; // TODO: dont hardcode map width/height; use room.map.map.mapSize.width
-                if (previousPlayer.role !== Role.ADMIN && d.y > 2000) d.y = 2000;
+                if (previousPlayer.role !== Role.ADMIN && d.x > room.map.map.mapSize.width) d.x = room.map.map.mapSize.width;
+                if (previousPlayer.role !== Role.ADMIN && d.y > room.map.map.mapSize.height) d.y = room.map.map.mapSize.height;
                 previousPlayer.x = d.x;
                 previousPlayer.y = d.y;
             }
@@ -347,13 +355,13 @@ export default class WSHandler {
                                         }
                                     }
 
-                                    loser.directionChangeCoordinates.x = Math.floor(Math.random() * 2000);
-                                    loser.directionChangeCoordinates.y = Math.floor(Math.random() * 2000);
+                                    loser.directionChangeCoordinates.x = Math.floor(Math.random() * room.map.map.mapSize.width);
+                                    loser.directionChangeCoordinates.y = Math.floor(Math.random() * room.map.map.mapSize.height);
                                     loser.directionChangedAt = Date.now();
 
 
                                     for (let j: number = 0; j < room.players.length; ++j) {
-                                        const socket: wsSocket | undefined = this.base.wsSockets.find((v: wsSocket) => v.id === room.players[i].id);
+                                        const socket: wsSocket | undefined = this.base.wsSockets.find((v: wsSocket) => v.id === room.players[j].id);
                                         if (!socket) continue;
                                         socket.conn.send(JSON.stringify({
                                             op: OPCODE.EVENT,
@@ -369,6 +377,65 @@ export default class WSHandler {
                         }
                     }
                 }
+            }
+            else if (t === EventTypes.COLLECT_ITEM) {
+                if (!d || !d.room) return;
+                const room: Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room);
+                if (!room) return;
+                const player: Player | undefined = room.players.find((p: Player) => p.id === id);
+                if (!player) return;
+                const itemIndex: number = room.items.findIndex(i => i.id === d.item && player.x < (i.x + ItemWidth) && player.x > (i.x - ItemWidth) && player.y < (i.y + ItemHeight) && player.y > (i.y - ItemHeight));
+                if (itemIndex < 0) return;
+                const item: Item = room.items[itemIndex];
+                room.items.splice(itemIndex, 1);
+
+                // Add new item
+                const newItem: Item = {
+                    id: item.id.replace(/\d+/, room.getItemsOfType(item.type).length.toString()),
+                    type: item.type,
+                    x: Math.floor(Math.random() * room.map.map.mapSize.width),
+                    y: Math.floor(Math.random() * room.map.map.mapSize.height)
+                };
+                room.items.push(newItem);
+
+                if (item.type === ItemType.HEALTH) {
+                    player.health += Math.floor(Math.random () * 5) + 10;
+                    if (player.health > 100) player.health = 100;
+                } else if (item.type === ItemType.COIN && !player.guest) { // coins only claimable by actual users (not guests)
+                    const generations: Array<number> = [
+                        Math.random(),
+                        Math.random(),
+                        Math.random()
+                    ];
+                    let value: number = 0;
+                    if (generations[0] > .6) {
+                        value = 5;
+                        if (generations[1] > .7) {
+                            value += 15;
+                            if (generations[2] > .7)
+                                value += 35;
+                        }
+                    } else
+                        value = 3;
+
+                    this.base.db.run("UPDATE accounts SET blobcoins = ? WHERE username = ?", player.coins += value, player.owner);
+                    player.wsSend(JSON.stringify({
+                        op: OPCODE.EVENT,
+                        t: EventTypes.STATSCHANGE,
+                        d: {
+                            coins: player.coins
+                        }
+                    }));
+                }
+                
+                room.broadcastSend(JSON.stringify({
+                    op: OPCODE.EVENT,
+                    t: EventTypes.ITEM_UPDATE,
+                    d: {
+                        old: item.id,
+                        new: newItem
+                    }
+                }));
             }
         }
         else if (op === OPCODE.CLOSE) {

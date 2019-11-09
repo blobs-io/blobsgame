@@ -23,7 +23,7 @@ function createImage(src: string): any {
     return img;
 }
 
-const useSecureWS: boolean = true;
+const useSecureWS: boolean = !document.location.href.startsWith("http://localhost");
 
 // Phone controls
 if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
@@ -65,41 +65,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         bottom: { from: { x: 0, y: 0,}, to: { x: 0, y: 0 } }
     };
     const emblems: any = {
-        bronze: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_bronze.png";
-            return image;
-        })(),
-        silver: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_silver.png";
-            return image;
-        })(),
-        platinum: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_platinum.png";
-            return image;
-        })(),
-        gold: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_gold.png";
-            return image;
-        })(),
-        diamond: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_diamond.png";
-            return image;
-        })(),
-        guest: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_guest-or-unknown.png";
-            return image;
-        })(),
-        admin: (() => {
-            const image = new Image();
-            image.src = "../../assets/emblems/emblem_admin.png";
-            return image;
-        })(),
+        bronze: createImage("../../assets/emblems/emblem_bronze.png"),
+        silver: createImage("../../assets/emblems/emblem_silver.png"),
+        platinum: createImage("../../assets/emblems/emblem_platinum.png"),
+        gold: createImage("../../assets/emblems/emblem_gold.png"),
+        diamond: createImage("../../assets/emblems/emblem_diamond.png"),
+        guest: createImage("../../assets/emblems/emblem_guest-or-unknown.png"),
+        admin: createImage("../../assets/emblems/emblem_admin.png")
     };
     const details: any = {
         mode: getParameterByName("mode"),
@@ -146,6 +118,9 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         SP_NOM_KEY         = "singlePlayerNomKey",
         DIRECTION_CHANGE_C = "directionChange",
         PLAYER_NOMMED      = "playerNommed",
+        COLLECT_ITEM       = "collectItem",
+        ITEM_UPDATE        = "updateItem",
+        STATSCHANGE        = "statsChange"
     }
     enum KickTypes {
         ROOM_FULL = "roomFull",
@@ -265,6 +240,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public ready: boolean | undefined;
         public blob: BlobType;
         public collision: boolean;
+        public coins: number;
 
         constructor(br: number,
                     owner: string,
@@ -285,6 +261,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             this.y = y;
             this.role = 0;
             this.collision = true;
+            this.coins = 0;
         }
 
         get inProtectedArea(): boolean {
@@ -438,6 +415,11 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public y: number;
         public type: ItemType;
         public id: string;
+        public static animationScale: number = 0;
+        public static animationState: boolean = true; // 1 = up, 0 = approach original value
+        public static animationScaleLimit: number = -15;
+        public static width: number = 20;
+        public static height: number = 20;
         constructor(type: ItemType,
                     x = randomNumber(0, mapSize.width),
                     y = randomNumber(0, mapSize.height)) {
@@ -455,18 +437,24 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             } else if (ownBlob.x < this.x) {
                 canvasPosX = (canvas.width / 2) + (this.x - ownBlob.x);
             }
-            if (ownBlob.y >=this.y) {
+            if (ownBlob.y >= this.y) {
                 canvasPosY = (canvas.height / 2) - (ownBlob.y - this.y);
             } else if (ownBlob.y < this.y) {
                 canvasPosY = (canvas.height / 2) + (this.y - ownBlob.y);
             }
             canvasPosY -= 45;
             canvasPosX -= 45;
-            ctx.drawImage(objects.images.heart, canvasPosX, canvasPosY, 20, 20);
+            ctx.drawImage(objects.images[this.toString()], canvasPosX, canvasPosY + Item.animationScale, Item.width, Item.height);
         }
 
         get state(): boolean {
-            return this.x < (ownBlob.x + 10) && this.x > (ownBlob.x - 10) && this.y < (ownBlob.y + 10) && this.y > (ownBlob.y - 10);
+            return this.x < (ownBlob.x + (Item.width / 2)) && this.x > (ownBlob.x - (Item.width / 2)) && this.y < (ownBlob.y + (Item.height / 2)) && this.y > (ownBlob.y - (Item.height / 2));
+        }
+
+        toString(): string {
+            if (this.type === ItemType.COIN) return "coin";
+            else if (this.type === ItemType.HEALTH) return "heart";
+            else throw new ReferenceError("Invalid type");
         }
     }
     class Room {
@@ -638,6 +626,27 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         displayNoNomAreas(ctx);
         displayHP(ctx);
         displayMinimap(ctx);
+        displayCoins(ctx);
+
+        // Item animation
+        if (Item.animationState) {
+            if (Item.animationScale <= Item.animationScaleLimit)
+                Item.animationState = false;
+            else
+                Item.animationScale -= 0.3;
+        } else {
+            if (Item.animationScale >= 0)
+                Item.animationState = true;
+            else
+                Item.animationScale += 0.3;
+        }
+
+        // Show items
+        for (const item of objects.items) {
+            item.display();
+        }
+
+        // Show countdown if room is Elimination Room
         if (room instanceof EliminationRoom && (room.state === EliminationRoomState.COUNTDOWN || room.state === EliminationRoomState.WAITING)) {
             room.showCountdown(ctx);
         }
@@ -664,6 +673,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
 
                 console.log(eventData);
 
+                // Items
+                for(const item of eventData.items) {
+                    const itemObj: Item = new Item(item.type, item.x, item.y);
+                    itemObj.id = item.id;
+                    objects.items.push(itemObj);
+                }
+
                 // Own blob
                 ownBlob.owner = eventData.user.username;
                 ownBlob.blob = eventData.user.blob;
@@ -673,6 +689,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 ownBlob.br = eventData.user.br;
                 ownBlob.ready = true;
                 ownBlob.role = eventData.user.role;
+                ownBlob.coins = eventData.user.coins;
                 ownBlob.setBlob(<BlobType>`../assets/${eventData.user.blob}.png`).catch(console.log);
                 room.blobs.push(ownBlob);
 
@@ -778,6 +795,70 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 if (room instanceof EliminationRoom) {
                     room.countdownStarted = eventData.countdownStarted;
                     room.state = eventData.state;
+                }
+            }
+            else if (eventType === EventType.PLAYER_NOMMED && room.type === Room.Type.FFA) {
+                displayLeaderboard();
+                const loser: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.loser.owner);
+                const winner: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.winner.owner);
+
+                if (loser) {
+                    loser.br = eventData.loser.br;
+                    loser.directionChangeCoordinates.x = eventData.loser.directionChangeCoordinates.x;
+                    loser.directionChangeCoordinates.y = eventData.loser.directionChangeCoordinates.y;
+                    loser.directionChangedAt = eventData.loser.directionChangedAt;
+                    loser.health = 100;
+                }
+                if (winner) {
+                    winner.br = eventData.winner.br;
+                }
+
+                // HTML Elements, ...
+                const nomHistoryDiv = document.getElementById("nom-hist");
+                const nomEntryDiv = document.createElement("div");
+                nomEntryDiv.className = "nom-hist-entry";
+                const nomUser = document.createElement("span");
+                const targetUser = document.createElement("span");
+                nomUser.className = "nom-user nom-entry";
+                nomUser.innerHTML = `${winner.owner} (+${eventData.result})`;
+                const newBRLabel = document.createElement("span");
+                const newBRLabelLoser = document.createElement("span");
+                newBRLabel.className = "new-br";
+                newBRLabel.innerHTML = winner.br + " BR";
+                const linebreakWinner = document.createElement("br");
+                targetUser.className = "target-user nom-entry";
+                targetUser.innerHTML = `${loser.owner} (-${eventData.result})`;
+                newBRLabelLoser.className = "new-br";
+                newBRLabelLoser.innerHTML = loser.br + " BR";
+                const linebreakLoser = document.createElement("br");
+                nomHistoryDiv.appendChild(nomEntryDiv);
+                nomEntryDiv.appendChild(nomUser);
+                nomEntryDiv.appendChild(newBRLabel);
+                nomEntryDiv.appendChild(linebreakWinner);
+                nomEntryDiv.appendChild(targetUser);
+                nomEntryDiv.appendChild(newBRLabelLoser);
+                nomEntryDiv.appendChild(linebreakLoser);
+
+                setTimeout(() => {
+                    nomHistoryDiv.removeChild(nomEntryDiv);
+                }, 3500);
+            }
+            else if (eventType === EventType.ITEM_UPDATE) {
+                console.log(eventData);
+                if (typeof eventData.old === "string") { // removed item
+                    const item: number = objects.items.findIndex(i => i.id === eventData.old);
+                    if (item < 0) return; // item somehow not found
+                    objects.items.splice(item, 1);
+                }
+                if (eventData.new && Object.keys(eventData.new).length > 0) { // new item
+                    const item: Item = new Item(eventData.new.type, eventData.new.x, eventData.new.y);
+                    item.id = eventData.new.id;
+                    objects.items.push(item);
+                }
+            }
+            else if (eventType === EventType.STATSCHANGE) {
+                for (const prop of Object.getOwnPropertyNames(eventData)) {
+                    ownBlob[prop] = eventData[prop];
                 }
             }
         }
@@ -1051,6 +1132,20 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 if (ownBlob.role === 1 && kickMenu)
                     kickMenu.style.display = "block";
                 break;
+            case "c":
+                //TODO: this doesn't work properly yet, sometimes selectedItem is undefined
+                const selectedItem: Item | undefined = objects.items.find(i => ownBlob.x < (i.x + Item.width) && ownBlob.x > (i.x - Item.width) && ownBlob.y < (i.y + Item.height) && ownBlob.y > (i.y - Item.height));
+                console.log(selectedItem);
+                if (!selectedItem) return;
+                ws.send(JSON.stringify({
+                    op: OPCODE.EVENT,
+                    t: EventType.COLLECT_ITEM,
+                    d: {
+                        room: details.id,
+                        item: selectedItem.id
+                    }
+                }));
+                break;
         }
     });
 
@@ -1094,7 +1189,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     }
     function displayHP(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
-        context.font = "30px Raleway";
+        context.font = "15px Raleway";
 
         if (ownBlob.health >= 80) context.fillStyle = "#2ecc71";
         else if (ownBlob.health >= 50) context.fillStyle = "#f39c12";
@@ -1102,9 +1197,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         else if (ownBlob.health >= 10) context.fillStyle = "#e74c3c";
         else context.fillStyle = "#c0392b";
 
-        context.fillText(ownBlob.health.toString(), canvas.width - 90, canvas.height - 30);
-        context.font = "13px Raleway";
-        context.fillText("HP", canvas.width - 40, canvas.height - 30);
+        context.fillText("HP: " + ownBlob.health, canvas.width - 100, canvas.height - 10);
         context.fillStyle = "white";
         window.requestAnimationFrame(animationFrame);
     }
@@ -1197,7 +1290,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     function displayPlayerStats(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
         context.font = "15px Raleway";
-        context.fillText(`X: ${Math.floor(ownBlob.x)} | Y: ${Math.floor(ownBlob.y)}`, canvas.width - 90, canvas.height - 10);
+        context.fillText("X: "+ Math.floor(ownBlob.x), canvas.width - 100, canvas.height - 50);
+        context.fillText("Y: "+ Math.floor(ownBlob.y), canvas.width - 100, canvas.height - 70);
     }
     function drawBorder(context: CanvasRenderingContext2D | null = ctx): void {
         if (!context) return;
@@ -1243,6 +1337,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         } else if (border.top.from.x !== 0 || border.top.from.y !== 0 || border.top.to.x !== 0 || border.top.to.y !== 0) {
             border.top.from.x = border.top.from.y = border.top.to.x = border.top.to.y = 0;
         }
+    }
+    function displayCoins(context: CanvasRenderingContext2D) {
+        context.beginPath();
+        context.font = "15px Raleway";
+        context.fillStyle = "white";
+        context.fillText("Coins: " + ownBlob.coins, canvas.width - 100, canvas.height - 30);
+        context.closePath();
     }
     function getTier(br: number): Tier {
         let result: Tier = {};
@@ -1318,7 +1419,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         else if (mode === "elimination") return "Elimination";
     }
     // Last part
-    console.log("%c You know JavaScript / TypeScript? Contribute to blobs.live! https://github.com/blobs-io/blobs.live", "color: green");
+    console.log("%c You know JavaScript / TypeScript? Contribute to blobs! https://github.com/blobs-io/blobs.live", "color: green");
     (async(): Promise<any> => {
         {
             const headingElement: HTMLCollection = document.getElementsByClassName("heading");

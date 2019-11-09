@@ -54,6 +54,8 @@ export default class Player {
     public lastRegeneration: number | undefined;
     // Timestamp of when the last heartbeat from this user was received
     public lastHeartbeat: number;
+    // The number of coins this user has
+    public coins: number;
 
     constructor(base: Base, x?: number, y?: number, owner?: string, role: number = 0, blob: string = "blobowo") {
         this.owner = owner;
@@ -90,6 +92,11 @@ export default class Player {
             },
             id: {
                 value: null,
+                enumerable: false,
+                writable: true
+            },
+            coins: {
+                value: 0,
                 enumerable: false,
                 writable: true
             }
@@ -131,5 +138,10 @@ export default class Player {
     // Updates the distance in database
     public saveDistance(customDistance: number = this.distance): Promise<any> {
         return this.base.db.run("UPDATE accounts SET distance = distance + ? WHERE username = ?", customDistance / 1000, this.owner);
+    }
+
+    // Sends a websocket message to this player
+    public wsSend(str: string): void {
+        this.base.wsSockets.find(v => v.id === this.id).conn.send(str);
     }
 }
