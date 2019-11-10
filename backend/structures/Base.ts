@@ -50,9 +50,6 @@ interface Maintenance {
 
 // Used for sharing required data across all modules
 export default class Base {
-    // A command that is executed when a BR calculation is performed
-    // WARNING: Watch out for this path; make sure it points to a rating-system executable!
-    static algorithm: string = process.platform === "linux" ? "./b {ownbr} {opponentbr} --br" : "b {ownbr} {opponentbr} --br";
     // The server
     public server: Server;
     // The WebSocket server
@@ -91,32 +88,6 @@ export default class Base {
     public wsSockets: Socket.wsSocket[];
 
     constructor(options: BaseOptions) {
-        // Check if rating-system binary exists
-        {
-            // Read executable name
-            let executable = "";
-            for (const c of Base.algorithm) {
-                if (c === '.' || c === '/') continue;
-                else if (c === ' ') break;
-                executable += c;
-            }
-            // Platform-dependent execution command
-            const platformExec = process.platform === "linux" ? executable : executable + ".exe";
-            if (!existsSync(platformExec)) {
-                console.warn("[warn] rating-system executable not found");
-                if (process.platform === "linux") {
-                    // Execute shell script if operating system is linux
-                    exec(`${platformExec} > /dev/null`, (err, res) => {
-                        if (err) console.error("[err] ./scripts/get-rs.sh returned non-zero exit code. Is it executable?");
-                        else {
-                            console.log("compiled rating-system source code");
-                        }
-                    });
-                } else
-                    console.warn("[warn] operating system is not linux, therefore get-rs.sh script cannot be executed. Please compile rating-system source code manually.");
-            }
-        }
-
         // Assign all local variables
         this.server = options.server;
         this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
