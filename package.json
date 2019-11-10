@@ -5,8 +5,8 @@
   "main": "backend/Server.js",
   "scripts": {
     "start": "node .",
-    "test": "tsc backend/Server.ts -t es5 --removeComments && tsc public/js/Game.ts -t es5 --removeComments",
-    "tscRelative": "node_modules/typescript/bin/tsc backend/Server.ts -t es5 --removeComments && node_modules/typescript/bin/tsc public/js/Game.ts -t es5 --removeComments"
+    "transpile": "tsc backend/Server.ts -t es5 --removeComments && tsc public/js/Game.ts -t es5 --removeComments",
+    "test": "npm run transpile && chmod -R 777 scripts && ./scripts/get-rs.sh && node-gyp configure build"
   },
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
@@ -26,7 +26,8 @@
     "sqlite": "^3.0.0",
     "sqlite3": "^4.0.4",
     "typescript": "^3.5.3",
-    "ws": "^7.0.1"
+    "ws": "^7.0.1",
+    "node-gyp": "6.0.1"
   },
   "engines": {
     "node": "8.x"
