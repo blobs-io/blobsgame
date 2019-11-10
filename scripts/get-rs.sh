@@ -17,7 +17,7 @@ chmod 777 deps.sh
 cd ..
 
 # compile rating-system to binary in project folder
-g++ -Irating-system/include rating-system/main.cc -o b
+g++ -std=c++11 -Irating-system/include rating-system/main.cc -o b
 
 # Make directory 'include'
 mkdir ../rating-system/include
