@@ -6,7 +6,7 @@
                 "rating-system/Main.cc"
             ],
             "include_dirs": [
-                "rating-system/include"
+                "./rating-system/include"
             ]
         }
     ]
