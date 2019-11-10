@@ -19,6 +19,9 @@ cd ..
 # compile rating-system to binary in project folder
 g++ -Irating-system/include rating-system/main.cc -o b
 
+# Move algorithm file to ../rating-system/include so the node addon can use it
+mv rating-system/algorithm.cc ../rating-system/include
+
 # remove repository (only the binary is needed)
 rm -rf rating-system
 
