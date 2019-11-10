@@ -5,8 +5,7 @@
   "main": "backend/Server.js",
   "scripts": {
     "start": "node .",
-    "transpile": "tsc backend/Server.ts -t es5 --removeComments && tsc public/js/Game.ts -t es5 --removeComments",
-    "test": "npm run transpile && chmod -R 777 scripts && cd scripts && ./get-rs.sh && cd .. && node-gyp configure build"
+    "transpile": "tsc backend/Server.ts -t es5 --removeComments && tsc public/js/Game.ts -t es5 --removeComments"
   },
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
