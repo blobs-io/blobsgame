@@ -3,5 +3,5 @@ node_js:
   - 9
   - 10
   - 11
-before_install: npm install typescript -g
-script: npm run transpile
+before_install: cd scripts && ./get-rs.sh && cd .. && npm install typescript -g
+script: npm run transpile && node-gyp configure build
