@@ -7,6 +7,8 @@ import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
 import * as EliminationRoom from "./structures/EliminationRoom";
 import {Item, ItemHeight, ItemType, ItemWidth} from "./structures/Item";
+// Rating System as Node addon; needs to be compiled before using node-gyp
+const { calc } = require("../build/Release/rating-system-api");
 
 export enum EventTypes {
     PLAYER_KICK = "kick",
@@ -324,12 +326,7 @@ export default class WSHandler {
                                     let result;
                                     if (!isNaN(blobobj.br) && !hasGuest) {
                                         if (eventd.br === blobobj.br) --eventd.br;
-                                        let execution = execSync(
-                                            Base.algorithm
-                                                .replace(/{ownbr}/, eventd.br.toString())
-                                                .replace(/{opponentbr}/, blobobj.br.toString())
-                                        ).toString();
-                                        result = parseInt(execution);
+                                        let result = parseInt(calc(eventd.br, blobobj.br), 10);
                                         if (result === 0) ++result;
                                         winner.br = winner.br + result > 9999 ? 9999 : winner.br + result;
                                         loser.br = loser.br - result <= 0 ? 1 : loser.br - result;
