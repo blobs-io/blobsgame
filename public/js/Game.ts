@@ -495,7 +495,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             context.fillText("Waiting for players...", canvas.width / 2 - 140, canvas.height - 100);
         }
 
-        showResults(win: boolean, result: number): void {
+        showResults(win: boolean, result: number, gainedCoins: number): void {
             const scrDiv = document.createElement("div"),
                   messageElement = document.createElement("span"),
                   statsElement = document.createElement("div"),
@@ -515,7 +515,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             timeAliveValueElement.innerText = formatDiff(Date.now() + (Date.now() - this.createdAt));
             positionElement.innerText = "Position: ";
             positionValueElement.innerText = "#" + this.blobs.length;
-            ratingChangeElement.innerText = "Rating change: " + (result >= 0 ? "+" + result : result);
+            ratingChangeElement.innerHTML = "Rating change: " + (result >= 0 ? "+" + result : result) + "<br/>Coins gained: " + gainedCoins;
             ratingChangeElement.style.borderTop = "1px solid grey";
 
             if (win) {
@@ -773,7 +773,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     break;
                     case KickTypes.ELIMINATED:
                         if (room instanceof EliminationRoom)
-                            room.showResults(false, eventData.result);
+                            room.showResults(false, eventData.result, eventData.coinChange);
                         showAlert = false;
                     break;
                     case KickTypes.MOD_KICK:
@@ -781,7 +781,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     break;
                     case KickTypes.WIN:
                         if (room instanceof EliminationRoom)
-                            room.showResults(true, eventData.result);
+                            room.showResults(true, eventData.result, eventData.coinChange);
                         showAlert = false;
                     break;
                 }
