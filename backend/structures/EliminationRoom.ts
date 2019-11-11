@@ -15,11 +15,19 @@ export enum State {
     INGAME
 }
 
+export const CoinChangeTable: any = {
+    1: 250,
+    2: 120,
+    3: 50,
+    4: 25,
+    5: 10
+};
+
 export default class EliminationRoom extends Room.default {
     // The number of milliseconds users have to wait when the room enters COUNTDOWN phase
     static waitingTime: number = 120000;
     // The number of players that need to be in a room for the COUNTDOWN phase to start
-    static minPlayersStartup: number = 2;
+    static minPlayersStartup: number = 4;
     // The timestamp of when the room has entered the COUNTDOWN phase
     public countdownStarted: number = null;
     // This rooms state
@@ -76,12 +84,13 @@ export default class EliminationRoom extends Room.default {
             const winner: Player = this.players[0];
             const socket: wsSocket = this.base.wsSockets.find(v => v.id === winner.id);
             const result: number = 125; // todo: dont hardcode
+            const coinChange = CoinChangeTable[this.players.length] || 0;
 
             // Check whether the winner is a guest
             // If they are a guest, don't transfer br
             if (!winner.guest) {
                 winner.saveDistance();
-                this.base.db.run("UPDATE accounts SET br = br + ? WHERE username = ?", result, winner.owner);
+                this.base.db.run("UPDATE accounts SET br = br + ?, blobcoins = blobcoins + ? WHERE username = ?", result, coinChange, winner.owner);
             }
 
             // Emit WIN KickType to winning player
@@ -92,6 +101,7 @@ export default class EliminationRoom extends Room.default {
                     d: {
                         type: KickTypes.WIN,
                         result,
+                        coinChange,
                         message: null
                     }
                 }));

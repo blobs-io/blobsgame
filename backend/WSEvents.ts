@@ -304,6 +304,10 @@ export default class WSHandler {
                                         break;
                                     else {
                                         if (room instanceof EliminationRoom.default) {
+                                            const coinChange: number = EliminationRoom.CoinChangeTable[room.players.length] || 0;
+                                            if (!blobobj.guest) {
+                                                this.base.db.run("UPDATE accounts SET blobcoins = blobcoins + ? WHERE username = ?", coinChange, blobobj.owner);
+                                            }
                                             const targetWs: wsSocket = this.base.wsSockets.find((s: wsSocket) => s.id === blobobj.id);
                                             targetWs.conn.send(JSON.stringify({
                                                 op: OPCODE.EVENT,
@@ -311,6 +315,7 @@ export default class WSHandler {
                                                 d: {
                                                     type: KickTypes.ELIMINATED,
                                                     result: 0, // TODO: calculate BR loss (if not guest)
+                                                    coinChange,
                                                     message: "You were nommed by " + eventd.owner
                                                 }
                                             }));
