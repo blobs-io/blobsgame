@@ -16,11 +16,9 @@ export enum State {
 }
 
 export const CoinChangeTable: any = {
-    1: 250,
-    2: 120,
-    3: 50,
-    4: 25,
-    5: 10
+    1: 75,
+    2: 50,
+    3: 25
 };
 
 export default class EliminationRoom extends Room.default {
