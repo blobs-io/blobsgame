@@ -141,8 +141,20 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     enum EliminationRoomState {
         WAITING,
         COUNTDOWN,
-        INGAME
+        INGAME,
+        ENDED
     }
+
+    enum Currency {
+        COINS,
+        BR
+    }
+
+    const CoinChangeTable: any = {
+        1: 75,
+        2: 50,
+        3: 25
+    };
 
     // -------------
     // Interfaces
@@ -465,9 +477,22 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public type: string;
         public blobs: BlobObject[];
         public createdAt: number;
+        public rewards: {
+            text: string;
+            gain: number;
+            gainCurrency: Currency;
+            pos: number;
+        }[];
+        public resultColor: number;
+        public resultColorState: number;
+        public won: boolean;
+
         constructor(type: string = Room.Type.FFA, blobs: BlobObject[] = []) {
             this.type = type;
             this.blobs = blobs;
+            this.rewards = [];
+            this.resultColor = this.resultColorState = 0;
+            this.won = null;
         }
     }
     class EliminationRoom extends Room {
@@ -495,44 +520,28 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             context.fillText("Waiting for players...", canvas.width / 2 - 140, canvas.height - 100);
         }
 
-        showResults(win: boolean, result: number, gainedCoins: number): void {
-            const scrDiv = document.createElement("div"),
-                  messageElement = document.createElement("span"),
-                  statsElement = document.createElement("div"),
-                  timeAliveElement = document.createElement("span"),
-                  timeAliveValueElement = document.createElement("span"),
-                  positionElement = document.createElement("span"),
-                  positionValueElement = document.createElement("span"),
-                  ratingChangeElement = document.createElement("p");
-            scrDiv.id = "scr";
-            messageElement.style.fontSize = "24px";
-            messageElement.style.display = "block";
-            messageElement.style.textAlign = "center";
-            statsElement.id = "stats";
-            timeAliveElement.className = positionElement.className = "big-font";
-            timeAliveValueElement.className = positionValueElement.className = "medium-font";
-            timeAliveElement.innerText = "Time alive: ";
-            timeAliveValueElement.innerText = formatDiff(Date.now() + (Date.now() - this.createdAt));
-            positionElement.innerText = "Position: ";
-            positionValueElement.innerText = "#" + this.blobs.length;
-            ratingChangeElement.innerHTML = "Rating change: " + (result >= 0 ? "+" + result : result) + "<br/>Coins gained: " + gainedCoins;
-            ratingChangeElement.style.borderTop = "1px solid grey";
-
-            if (win) {
-                messageElement.innerText = "You won!";
+        showResults(): void { // todo: noms as BlobObj prototype property
+            if (this.resultColorState === 0) {
+                if (this.resultColor >= 0xfa) this.resultColorState = 1;
+                else this.resultColor += 2;
             } else {
-                messageElement.innerText = "You have been nommed!";
+                if (this.resultColor <= 0x10) this.resultColorState = 0;
+                else this.resultColor -= 2;
             }
 
-            scrDiv.appendChild(messageElement);
-            scrDiv.appendChild(statsElement);
-            statsElement.appendChild(timeAliveElement);
-            statsElement.appendChild(timeAliveValueElement);
-            statsElement.appendChild(document.createElement("br"));
-            statsElement.appendChild(positionElement);
-            statsElement.appendChild(positionValueElement);
-            statsElement.appendChild(ratingChangeElement);
-            document.body.appendChild(scrDiv);
+            const colorHex = this.resultColor.toString(16);
+            ctx.font = "32px Raleway";
+            ctx.fillStyle = this.won ? `#00${colorHex + (colorHex.length < 2 ? "0" : "")}00` : `#${colorHex + (colorHex.length < 2 ? "0" : "")}0000`;
+            ctx.fillText(this.won ? "You won!" : "You died", canvas.width / 2 - 100, canvas.height / 2 - 150);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "20px Raleway";
+            for (let i = 0; i < this.rewards.length; ++i) {
+                const reward = this.rewards[i];
+                if (reward.pos <= (canvas.width / 2 - 150)) reward.pos += 50;
+                ctx.fillText(reward.text, reward.pos, canvas.height / 2 - (50 - (i * 25)));
+                ctx.fillText("+" + reward.gain, canvas.width / 2 + 30, canvas.height / 2 - (50 - (i * 25)));
+            }
         }
     }
 
@@ -561,7 +570,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         lastIteration = Date.now();
 
         // Blob State Check
-        if (!ownBlob || !ownBlob.ready) return window.requestAnimationFrame(animationFrame);
+        if ((!ownBlob || !ownBlob.ready) && !(room instanceof EliminationRoom && room.state === EliminationRoomState.ENDED)) return window.requestAnimationFrame(animationFrame);
 
         // Ping
         if (Date.now() - lastTick > 2500) {
@@ -647,8 +656,12 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         }
 
         // Show countdown if room is Elimination Room
-        if (room instanceof EliminationRoom && (room.state === EliminationRoomState.COUNTDOWN || room.state === EliminationRoomState.WAITING)) {
-            room.showCountdown(ctx);
+        if (room instanceof EliminationRoom) {
+            if (room.state === EliminationRoomState.COUNTDOWN || room.state === EliminationRoomState.WAITING) {
+                room.showCountdown(ctx);
+            } else if (room.state === EliminationRoomState.ENDED) {
+                room.showResults();
+            }
         }
         BlobObject.display(room.blobs, true, true);
     }
@@ -772,16 +785,61 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                         kickReason += "\nThis is probably due to (a) client modification(s). Avoid doing so, as it is against the rules."
                     break;
                     case KickTypes.ELIMINATED:
-                        if (room instanceof EliminationRoom)
-                            room.showResults(false, eventData.result, eventData.coinChange);
+                        if (room instanceof EliminationRoom) {
+                            room.rewards.push({
+                                text: room.blobs.length + (room.blobs.length === 1 
+                                    ? "st" : (room.blobs.length === 2 
+                                    ? "nd" : (room.blobs.length === 3 ? "rd" : "th"))) + " place",
+                                gain: CoinChangeTable[room.blobs.length] || 0,
+                                gainCurrency: Currency.COINS,
+                                pos: 0
+                            });
+                            room.rewards.push({
+                                text: room.blobs.length + (room.blobs.length === 1 
+                                    ? "st" : (room.blobs.length === 2 
+                                    ? "nd" : (room.blobs.length === 3 ? "rd" : "th"))) + " place",
+                                gain: eventData.result,
+                                gainCurrency: Currency.BR,
+                                pos: 0
+                            });
+                            room.rewards.push({
+                                text: eventData.noms + " noms",
+                                gain: 5 * eventData.noms,
+                                gainCurrency: Currency.COINS,
+                                pos: 0
+                            });
+                            room.state = EliminationRoomState.ENDED;
+                            room.won = false;
+                        }
                         showAlert = false;
                     break;
                     case KickTypes.MOD_KICK:
                         kickReason += "\nThis is a mod-kick, which means that a moderator has noticed that you have violated the rules and taken action by kicking you from this room.\n";
                     break;
                     case KickTypes.WIN:
-                        if (room instanceof EliminationRoom)
-                            room.showResults(true, eventData.result, eventData.coinChange);
+                    console.log(eventData);
+                        if (room instanceof EliminationRoom) {
+                            room.rewards.push({
+                                text: "1st place",
+                                gain: CoinChangeTable[room.blobs.length] || 0,
+                                gainCurrency: Currency.COINS,
+                                pos: 0
+                            });
+                            room.rewards.push({
+                                text: "1st place",
+                                gain: eventData.result,
+                                gainCurrency: Currency.BR,
+                                pos: 0
+                            });
+                            room.rewards.push({
+                                text: eventData.noms + " noms",
+                                gain: 5 * eventData.noms,
+                                gainCurrency: Currency.COINS,
+                                pos: 0
+                            });
+                            room.state = EliminationRoomState.ENDED;
+                            room.won = true;
+                        }
                         showAlert = false;
                     break;
                 }
@@ -864,12 +922,10 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         }
     });
     ws.onclose = () => {
-        let timeout: number;
         if (showWSCloseNotification) {
-            timeout = 0;
             alert("Connection closed.");
-        } else timeout = 10000;
-        setTimeout(() => document.location.href = "/", timeout);
+            document.location.href = "/";
+        }
     };
 
     // Mobile Controls
