@@ -96,7 +96,13 @@ export default class EliminationRoom extends Room.default {
             // If they are a guest, don't transfer br
             if (!winner.guest) {
                 winner.saveDistance();
-                this.base.db.run("UPDATE accounts SET br = br + ?, blobcoins = blobcoins + ? WHERE username = ?", result, coinChange, winner.owner);
+                let query = "UPDATE accounts SET blobcoins = blobcoins + ?, br = br + ? WHERE username = ?";
+                if (winner.br + result > 9999) query = query.replace(", br = br + ?", ", br = 9999");
+
+                if (query.includes(", br = br + ?"))
+                    this.base.db.run(query, coinChange, result, winner.owner);
+                else
+                    this.base.db.run(query, coinChange, winner.owner);
             }
 
             // Emit WIN KickType to winning player
