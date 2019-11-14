@@ -21,6 +21,14 @@ export const CoinChangeTable: any = {
     3: 25
 };
 
+export const BRTable: any = {
+    1: 150,
+    2: 100,
+    3: 50,
+    4: 25,
+    5: 10
+};
+
 export default class EliminationRoom extends Room.default {
     // The number of milliseconds users have to wait when the room enters COUNTDOWN phase
     static waitingTime: number = 120000;
@@ -81,8 +89,8 @@ export default class EliminationRoom extends Room.default {
             // Get winning socket
             const winner: Player = this.players[0];
             const socket: wsSocket = this.base.wsSockets.find(v => v.id === winner.id);
-            const result: number = 125; // todo: dont hardcode
-            const coinChange = CoinChangeTable[this.players.length] || 0;
+            const result: number = BRTable[1] || 0;
+            const coinChange = (CoinChangeTable[this.players.length] || 0) + winner.noms * 5;
 
             // Check whether the winner is a guest
             // If they are a guest, don't transfer br
@@ -99,7 +107,7 @@ export default class EliminationRoom extends Room.default {
                     d: {
                         type: KickTypes.WIN,
                         result,
-                        coinChange,
+                        noms: winner.noms,
                         message: null
                     }
                 }));
@@ -108,6 +116,8 @@ export default class EliminationRoom extends Room.default {
                 socket.conn.close();
             }
             
+            // TODO: create new room
+
             // Finally remove room from rooms array
             this.base.rooms.splice(this.base.rooms.findIndex(v => v.id === this.id), 1);
         }
