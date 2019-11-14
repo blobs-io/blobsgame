@@ -540,8 +540,14 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 const reward = this.rewards[i];
                 if (reward.pos <= (canvas.width / 2 - 150)) reward.pos += 50;
                 ctx.fillText(reward.text, reward.pos, canvas.height / 2 - (50 - (i * 25)));
-                ctx.fillText("+" + reward.gain, canvas.width / 2 + 30, canvas.height / 2 - (50 - (i * 25)));
+                ctx.fillText("+" + reward.gain + " " + EliminationRoom.currencyToString(reward.gainCurrency), canvas.width / 2 + 30, canvas.height / 2 - (50 - (i * 25)));
             }
+        }
+
+        static currencyToString(currency: Currency): string {
+            if (currency === Currency.BR) return "BR";
+            else if (currency === Currency.COINS) return "Coins";
+            else return "";
         }
     }
 
