@@ -56,6 +56,8 @@ export default class Player {
     public lastHeartbeat: number;
     // The number of coins this user has
     public coins: number;
+    // The number of times how often this player has won against another player
+    public noms: number;
 
     constructor(base: Base, x?: number, y?: number, owner?: string, role: number = 0, blob: string = "blobowo") {
         this.owner = owner;
@@ -73,6 +75,7 @@ export default class Player {
         this.x = x;
         this.y = y;
         this.lastHeartbeat = Date.now();
+        this.noms = 0;
 
         Object.defineProperties(this, {
             anticheat: {
