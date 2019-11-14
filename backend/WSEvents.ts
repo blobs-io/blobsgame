@@ -303,8 +303,9 @@ export default class WSHandler {
                                     if (blobobj.health > 0)
                                         break;
                                     else {
+                                        eventd.noms++;
                                         if (room instanceof EliminationRoom.default) {
-                                            const coinChange: number = EliminationRoom.CoinChangeTable[room.players.length] || 0;
+                                            const coinChange: number = (EliminationRoom.CoinChangeTable[room.players.length] || 0) + blobobj.noms * 5;
                                             if (!blobobj.guest) {
                                                 this.base.db.run("UPDATE accounts SET blobcoins = blobcoins + ? WHERE username = ?", coinChange, blobobj.owner);
                                             }
@@ -314,8 +315,9 @@ export default class WSHandler {
                                                 t: EventTypes.PLAYER_KICK,
                                                 d: {
                                                     type: KickTypes.ELIMINATED,
-                                                    result: 0, // TODO: calculate BR loss (if not guest)
+                                                    result: EliminationRoom.BRTable[room.players.length] || 0,
                                                     coinChange,
+                                                    noms: blobobj.noms,
                                                     message: "You were nommed by " + eventd.owner
                                                 }
                                             }));
