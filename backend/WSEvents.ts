@@ -343,7 +343,7 @@ export default class WSHandler {
                                         let result = parseInt(calc(eventd.br, blobobj.br), 10);
                                         if (result === 0) ++result;
                                         winner.br = winner.br + result > 9999 ? 9999 : winner.br + result;
-                                        loser.br = loser.br - result <= 0 ? 1 : loser.br - result;
+                                        loser.br = loser.br - ((result % 10) + 1) <= 0 ? 1 : loser.br - ((result % 9) + 1);
 
                                         this.base.db.run("UPDATE accounts SET br = ? WHERE username = ?", loser.br, loser.owner).catch(console.log);
                                         this.base.db.run("UPDATE accounts SET br = ? WHERE username = ?", winner.br, winner.owner).catch(console.log);
@@ -355,7 +355,7 @@ export default class WSHandler {
                                             loser: TierHelper.Promotion | void
                                         } = {
                                             winner: TierHelper.promotedTo(winner.br - result, winner.br),
-                                            loser: TierHelper.promotedTo(winner.br + result, winner.br)
+                                            loser: TierHelper.promotedTo(winner.br + ((result % 10) + 1), winner.br)
                                         };
 
                                         if (dropResult.winner) {
