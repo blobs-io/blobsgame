@@ -355,7 +355,7 @@ export default class WSHandler {
                                             loser: TierHelper.Promotion | void
                                         } = {
                                             winner: TierHelper.promotedTo(winner.br - result, winner.br),
-                                            loser: TierHelper.promotedTo(winner.br + ((result % 10) + 1), winner.br)
+                                            loser: TierHelper.promotedTo(loser.br + ((result % 10) + 1), loser.br)
                                         };
 
                                         if (dropResult.winner) {
