@@ -54,6 +54,8 @@ export default class RouteController {
                         .replace(/\[!BLOBCOINS]/g, user.blobcoins)
                         .replace(/\[!DISTANCE]/g, user.distance)
                         .replace(/\[!ACTIVEBLOB]/g, user.activeBlob).replace(/\[!USERBLOBS]/g, user.blobs).replace(/\[!PROMOTIONS]/g, JSON.stringify(promotions))
+                        .replace(/[!LEVEL]/g, user.level)
+                        .replace(/[!XP]/g, user.xp)
                 );
             });
         });
@@ -196,11 +198,13 @@ export default class RouteController {
 
             const hash: string = bcrypt.hashSync(req.body.password, 10);
 
-            base.db.prepare("INSERT INTO accounts VALUES (?, ?, 1000, ?, 0, 0, 0, 0, 'blobowo', 'blobowo', null, 0, 0)")
+            base.db.prepare("INSERT INTO accounts VALUES (?, ?, 1000, ?, 0, 0, 0, 0, ?, ?, null, 0, 0, 0, 0)")
                 .then((v: any) => v.run([
                     req.body.username,
                     hash,
-                    Date.now()
+                    Date.now(),
+                    "blobowo",
+                    "blobowo"
                 ]))
                 .then(() => {
                     res.send("Account successfully created! Redirecting in 5 seconds...<script>setTimeout(()=>document.location.href='/',5000);</script>");
