@@ -119,8 +119,8 @@ export default class RouteController {
                     res.send("<script>alert('You are banned: " + banned.reason + "\\nExpires: " + new Date(Number(banned.expires)).toLocaleString() + "');</script>" + data);
                 });
 
-            base.db.prepare("SELECT * FROM accounts WHERE username = ?")
-                .then((prepare: any) => prepare.get([ username ]))
+            base.db.prepare("SELECT * FROM accounts WHERE upper(username) = ?")
+                .then((prepare: any) => prepare.get([ username.toUpperCase() ]))
                 .then(async (result: any) => {
                     if (!result)
                         return readFile("./public/login.html", "utf8", (err: any, data: any) => {
