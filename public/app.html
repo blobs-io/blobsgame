@@ -129,6 +129,7 @@
         document.getElementById("br").innerHTML = `${stats.br} BR (${getTier(stats.br).tier})`;
         document.getElementById("blobcoins").innerHTML = `${stats.blobcoins} Blobcoins`;
         document.getElementById("distance").innerHTML = `Distance travelled: ${parseDistance(stats.distance)} pixels`;
+        document.getElementById("level").innerHTML = `Lv. ${stats.level} (${Math.floor(stats.experience / (((stats.level+1) / 0.038) ** 2) * 100) + "%"})`;
         for (const blob of stats.blobs) {
             const blobElement = document.createElement("div");
             blobElement.className = "card bloblist-entry";
