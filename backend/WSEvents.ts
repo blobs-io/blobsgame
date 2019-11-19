@@ -7,6 +7,7 @@ import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
 import * as EliminationRoom from "./structures/EliminationRoom";
 import {Item, ItemHeight, ItemType, ItemWidth} from "./structures/Item";
+import LevelSystem from "./utils/LevelSystem";
 // Rating System as Node addon; needs to be compiled before using node-gyp
 const { calc } = require("../build/Release/rating-system-api");
 
@@ -304,6 +305,15 @@ export default class WSHandler {
                                         break;
                                     else {
                                         eventd.noms++;
+                                        if (!eventd.guest) {
+                                            const xpGain: number = 50; // todo: perhaps dont hardcode?
+                                            const levelup: boolean = LevelSystem.hasLevelUpped(eventd.xp, xpGain);
+                                            eventd.xp += xpGain;
+                                            if (levelup)
+                                                eventd.level++;
+                                            this.base.db.run("UPDATE accounts SET xp = xp + ?" + (levelup ? ", level = level + 1" : "") + " WHERE username = ?",
+                                                xpGain, eventd.owner);
+                                        }
                                         if (room instanceof EliminationRoom.default) {
                                             const coinChange: number = (EliminationRoom.CoinChangeTable[room.players.length] || 0) + blobobj.noms * 5;
                                             const result: number = EliminationRoom.BRTable[room.players.length] || 0;
