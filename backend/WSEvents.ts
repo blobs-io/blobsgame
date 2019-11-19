@@ -340,7 +340,7 @@ export default class WSHandler {
                                     let result;
                                     if (!isNaN(blobobj.br) && !hasGuest) {
                                         if (eventd.br === blobobj.br) --eventd.br;
-                                        let result = parseInt(calc(eventd.br, blobobj.br), 10);
+                                        result = parseInt(calc(eventd.br, blobobj.br), 10);
                                         if (result === 0) ++result;
                                         winner.br = winner.br + result > 9999 ? 9999 : winner.br + result;
                                         loser.br = loser.br - ((result % 10) + 1) <= 0 ? 1 : loser.br - ((result % 9) + 1);
@@ -378,7 +378,7 @@ export default class WSHandler {
                                             op: OPCODE.EVENT,
                                             t: EventTypes.PLAYER_NOMMED,
                                             d: {
-                                                winner, loser, result: typeof result !== "undefined" ? result : 0
+                                                winner, loser, result: result || 0
                                             }
                                         }));
                                     }
