@@ -8,4 +8,8 @@ export default class LevelSystem {
     static xpToLevel(xp: number): number {
         return LevelSystem.multiplier * Math.sqrt(xp);
     }
+
+    static hasLevelUpped(xpBefore: number, gain: number): boolean {
+        return Math.floor(LevelSystem.xpToLevel(xpBefore + gain)) > Math.floor(LevelSystem.xpToLevel(xpBefore));
+    }
 }
