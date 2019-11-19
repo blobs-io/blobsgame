@@ -58,6 +58,10 @@ export default class Player {
     public coins: number;
     // The number of times how often this player has won against another player
     public noms: number;
+    // The level of this player
+    public level: number;
+    // Experience points of this player
+    public xp: number;
 
     constructor(base: Base, x?: number, y?: number, owner?: string, role: number = 0, blob: string = "blobowo") {
         this.owner = owner;
@@ -100,6 +104,16 @@ export default class Player {
             },
             coins: {
                 value: 0,
+                enumerable: false,
+                writable: true
+            },
+            xp: {
+                value: null,
+                enumerable: false,
+                writable: true
+            },
+            level: {
+                value: null,
                 enumerable: false,
                 writable: true
             }
