@@ -50,7 +50,8 @@
         <div id="userinfo">
             <span id="br">Loading...</span><br/>
             <span id="blobcoins">Loading...</span><br/>
-            <span id="distance">Distance travelled: 97.23K pixels</span><br/>
+            <span id="distance">Loading...</span><br/>
+            <span id="level">Loading...</span><br/>
             <a id="daily-bonus" class="waves-effect waves-light btn blue lighten-2">Claim Daily Bonus</a>
         </div>
         <div id="blobs">
@@ -119,7 +120,9 @@
             blobcoins: parseInt("[!BLOBCOINS]"),
             distance: parseFloat("[!DISTANCE]"),
             blobs: "[!USERBLOBS]".split(","),
-            activeBlob: "[!ACTIVEBLOB]"
+            activeBlob: "[!ACTIVEBLOB]",
+            level: parseInt("[!LEVEL]"),
+            experience: parseFloat("[!XP]")
         };
         const promotions = JSON.parse('[!PROMOTIONS]');
 
