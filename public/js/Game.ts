@@ -324,14 +324,31 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         }
 
         animate(): void {
+            if (!ctx) return;
             for(let i = 0; i < this.hudColors.length; ++i) {
                 ctx.font = "15px Raleway";
                 if (this.hudColors[i] <= 0x80) {
                     this.hudColors.splice(i, 1);
                 } else {
                     // TODO: this will only work if color is supposed to be green
+                    const { canvasX, canvasY } = getRelativeCoordinates(
+                        this.x,
+                        this.y,
+                        {
+                            x: ownBlob.x,
+                            y: ownBlob.y
+                        },
+                        {
+                            width: canvas.width,
+                            height: canvas.height
+                        },
+                        {
+                            height: 50,
+                            width: 50
+                        }
+                    );
                     ctx.fillStyle = "#00" + (this.hudColors[i].toString(16).padStart(2, "0")) + "00";
-                    ctx.fillText("50 XP", this.x + 15, (this.y - 50) / 2 + (this.hudColors[i] / 4));
+                    ctx.fillText("50 XP", canvasX + 15, (canvasY - 70) + (this.hudColors[i] / 4));
                     this.hudColors[i] -= 3;
                 }
             }
