@@ -3,10 +3,12 @@ export default class AntiCheat {
     // Stores the flags
     // Higher flag value = Higher probability of cheating
     public _FLAGS: number;
+    public ignores: number;
 
     constructor(flagValue: number = 0) {
         // Assign local variable
         this._FLAGS = flagValue;
+        this.ignores = 0;
     }
 
     // Equivalent to reading property this._FLAGS
@@ -28,13 +30,17 @@ export default class AntiCheat {
 
     // Penalizes user by a calculated amount
     public penalize(action: number, value: number): void {
-        const penalty: number = AntiCheat.penalize(action, value);
+        const penalty: number = AntiCheat.penalize(action, value, this.ignores);
         this.flags += penalty;
     }
 
     // Penalizes an action by a calculated number
     // No instance needed for this
-    public static penalize(action: number, value: number) {
+    public static penalize(action: number, value: number, ignores: number) {
+        if (ignores >= 1) {
+            return 0;
+            ignores--;
+        }
         let penalty = 0;
         if (action === 1) {
             if (value > 10 && value < 20) penalty += 0x1;
