@@ -23,6 +23,29 @@ function createImage(src: string): any {
     return img;
 }
 
+function getRelativeCoordinates(x: number, y: number, ownBlob: {x: number, y: number}, canvasSize: {width: number, height: number}, objSize: {width: number, height: number} = {width: 30, height: 30}): {canvasX: number, canvasY: number} {
+    let canvasX = 0,
+        canvasY = 0;
+    if (ownBlob.x >= x) {
+        canvasX = (canvasSize.width / 2) - (ownBlob.x - x);
+    } else if (ownBlob.x < x) {
+        canvasX = (canvasSize.width / 2) + (x - ownBlob.x);
+    }
+
+    if (ownBlob.y >= y) {
+        canvasY = (canvasSize.height / 2) - (ownBlob.y - y);
+    } else if (ownBlob.y < y) {
+        canvasY = (canvasSize.height / 2) + (y - ownBlob.y);
+    }
+    canvasY -= objSize.height;
+    canvasX -= objSize.width;
+
+    return {
+        canvasX,
+        canvasY
+    };
+}
+
 const useSecureWS: boolean = !document.location.href.startsWith("http://localhost");
 
 // Phone controls
@@ -237,6 +260,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         }
     }
     class BlobObject {
+        static width: number = 30;
+        static height: number = 30;
         public guest: boolean;
         public owner: string;
         public br: number | undefined;
@@ -253,6 +278,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public blob: BlobType;
         public collision: boolean;
         public coins: number;
+        public hudColors: number[];
 
         constructor(br: number,
                     owner: string,
@@ -274,6 +300,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             this.role = 0;
             this.collision = true;
             this.coins = 0;
+            this.hudColors = [];
         }
 
         get inProtectedArea(): boolean {
@@ -294,6 +321,20 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 this.img.src = image;
                 this.img.onload = a;
             });
+        }
+
+        animate(): void {
+            for(let i = 0; i < this.hudColors.length; ++i) {
+                ctx.font = "15px Raleway";
+                if (this.hudColors[i] <= 0x80) {
+                    this.hudColors.splice(i, 1);
+                } else {
+                    // TODO: this will only work if color is supposed to be green
+                    ctx.fillStyle = "#00" + (this.hudColors[i].toString(16).padStart(2, "0")) + "00";
+                    ctx.fillText("50 XP", this.x + 15, (this.y - 50) / 2 + (this.hudColors[i] / 4));
+                    this.hudColors[i] -= 3;
+                }
+            }
         }
 
         display(displayUser: boolean = false,
@@ -345,21 +386,23 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                             20 * scale);
                     }
                 } else if (this.owner) {
-                    let blobCanvasX = 0,
-                        blobCanvasY = 0;
-                    if (ownBlob.x >= this.x) {
-                        blobCanvasX = (canvas.width / 2) - (ownBlob.x - this.x);
-                    } else if (ownBlob.x < this.x) {
-                        blobCanvasX = (canvas.width / 2) + (this.x - ownBlob.x);
-                    }
+                    const { canvasX: blobCanvasX, canvasY: blobCanvasY } = getRelativeCoordinates(
+                        this.x,
+                        this.y,
+                        {
+                            x: ownBlob.x,
+                            y: ownBlob.y
+                        },
+                        {
+                            width: canvas.width,
+                            height: canvas.height
+                        },
+                        {
+                            width,
+                            height
+                        }
+                    );
 
-                    if (ownBlob.y >= this.y) {
-                        blobCanvasY = (canvas.height / 2) - (ownBlob.y - this.y);
-                    } else if (ownBlob.y < this.y) {
-                        blobCanvasY = (canvas.height / 2) + (this.y - ownBlob.y);
-                    }
-                    blobCanvasY -= height;
-                    blobCanvasX -= width;
                     if (emblems[tier.tier].complete) {
                         ctx.drawImage(emblems[tier.tier],
                             blobCanvasX - (15 + 15 * scale),
@@ -669,7 +712,10 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 room.showResults();
             }
         }
-        BlobObject.display(room.blobs, true, true);
+        for (const blob of room.blobs) {
+            blob.display(true, true).catch(console.log);
+            blob.animate();
+        }
     }
 
     let lastIteration: number = Date.now();
@@ -876,6 +922,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 if (winner) {
                     winner.br = eventData.winner.br;
                 }
+
+                winner.hudColors.push(0xff);
 
                 // HTML Elements, ...
                 const nomHistoryDiv = document.getElementById("nom-hist");
