@@ -376,11 +376,13 @@ export default class WSHandler {
                                         }
                                     }
 
-                                    loser.directionChangeCoordinates.x = Math.floor(Math.random() * room.map.map.mapSize.width);
-                                    loser.directionChangeCoordinates.y = Math.floor(Math.random() * room.map.map.mapSize.height);
+                                    loser.directionChangeCoordinates.x = loser.x =  Math.floor(Math.random() * room.map.map.mapSize.width);
+                                    loser.directionChangeCoordinates.y = loser.y = Math.floor(Math.random() * room.map.map.mapSize.height);
                                     loser.directionChangedAt = Date.now();
+                                    if (loser.anticheat)
+                                        loser.anticheat.ignores++;
 
-
+                                    // todo: send new coordinates to loser
                                     for (let j: number = 0; j < room.players.length; ++j) {
                                         const socket: wsSocket | undefined = this.base.wsSockets.find((v: wsSocket) => v.id === room.players[j].id);
                                         if (!socket) continue;
