@@ -45,9 +45,9 @@ export default class Player {
     // AntiCheat object for this player (includes flags)
     public anticheat: AntiCheat | undefined;
     // X Coordinate
-    public x: number | undefined;
+    public x: number;
     // Y Coordinate
-    public y: number | undefined;
+    public y: number;
     // A reference to the base object
     public base: Base | undefined;
     // Timestamp of when the last regeneration for this user happened
@@ -76,8 +76,8 @@ export default class Player {
         this.distance = 0;
         this.maximumCoordinates = { };
         this.health = 100;
-        this.x = x;
-        this.y = y;
+        this.x = x || 0;
+        this.y = y || 0;
         this.lastHeartbeat = Date.now();
         this.noms = 0;
 
@@ -108,7 +108,7 @@ export default class Player {
                 writable: true
             },
             xp: {
-                value: null,
+                value: 0,
                 enumerable: false,
                 writable: true
             },
