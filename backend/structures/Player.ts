@@ -2,6 +2,9 @@
 import Base from "./Base";
 import Room from "./Room";
 import AntiCheat from "./AntiCheat";
+import { wsSocket } from "./Socket";
+import * as EliminationRoom from "./EliminationRoom";
+import LevelSystem from "../utils/LevelSystem";
 
 export enum Role {
     GUEST = -1,
@@ -48,8 +51,9 @@ export default class Player {
     public x: number;
     // Y Coordinate
     public y: number;
-    // A reference to the base object
-    public base: Base | undefined;
+    // A reference to the base object; ts-ignore because it is defined using Object.defineProperties
+    // @ts-ignore
+    public base: Base;
     // Timestamp of when the last regeneration for this user happened
     public lastRegeneration: number | undefined;
     // Timestamp of when the last heartbeat from this user was received
@@ -58,8 +62,6 @@ export default class Player {
     public coins: number;
     // The number of times how often this player has won against another player
     public noms: number;
-    // The level of this player
-    public level: number;
     // Experience points of this player
     public xp: number;
 
@@ -80,6 +82,8 @@ export default class Player {
         this.y = y || 0;
         this.lastHeartbeat = Date.now();
         this.noms = 0;
+        this.coins = 0;
+        this.xp = 0;
 
         Object.defineProperties(this, {
             anticheat: {
@@ -111,11 +115,6 @@ export default class Player {
                 value: 0,
                 enumerable: false,
                 writable: true
-            },
-            level: {
-                value: null,
-                enumerable: false,
-                writable: true
             }
         });
     }
@@ -142,6 +141,10 @@ export default class Player {
         return inArea;
     }
 
+    get level(): number {
+        return LevelSystem.xpToLevel(this.xp);
+    }
+
     // Regenerates this players health points
     public regenerate(checkTime: boolean): void {
         if (checkTime) {
@@ -159,6 +162,23 @@ export default class Player {
 
     // Sends a websocket message to this player
     public wsSend(str: string): void {
-        this.base.wsSockets.find(v => v.id === this.id).conn.send(str);
+        const socket: wsSocket | undefined = this.base.wsSockets.find(v => v.id === this.id);
+        if (!socket) return;
+        socket.conn.send(str);
+    }
+
+    // Function to update BR/XP and do other recommended checks, such as level checks, ...
+    // TODO: change arguments to object and make properties optional
+    // dynamically add columns to query that are needed for update
+    public update(br: number, coins: number, xp: number): void {
+        if (!this.guest) {
+            let query = "UPDATE accounts SET blobcoins = blobcoins + ?, br = br + ?, xp = xp + ? WHERE username = ?";
+            if (this.br + br > 9999) query = query.replace(", br = br + ?", ", br = 9999");
+            
+            if (query.includes(", br = br + ?"))
+                this.base.db.run(query, coins, br, xp, this.owner);
+            else
+                this.base.db.run(query, coins, xp, this.owner);
+        }
     }
 }
