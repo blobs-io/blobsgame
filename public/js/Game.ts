@@ -8,8 +8,8 @@ function randomNumber(min: number, max: number): number {
 }
 
 function getParameterByName(param: string): string {
-    const matches: Array<string> = document.location.search.match(new RegExp(`[?&]${param}=([^&]*)`));
-    return matches ? matches[1] : undefined;
+    const matches: RegExpMatchArray | null = document.location.search.match(new RegExp(`[?&]${param}=([^&]*)`));
+    return matches ? matches[1] : "";
 }
 
 function formatDiff(time: any): string {
@@ -50,7 +50,9 @@ const useSecureWS: boolean = !document.location.href.startsWith("http://localhos
 
 // Phone controls
 if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
-    document.getElementById("dpad-controls").style.display = "block";
+    const controlsElement: HTMLElement | null = document.getElementById("dpad-controls");
+    if (controlsElement)
+        controlsElement.style.display = "block";
 }
 
 (() => {
@@ -498,6 +500,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             this.x = x;
             this.y = y;
             this.type = type;
+            this.id = "";
         }
 
         display(): void {
@@ -552,7 +555,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             this.blobs = blobs;
             this.rewards = [];
             this.resultColor = this.resultColorState = 0;
-            this.won = null;
+            this.won = false;
+            this.createdAt = Date.now();
         }
     }
     class EliminationRoom extends Room {
@@ -561,6 +565,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public countdownStarted: number;
         constructor(blobs: BlobObject[] = []) {
             super(Room.Type.ELIMINATION, blobs);
+            this.state = EliminationRoomState.WAITING;
+            this.countdownStarted = Date.now();
         }
 
         showCountdown(context: CanvasRenderingContext2D | null): void {
@@ -581,6 +587,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         }
 
         showResults(): void { // todo: noms as BlobObj prototype property
+            if (!ctx) return;
             if (this.resultColorState === 0) {
                 if (this.resultColor >= 0xfa) this.resultColorState = 1;
                 else this.resultColor += 2;
@@ -929,21 +936,21 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 const loser: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.loser.owner);
                 const winner: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.winner.owner);
 
-                if (loser) {
-                    loser.br = eventData.loser.br;
-                    loser.directionChangeCoordinates.x = eventData.loser.directionChangeCoordinates.x;
-                    loser.directionChangeCoordinates.y = eventData.loser.directionChangeCoordinates.y;
-                    loser.directionChangedAt = eventData.loser.directionChangedAt;
-                    loser.health = 100;
-                }
-                if (winner) {
-                    winner.br = eventData.winner.br;
-                }
+                if (!loser || !winner) return;
+
+                loser.br = eventData.loser.br;
+                loser.directionChangeCoordinates.x = eventData.loser.directionChangeCoordinates.x;
+                loser.directionChangeCoordinates.y = eventData.loser.directionChangeCoordinates.y;
+                loser.directionChangedAt = eventData.loser.directionChangedAt;
+                loser.health = 100;
+                
+                winner.br = eventData.winner.br;
 
                 winner.hudColors.push(0xff);
 
                 // HTML Elements, ...
                 const nomHistoryDiv = document.getElementById("nom-hist");
+                if (!nomHistoryDiv) return;
                 const nomEntryDiv = document.createElement("div");
                 nomEntryDiv.className = "nom-hist-entry";
                 const nomUser = document.createElement("span");
@@ -987,7 +994,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             }
             else if (eventType === EventType.STATSCHANGE) {
                 for (const prop of Object.getOwnPropertyNames(eventData)) {
-                    ownBlob[prop] = eventData[prop];
+                    (ownBlob as any)[prop] = eventData[prop];
                 }
             }
         }
@@ -1087,15 +1094,20 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         });
     }
 
-    document.getElementById("quit").addEventListener("click", () => {
-        ws.send(JSON.stringify({
-            op: OPCODE.CLOSE,
-            d: {
-                room: details.id
-            }
-        }));
-    });
-
+    {
+        const quitButton: HTMLElement | null = document.getElementById("quit");
+        if (quitButton) {
+            quitButton.addEventListener("click", () => {
+                ws.send(JSON.stringify({
+                    op: OPCODE.CLOSE,
+                    d: {
+                        room: details.id
+                    }
+                }));
+            });
+        }
+    }
+    
     // Kick User
     const kickMenu: HTMLElement | null = document.getElementById("kick-menu");
     {
@@ -1465,7 +1477,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             border.top.from.x = border.top.from.y = border.top.to.x = border.top.to.y = 0;
         }
     }
-    function displayCoins(context: CanvasRenderingContext2D) {
+    function displayCoins(context: CanvasRenderingContext2D | null) {
+        if (!context) return;
         context.beginPath();
         context.font = "15px Raleway";
         context.fillStyle = "white";
@@ -1544,6 +1557,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     function modeToString(mode: string): string {
         if (mode === "ffa") return "Free For All";
         else if (mode === "elimination") return "Elimination";
+        return "";
     }
     // Last part
     console.log("%c You know JavaScript / TypeScript? Contribute to blobs! https://github.com/blobs-io/blobs.live", "color: green");
