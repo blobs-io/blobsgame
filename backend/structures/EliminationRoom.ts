@@ -35,7 +35,7 @@ export default class EliminationRoom extends Room.default {
     // The number of players that need to be in a room for the COUNTDOWN phase to start
     static minPlayersStartup: number = 4;
     // The timestamp of when the room has entered the COUNTDOWN phase
-    public countdownStarted: number = null;
+    public countdownStarted: number;
     // This rooms state
     public state: State;
     // Identifier for interval that checks for ellapsed time
@@ -44,9 +44,10 @@ export default class EliminationRoom extends Room.default {
     constructor(base: Base, map: any = {}, id: string = Math.random().toString(32).substr(2,6), state = State.WAITING) {
         super(base, map, id, Room.Mode.ELIMINATION);
         this.state = state;
+        this.countdownStarted = Date.now();
         // Check every second if ellapsed time is >= waitingTime
         this._interval = setInterval(() => {
-            if (this.state === State.COUNTDOWN && Date.now() >= this.startsAt) {
+            if (this.state === State.COUNTDOWN && this.startsAt && Date.now() >= this.startsAt) {
                 // Start room
                 this.start();
                 clearInterval(this._interval);
@@ -88,7 +89,7 @@ export default class EliminationRoom extends Room.default {
         if (this.isSingle() && this.state === State.INGAME) {
             // Get winning socket
             const winner: Player = this.players[0];
-            const socket: wsSocket = this.base.wsSockets.find(v => v.id === winner.id);
+            const socket: wsSocket | undefined = this.base.wsSockets.find(v => v.id === winner.id);
             const result: number = BRTable[1] || 0;
             const coinChange = (CoinChangeTable[this.players.length] || 0) + winner.noms * 5;
 
@@ -96,13 +97,14 @@ export default class EliminationRoom extends Room.default {
             // If they are a guest, don't transfer br
             if (!winner.guest) {
                 winner.saveDistance();
-                let query = "UPDATE accounts SET blobcoins = blobcoins + ?, br = br + ? WHERE username = ?";
+                winner.update(result, coinChange, 250);
+                /*let query = "UPDATE accounts SET blobcoins = blobcoins + ?, br = br + ? WHERE username = ?";
                 if (winner.br + result > 9999) query = query.replace(", br = br + ?", ", br = 9999");
 
                 if (query.includes(", br = br + ?"))
                     this.base.db.run(query, coinChange, result, winner.owner);
                 else
-                    this.base.db.run(query, coinChange, winner.owner);
+                    this.base.db.run(query, coinChange, winner.owner);*/
             }
 
             // Emit WIN KickType to winning player
