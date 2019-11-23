@@ -305,27 +305,12 @@ export default class WSHandler {
                                         break;
                                     else {
                                         eventd.noms++;
-                                        if (!eventd.guest) {
-                                            const xpGain: number = 50; // todo: perhaps dont hardcode?
-                                            const levelup: boolean = LevelSystem.hasLevelUpped(eventd.xp, xpGain);
-                                            eventd.xp += xpGain;
-                                            if (levelup)
-                                                eventd.level++;
-                                            this.base.db.run("UPDATE accounts SET xp = xp + ?" + (levelup ? ", level = level + 1" : "") + " WHERE username = ?",
-                                                xpGain, eventd.owner);
-                                        }
+                                        eventd.update(0, 0, 50);
                                         if (room instanceof EliminationRoom.default) {
                                             const coinChange: number = (EliminationRoom.CoinChangeTable[room.players.length] || 0) + blobobj.noms * 5;
                                             const result: number = EliminationRoom.BRTable[room.players.length] || 0;
-                                            if (!blobobj.guest) {
-                                                let query = "UPDATE accounts SET blobcoins = blobcoins + ?, br = br + ? WHERE username = ?";
-                                                if (blobobj.br + result > 9999) query = query.replace(", br = br + ?", ", br = 9999");
-                                                
-                                                if (query.includes(", br = br + ?"))
-                                                    this.base.db.run(query, coinChange, result, blobobj.owner);
-                                                else
-                                                    this.base.db.run(query, coinChange, blobobj.owner);
-                                            }
+                                            // 100 xp as reward, no matter in what placement they ended
+                                            blobobj.update(result, coinChange, 100);
                                             const targetWs: wsSocket = this.base.wsSockets.find((s: wsSocket) => s.id === blobobj.id);
                                             targetWs.conn.send(JSON.stringify({
                                                 op: OPCODE.EVENT,
