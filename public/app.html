@@ -162,6 +162,7 @@
                 <span class="small material-icons">${promotion.drop === 0 ? "expand_less" : "expand_more"}</span> ${promotion.user} (${promotion.newTier})
             `;
             document.getElementById("promotions").appendChild(promotionElement);
+            document.getElementById("promotions").appendChild(document.createElement("br"));
         }
 
         document.getElementById("daily-bonus").addEventListener("click", () => {
