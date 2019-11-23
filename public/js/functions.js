@@ -46,3 +46,14 @@ function getTierByName(name) {
         case "diamond": return getTier(9500); break;
     }
 }
+
+/* levelsystem helper functions/constants */
+const xpScale = 0.09;
+
+function xpToLevel(xp) {
+    return xpScale * Math.sqrt(xp);
+}
+
+function leveltoXP(level) {
+    return (level / xpScale) ** 2;
+}
