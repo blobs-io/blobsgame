@@ -54,7 +54,6 @@ export default class RouteController {
                         .replace(/\[!BLOBCOINS]/g, user.blobcoins)
                         .replace(/\[!DISTANCE]/g, user.distance)
                         .replace(/\[!ACTIVEBLOB]/g, user.activeBlob).replace(/\[!USERBLOBS]/g, user.blobs).replace(/\[!PROMOTIONS]/g, JSON.stringify(promotions))
-                        .replace(/\[!LEVEL]/g, user.level)
                         .replace(/\[!XP]/g, user.xp)
                 );
             });
