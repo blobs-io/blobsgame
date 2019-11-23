@@ -121,9 +121,9 @@
             distance: parseFloat("[!DISTANCE]"),
             blobs: "[!USERBLOBS]".split(","),
             activeBlob: "[!ACTIVEBLOB]",
-            level: parseInt("[!LEVEL]"),
             experience: parseFloat("[!XP]")
         };
+        stats.level = Math.floor(xpToLevel(stats.experience));
         const promotions = JSON.parse('[!PROMOTIONS]');
 
         document.getElementById("br").innerHTML = `${stats.br} BR (${getTier(stats.br).tier})`;
