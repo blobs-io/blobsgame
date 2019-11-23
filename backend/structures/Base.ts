@@ -171,7 +171,6 @@ export default class Base {
             "`clan` TEXT, " +
             "`wins` INTEGER, " +
             "`losses` INTEGER," +
-            "`level` INTEGER, " +
             "`xp` INTEGER)");
         await db.run("CREATE TABLE IF NOT EXISTS sessionids (" +
             "`username` TEXT, " +
