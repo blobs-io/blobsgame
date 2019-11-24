@@ -16,7 +16,7 @@ cd scripts && ./get-rs.sh && cd ..
 node-gyp configure build
 ```
 
-A documentation for this which includes controls, a description for each gamemode, item type and more can be found [here](https://y21.gitbook.io/blobs).
+A documentation for this which includes controls, a description for each gamemode, item type and more can be found [here](https://docs.blobs-game.com).
 
 ### What is this?
 __A:__ Blobs is a work-in-progress multiplayer game that involves blob characters (you may know these from Android) that “nom” players in order to gain blob rating, which shows how skilled you are at the game.
