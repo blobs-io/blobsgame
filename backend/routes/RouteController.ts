@@ -31,7 +31,7 @@ export default class RouteController {
         this.app.get("/app", async (req: express.Request, res: express.Response) => {
             const { session } = req.cookies;
             if (!session)
-                return res.send("<script>document.location.href='/login';</script>");
+                return res.send("<script>document.location.href='/login?nr';</script>");
 
             const dbSession: any = await SessionIDManager.getSession(base.db, {
                 type: "session",
