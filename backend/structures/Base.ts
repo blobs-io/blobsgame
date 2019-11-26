@@ -84,7 +84,7 @@ export default class Base {
     public captchas: Captcha[];
     // The Route Controller (handles all incoming requests)
     public RouteController: RouteController;
-    // All websocket connections
+    // All websocket connections (game)
     public wsSockets: Socket.wsSocket[];
 
     constructor(options: BaseOptions) {
@@ -228,7 +228,8 @@ export default class Base {
                 const room: Room.default | undefined = this.rooms[roomIndex];
                 if (!room) return;
 
-                room.broadcast((ws: wsSocket, player: Player) => {
+                room.broadcast((ws: wsSocket, player?: Player) => {
+                    if (!player) return;
                     if (Date.now() - player.lastHeartbeat > WSEvents.default.intervalLimit) {
                         // User has not sent heartbeats for a number of milliseconds (see WSEvents.default.intervalLimit)
                         ws.conn.send(JSON.stringify({
@@ -240,7 +241,7 @@ export default class Base {
                         WSEvents.default.disconnectSocket(ws, room);
                         if (room instanceof EliminationRoom && room.state === State.COUNTDOWN && room.players.length === EliminationRoom.minPlayersStartup - 1) {
                             room.state = State.WAITING;
-                            room.countdownStarted = null;
+                            room.countdownStarted = 0;
                             room.broadcastSend(JSON.stringify({
                                 op: OPCODE.EVENT,
                                 t: EventTypes.STATECHANGE,
