@@ -6,6 +6,9 @@
 			body {
 				font-family: "Verdana", Arial;
 			}
+			div #res {
+				word-wrap: break-word;
+			}
 		</style>
 	</head>
 	<body>
@@ -21,17 +24,24 @@
 	<script>
 		const session = (document.cookie.split(/; */).find(v => v.startsWith("session=")) || "").split("=")[1];
 		function postQuery(method) {
-			alert(method)
 			return new Promise((res, rej) => {
-				request("/api/execSQL?method=" + method, "POST", {
-					session
+				request("/api/executeSQL/" + method, "GET", {
+					sessionid: session,
+					query: document.getElementById("query").value
 				}).then(({responseText}) => {
-					document.getElementById("res").innerHTML = responseText
-					.replace(/</g, "&lt;")
-					.replace(/>/g, "&gt;")
-					.replace(/ /g, "&nbsp;")
-					.replace(/\n/g, "<br/>");
-				}).catch(console.log);
+					try {
+						const res = JSON.parse(responseText);
+						document.getElementById("res").innerHTML = JSON.stringify(res, null, 4)
+						.replace(/</g, "&lt;")
+						.replace(/>/g, "&gt;")
+						.replace(/ /g, "&nbsp;")
+						.replace(/\n/g, "<br/>");
+					} catch(e) {
+						document.getElementById("res").innerHTML = e.toString();
+					}
+				}).catch(e => {
+					document.getElementById("res").innerHTML = e.toString();
+				});
 			});
 		}
 
