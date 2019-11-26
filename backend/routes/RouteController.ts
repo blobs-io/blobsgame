@@ -2,7 +2,7 @@
 import Base from "../structures/Base";
 import * as express from "express";
 import * as SessionIDManager from "../structures/SessionIDManager";
-import {readFile, appendFile} from "fs";
+import {readFile, appendFile, existsSync} from "fs";
 import * as bcrypt from "bcrypt";
 import Captcha from "../structures/Captcha";
 
@@ -271,11 +271,59 @@ export default class RouteController {
         // GET /cms
         // Returns the content management system page where administrators can access the database
         this.app.get("/cms", async (req: express.Request, res: express.Response) => {
-            // todo: authorization
+            const { session } = req.cookies;
+
+            if (!session) {
+                try {
+                    RouteController.displayStaticError("403", res);
+                } catch (e) {
+                    res.status(500).send(String(e));
+                }
+                return;
+            }
+
+            const dbSession: any = await SessionIDManager.getSession(this.base.db, {
+                type: "session",
+                value: session
+            });
+
+            if (!dbSession) {
+                try {
+                    RouteController.displayStaticError("400", res);
+                } catch (e) {
+                    res.status(500).send(String(e));
+                }
+                return;
+            }
+
+            const { role } = await this.base.db.get("SELECT role FROM accounts WHERE username = ?", dbSession.username);
+
+            if (role !== 1) {
+                try {
+                    RouteController.displayStaticError("403", res);
+                } catch (e) {
+                    res.status(500).send(String(e));
+                }
+                return;
+            }
+
             readFile("./backend/cms/index.html", "utf8", (err: NodeJS.ErrnoException | null, data: string) => {
                 if (err) return res.send(err);
                 else res.send(data);
             });
         });
+    }
+
+    static displayStaticError(code: string, res: express.Response): void {
+        const codeNum: number = parseInt(code, 10);
+        if (isNaN(codeNum)) throw new TypeError("Argument code needs to be type of number");
+        if (existsSync(`./public/error/${code}.html`)) {
+            readFile(`./public/error/${code}.html`, "utf8", (err: NodeJS.ErrnoException | null, data: string) => {
+                if (err) {
+                    throw new Error("Could not read file.");
+                }
+                res.status(codeNum).send(data);
+            });
+        }
     }
 }
