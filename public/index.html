@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
 	<head>
-    		<script>
-				document.location.href="/login/";
-			</script>
+		<script>
+			if (document.cookie.includes("session=")) {
+				document.location.href = "/app";
+			} else {
+				document.location.href = "/login";
+			}
+		</script>
 	</head>
 </html>
