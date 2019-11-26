@@ -2,7 +2,7 @@
 import Base from "../structures/Base";
 import * as express from "express";
 import * as SessionIDManager from "../structures/SessionIDManager";
-import {readFile} from "fs";
+import {readFile, appendFile} from "fs";
 import * as bcrypt from "bcrypt";
 import Captcha from "../structures/Captcha";
 
@@ -268,11 +268,14 @@ export default class RouteController {
             });
         });
 
-        // POST /execSQL
-        // Executes an SQL query
-        // WARNING: This route may ONLY be accessed by people who have permissions to view the database
-        this.app.post("/execSQL", async (req: express.Request, res: express.Response) => {
-            
+        // GET /cms
+        // Returns the content management system page where administrators can access the database
+        this.app.get("/cms", async (req: express.Request, res: express.Response) => {
+            // todo: authorization
+            readFile("./backend/cms/index.html", "utf8", (err: NodeJS.ErrnoException | null, data: string) => {
+                if (err) return res.send(err);
+                else res.send(data);
+            });
         });
     }
 }
