@@ -63,19 +63,64 @@ export default class RouteController {
         // WARNING: This route may ONLY be accessed by people who have permissions to view the database
         // You are required to authorize by using a 45-characters long database token 
         // that is logged to the console when the process is started as GET parameter `token`
-        this.app.get("/db.sqlite", (req: express.Request, res: express.Response) => {
-            if (req.query.token !== base.dbToken) {
-                res.status(401).json({
-                    message: "Invalid token"
+        this.app.get("/db.sqlite", async (req: express.Request, res: express.Response) => {
+            if (req.query.auth === "cookie") {
+                const { session } = req.cookies;
+
+                if (!session) {
+                    try {
+                        RouteController.displayStaticError("403", res);
+                    } catch (e) {
+                        res.status(500).send(String(e));
+                    }
+                    return;
+                }
+
+                const dbSession: any = await SessionIDManager.getSession(this.base.db, {
+                    type: "session",
+                    value: session
                 });
-                return;
-            } else {
+
+                if (!dbSession) {
+                    try {
+                        RouteController.displayStaticError("400", res);
+                    } catch (e) {
+                        res.status(500).send(String(e));
+                    }
+                    return;
+                }
+
+                const { role } = await this.base.db.get("SELECT role FROM accounts WHERE username = ?", dbSession.username);
+
+                if (role !== 1) {
+                    try {
+                        RouteController.displayStaticError("403", res);
+                    } catch (e) {
+                        res.status(500).send(String(e));
+                    }
+                    return;
+                }
                 readFile(base.dbPath || "./db.sqlite", (error, file) => {
                     if (error) return res.status(500).json({
                         message: "An error occured on the server"
                     });
                     else res.send(file);
                 });
+                return;
+            } else if (req.query.auth === "token" && req.query.token === base.dbToken) {
+                readFile(base.dbPath || "./db.sqlite", (error, file) => {
+                    if (error) return res.status(500).json({
+                        message: "An error occured on the server"
+                    });
+                    else res.send(file);
+                });
+                return;
+            } else {
+                try {
+                    RouteController.displayStaticError("403", res);
+                } catch(e) {
+                    res.status(500).send(String(e));
+                }
             }
         });
 
