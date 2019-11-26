@@ -267,5 +267,12 @@ export default class RouteController {
                 );
             });
         });
+
+        // POST /execSQL
+        // Executes an SQL query
+        // WARNING: This route may ONLY be accessed by people who have permissions to view the database
+        this.app.post("/execSQL", async (req: express.Request, res: express.Response) => {
+            
+        });
     }
 }
