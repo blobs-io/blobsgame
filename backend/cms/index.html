@@ -16,6 +16,7 @@
 		<button id="get-query">get</button>
 		<button id="all-query">all</button>
 		<button id="run-query">run</button>
+		<button id="download">download</button>
 		<h3>Result</h3>
 		<div id="res">
 		</div>
@@ -48,5 +49,9 @@
 		for (const method of ["get", "all", "run"]) {
 			document.getElementById(method + "-query").addEventListener("click", postQuery.bind(null, method));
 		}
+
+		document.getElementById("download").addEventListener("click", () => {
+			document.location.href = "/db.sqlite?auth=cookie";
+		});
 	</script>
 </html>
