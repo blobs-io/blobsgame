@@ -218,7 +218,7 @@ export default class WSHandler {
                             message: "Too many flags"
                         }
                     }));
-                    WSHandler.disconnectSocket(<wsSocket>this.base.wsSockets.find(v => v.id === id), room);
+                    WSHandler.disconnectSocket(this.base.wsSockets.find(v => v.id === id), room);
                     return;
                 }
 
