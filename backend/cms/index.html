@@ -10,23 +10,33 @@
 	</head>
 	<body>
 		<textarea id="query"></textarea><br />
-		<button onclick="get">get</button>
-		<button onclick="all">all</button>
-		<button onclick="run">run</button>
+		<button id="get-query">get</button>
+		<button id="all-query">all</button>
+		<button id="run-query">run</button>
 		<h3>Result</h3>
 		<div id="res">
 		</div>
 	</body>
 	<script src="js/request.js"></script>
 	<script>
-		function get() {
-
+		const session = (document.cookie.split(/; */).find(v => v.startsWith("session=")) || "").split("=")[1];
+		function postQuery(method) {
+			alert(method)
+			return new Promise((res, rej) => {
+				request("/api/execSQL?method=" + method, "POST", {
+					session
+				}).then(({responseText}) => {
+					document.getElementById("res").innerHTML = responseText
+					.replace(/</g, "&lt;")
+					.replace(/>/g, "&gt;")
+					.replace(/ /g, "&nbsp;")
+					.replace(/\n/g, "<br/>");
+				}).catch(console.log);
+			});
 		}
-		function all() {
 
-		}
-		function run() {
-
+		for (const method of ["get", "all", "run"]) {
+			document.getElementById(method + "-query").addEventListener("click", postQuery.bind(null, method));
 		}
 	</script>
 </html>
