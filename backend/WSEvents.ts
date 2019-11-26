@@ -311,7 +311,8 @@ export default class WSHandler {
                                             const result: number = EliminationRoom.BRTable[room.players.length] || 0;
                                             // 100 xp as reward, no matter in what placement they ended
                                             blobobj.update(result, coinChange, 100);
-                                            const targetWs: wsSocket = this.base.wsSockets.find((s: wsSocket) => s.id === blobobj.id);
+                                            const targetWs: wsSocket | undefined = this.base.wsSockets.find((s: wsSocket) => s.id === blobobj.id);
+                                            if (!targetWs) return;
                                             targetWs.conn.send(JSON.stringify({
                                                 op: OPCODE.EVENT,
                                                 t: EventTypes.PLAYER_KICK,
@@ -454,7 +455,8 @@ export default class WSHandler {
         }
     }
 
-    static disconnectSocket(socket: wsSocket, room: Room, code?: number, handle: boolean = true): void {
+    static disconnectSocket(socket: wsSocket | undefined, room: Room, code?: number, handle: boolean = true): void {
+        if (!socket) return;
         socket.conn.close(code);
         const playerIndex: number = room.players.findIndex(p => p.id === socket.id);
         const player: Player = room.players[playerIndex];
