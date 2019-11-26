@@ -47,6 +47,10 @@
 <script src="/js/particles.js"></script>
 <script src="/js/roomOverview.js"></script>
 <script>
+    // Redirect to /app if session cookie is set and app didn't redirect previously
+    if (document.cookie.includes("session=") && !/[?&]nr/.test(document.location.search))
+        document.location.href = "/app";
+    
     initParticles();
     document.getElementById("guest-btn").onclick = showOverview.bind(null, true);
 </script>
