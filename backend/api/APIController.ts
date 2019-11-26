@@ -81,7 +81,7 @@ export default class APIController {
             try {
                 result = await this.base.db[req.params.method](req.headers.query);
             } catch(e) {
-                res.status(403);
+                res.status(500);
                 res.json({
                     error: e.toString(),
                     message: "An error occured on the server. Perhaps there's a syntax error in your query?"
