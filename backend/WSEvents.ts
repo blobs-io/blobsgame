@@ -242,7 +242,6 @@ export default class WSHandler {
                 player.directionChangedAt = Date.now() - d.directionChangedAt < 5000 ? d.directionChangedAt : Date.now();
                 player.direction = d.direction;
                 const distance = Math.abs(player.directionChangeCoordinates.x - player.x) + Math.abs(player.directionChangeCoordinates.y - player.y);
-                this.base.db.run("UPDATE accounts SET blobcoins = blobcoins + ? WHERE username = ?", distance / 2, player.owner);
                 player.distance += distance;
                 player.directionChangeCoordinates = {
                     x: d.directionChangeCoordinates.x,

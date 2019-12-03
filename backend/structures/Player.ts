@@ -156,8 +156,8 @@ export default class Player {
     }
 
     // Updates the distance in database
-    public saveDistance(customDistance: number = this.distance): Promise<any> {
-        return this.base.db.run("UPDATE accounts SET distance = distance + ? WHERE username = ?", customDistance / 1000, this.owner);
+    public async saveDistance(customDistance: number = this.distance): Promise<any> {
+        return this.base.db.run("UPDATE accounts SET distance = distance + ?, blobcoins = blobcoins + ? WHERE username = ?", customDistance / 1000, customDistance / 4, this.owner);
     }
 
     // Sends a websocket message to this player
