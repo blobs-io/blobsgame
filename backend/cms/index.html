@@ -25,12 +25,15 @@
 		const session = (document.cookie.split(/; */).find(v => v.startsWith("session=")) || "").split("=")[1];
 		function postQuery(method) {
 			return new Promise((res, rej) => {
-				request("/api/executeSQL/" + method, "GET", {
-					sessionid: session,
-					query: document.getElementById("query").value
-				}).then(({responseText}) => {
+				fetch("/api/executeSQL" + method, {
+					method: "GET",
+					headers: {
+						sessionid: session,
+						query: document.getElementById("query").value
+					}
+				}).then(async result => {
 					try {
-						const res = JSON.parse(responseText);
+						const res = await result.json();
 						document.getElementById("res").innerHTML = JSON.stringify(res, null, 4)
 						.replace(/</g, "&lt;")
 						.replace(/>/g, "&gt;")
