@@ -55,17 +55,30 @@
     </div>
 </div>
 </body>
-<script src="js/request.js"></script>
 <script src="js/functions.js"></script>
 <script>
     const session = document.cookie.split(/; */).find(v => v.startsWith("session=")).split("=")[1];
     const displayCode = d => document.getElementById("code").innerHTML = d;
-    request("/api/verify", "GET", { sessionid: session })
-        .then(v => displayCode(JSON.parse(v.responseText).code))
+    async function displayCode(res) {
+        document.getElementById("code").innerHTML = (await res.json()).code;
+    }
+
+    fetch("/api/verify", {
+        method: "GET",
+        headers: {
+            sessionid: session
+        }
+    })
+    .then(displayCode)
     .catch(() => {
-       request("/api/verify?request=true", "GET", { sessionid: session })
-           .then(v => displayCode(JSON.parse(v.responseText).code))
-           .catch(console.log);
+        fetch("/api/verify?request=true", {
+            method: "GET",
+            headers: {
+                sessionid: session
+            }
+        })
+        .then(displayCode)
+        .catch(console.log);
     });
 </script>
 </html>
