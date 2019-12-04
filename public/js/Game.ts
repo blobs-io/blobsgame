@@ -1,5 +1,4 @@
 declare const io: Function;
-declare const request: (path: string, method: string, headers?: any) => Promise<any>;
 declare const socket: any;
 declare const server: string;
 
@@ -649,8 +648,10 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         if (Date.now() - lastTick > 2500) {
             displayLeaderboard();
             const timestampBefore: number = Date.now();
-            request("/api/ping", "GET").then(res => {
-                const request: any = JSON.parse(res.responseText);
+            fetch("/api/ping", {
+                method: "GET"
+            }).then(async res => {
+                const request: any = await res.json();
                 const diff: number = ping = (request.arrived - timestampBefore);
                 const latencyElement: HTMLElement | null = document.getElementById("latency");
                 if (!latencyElement) return;
@@ -1570,8 +1571,10 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         }
         const bar = document.getElementById("bar-inside");
         if (!bar) return;
-        request("/api/players/" + details.id, "GET", {}).then((res: any) => {
-            const data: any = JSON.parse(res.responseText);
+        fetch("/api/players/" + details.id, {
+            method: "GET"
+        }).then(async res => {
+            const data: any = await res.json();
             for(const player of data) {
                 const tier: any = getTier(player.br || 0);
                 const spanElement: HTMLElement = document.createElement("span");
