@@ -53,7 +53,6 @@
 <a href="https://github.com/blobs-io/blobs.live" id="peek"></a>
 <span class="peek-label">Peek into the source</span>
 </body>
-<script src="/js/request.js"></script>
 <script src="/js/particles.js"></script>
 <script>
     initParticles();
@@ -64,8 +63,10 @@
         context.font = "20px Arial";
         context.fillText("Requesting captcha...", 6, 20);
 
-        request("/api/captcha/request", "GET").then(v => {
-            const response = JSON.parse(v.responseText);
+        fetch("/api/captcha/request", {
+            method: "GET"
+        }).then(async res => {
+            const response = await res.json();
             console.log(server + response.url);
             const image = new Image();
             image.src = server + response.url;
