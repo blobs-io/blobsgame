@@ -142,15 +142,15 @@
             `;
             document.getElementById("blobs").appendChild(blobElement);
             document.getElementById("choose-" + blob).addEventListener("click", () => {
-                request("/api/switchBlob?blob=" + blob, "POST", { session })
-                    .then(({ responseText }) => {
-                        const parsed = JSON.parse(responseText);
-                        alert(parsed.message);
-                    })
-                    .catch(({ responseText }) => {
-                        const parsed = JSON.parse(responseText);
-                        alert(parsed.message);
-                    });
+                fetch("/api/switchBlob?blob=" + blob, {
+                    method: "POST",
+                    headers: {
+                        session
+                    }
+                }).then(async res => {
+                    const parsed = await res.json();
+                    console.log(parsed.message);
+                })
             });
         }
 
@@ -165,13 +165,18 @@
         }
 
         document.getElementById("daily-bonus").addEventListener("click", () => {
-            request("/api/daily", "POST", { session })
-                .then(res => {
-                    const parsedResponse = JSON.parse(res.responseText);
-                    document.getElementById("blobcoins").innerHTML = `${stats.blobcoins += parsedResponse.bonus} Blobcoins`
-                }).catch((error) => {
-                const parsedError = JSON.parse(error.responseText);
-                alert(parsedError.message);
+            fetch("/api/daily", {
+                method: "POST",
+                headers: {
+                    session
+                }
+            }).then(async res => {
+                const parsed = await res.json();
+                if (res.status === 200) {
+                    document.getElementById("blobcoins").innerHTML = `${stats.blobcoins += parsed.bonus} Blobcoins`;
+                } else {
+                    alert(res.message);
+                }
             });
         });
     })();
