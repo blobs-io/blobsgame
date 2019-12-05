@@ -58,27 +58,29 @@
 <script src="js/functions.js"></script>
 <script>
     const session = document.cookie.split(/; */).find(v => v.startsWith("session=")).split("=")[1];
-    const displayCode = d => document.getElementById("code").innerHTML = d;
     async function displayCode(res) {
-        document.getElementById("code").innerHTML = (await res.json()).code;
+        const { code } = await res.json();
+        document.getElementById("code").innerHTML = code;
     }
-
     fetch("/api/verify", {
         method: "GET",
         headers: {
             sessionid: session
         }
     })
-    .then(displayCode)
-    .catch(() => {
-        fetch("/api/verify?request=true", {
-            method: "GET",
-            headers: {
-                sessionid: session
-            }
-        })
-        .then(displayCode)
-        .catch(console.log);
+    .then(res => {
+        if (res.status === 200) {
+            displayCode(res);
+        } else {
+            fetch("/api/verify?request=true", {
+                method: "GET",
+                headers: {
+                    sessionid: session
+                }
+            })
+            .then(displayCode)
+            .catch(console.log);
+        }
     });
 </script>
 </html>
