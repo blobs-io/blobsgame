@@ -175,7 +175,7 @@
                 if (res.status === 200) {
                     document.getElementById("blobcoins").innerHTML = `${stats.blobcoins += parsed.bonus} Blobcoins`;
                 } else {
-                    alert(res.message);
+                    alert(parsed.message);
                 }
             });
         });
