@@ -648,9 +648,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         if (Date.now() - lastTick > 2500) {
             displayLeaderboard();
             const timestampBefore: number = Date.now();
-            fetch("/api/ping", {
-                method: "GET"
-            }).then(async res => {
+            fetch("/api/ping").then(async res => {
                 const request: any = await res.json();
                 const diff: number = ping = (request.arrived - timestampBefore);
                 const latencyElement: HTMLElement | null = document.getElementById("latency");
@@ -1571,9 +1569,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         }
         const bar = document.getElementById("bar-inside");
         if (!bar) return;
-        fetch("/api/players/" + details.id, {
-            method: "GET"
-        }).then(async res => {
+        fetch("/api/players/" + details.id).then(async res => {
             const data: any = await res.json();
             for(const player of data) {
                 const tier: any = getTier(player.br || 0);

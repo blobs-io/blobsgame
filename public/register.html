@@ -63,9 +63,10 @@
         context.font = "20px Arial";
         context.fillText("Requesting captcha...", 6, 20);
 
-        fetch("/api/captcha/request", {
-            method: "GET"
-        }).then(async res => {
+        fetch("/api/captcha/request").then(async res => {
+            if (res.status !== 200) {
+                return alert("An error occurred while trying to request a captcha");
+            }
             const response = await res.json();
             console.log(server + response.url);
             const image = new Image();
@@ -73,9 +74,7 @@
             image.onload = () => {
                 context.drawImage(image, 0, 0, 250, 100);
             };
-        }).catch(err => {
-            console.log("An error occurred while trying to request a captcha: " + err.toString());
-        });
+        }).catch(console.error);
     })();
 </script>
 </html>
