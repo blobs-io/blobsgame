@@ -109,7 +109,7 @@
 					for(let i=0; i < clans.length; ++i) {
 						const clanDiv = document.createElement("div");
 						clanDiv.className = "clan-entry";
-						clanDiv.innerHTML = `<span class="clan-name">${clans[i].name.replace(/</g, "&lt;")}</span><br/><span class="clan-rating">${clans[i].members.split(",").length} members, ${clans[i].cr} cr</span><a href="clans/view/${clans[i].name}" class="view-clan">View</a>`;
+						clanDiv.innerHTML = `<span class="clan-name">${clans[i].name.replace(/</g, "&lt;")}</span><br/><span class="clan-rating">${clans[i].members.length} members, ${clans[i].cr} cr</span><a href="clans/view/${clans[i].name}" class="view-clan">View</a>`;
 						document.getElementById("top-clans").appendChild(clanDiv);
 					}
 				}

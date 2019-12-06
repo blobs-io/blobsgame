@@ -40,8 +40,8 @@ export default class ClanController {
                 readFileSync(__dirname + "/clan_view_anon_templ.html", "utf8")
                     .replace(/{leader}/g, clan.leader)
                     .replace(/{cr}/g, clan.cr.toString())
-                    .replace(/{members}/g, clan.members.split(",").join(", "))
-                    .replace(/description/g, (clan.description || "-")
+                    .replace(/{members}/g, clan.members.split(",").join(", ").slice(1, -1))
+                    .replace(/{description}/g, (clan.description || "-")
                         .replace(/</g, "&lt;")
                         .replace(/>/g, "&gt;"))
             );
