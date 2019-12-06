@@ -9,6 +9,8 @@ export default class ClanController {
     public app: express.Application;
     // A reference to the SQLite driver (base.db)
     public db: any;
+    // Maximum number of members a clan can have
+    public static MemberLimit: number = 20;
 
     constructor(app: express.Application, db: any) {
         // Assign local variables to object
