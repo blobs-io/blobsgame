@@ -143,7 +143,9 @@ export default class Base {
             "`leader` TEXT, " +
             "`cr` INTEGER DEFAULT 0, " +
             "`members` TEXT, " +
-            "`description` TEXT)");
+            "`description` TEXT, " +
+            "`joinable` INTEGER, " +
+            "`tag` TEXT)");
         await db.run("CREATE TABLE IF NOT EXISTS verifications (" +
             "`user` TEXT," +
             "`code` TEXT, " +
