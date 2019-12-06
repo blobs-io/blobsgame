@@ -68,7 +68,7 @@ export default class APIController {
                 });
         });
 
-        // (TODO) POST Endpoint: /api/clans/:name/join
+        // POST Endpoint: /api/clans/:name/join
         // Joins a specific clan by its name
         // Returns the joined clan
         this.app.post("/api/clans/:name/join", async (req: express.Request, res: express.Response) => {
@@ -104,7 +104,7 @@ export default class APIController {
             res.json(clan);
         });
 
-        // (TODO) POST Endpoint: /api/clans/:name/leave
+        // POST Endpoint: /api/clans/:name/leave
         // Leaves a specific clan by its name
         // Returns all members of the clan after leaving
         this.app.post("/api/clans/:name/leave", async (req: express.Request, res: express.Response) => {
