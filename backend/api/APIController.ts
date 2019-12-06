@@ -28,22 +28,43 @@ export default class APIController {
     // It creates listeners for every endpoint
     public listen(): void {
         // GET Endpoint: /api/clans/:name
-        // Retrieve information about a specific clan
+        // Retrieve information about a specific clan or get an array of clans by using `list` as name parameter
         this.app.get("/api/clans/:name", (req: express.Request, res: express.Response) => {
             if (Array.isArray(req.params)) return;
-            if (req.params.name === "list") {
-                this.base.db.all("SELECT members, cr, name FROM clans ORDER BY cr DESC LIMIT 10")
-                    .then((v: any) => {
-                        res.json(v);
-                    })
-                    .catch((err: any) => {
-                        res.status(500);
-                        res.json({
-                            message: "An error occurred",
-                            error: err.stack
-                        });
+            if (!req.params.name) return res.status(400).json({
+                message: "Invalid parameter provided"
+            });
+            const query: string = req.params.name === "list" ? 
+            "SELECT members, cr, name FROM clans ORDER BY cr DESC LIMIT 10"
+            : "SELECT members, cr, leader FROM clans WHERE name = ?"
+            this.base.db[req.params.name !== "list" ? "get" : "all"](query, req.params.name !== "list" ? req.params.name : undefined)
+                .then((v: Array<any> | any) => {
+                    if (Array.isArray(v)) {
+                        res.json(v.map((r: any) => ({
+                            ...r,
+                            members: JSON.parse(r.members)
+                        })));
+                    } else {
+                        if (!v) {
+                            res.status(404);
+                            res.json({
+                                message: "Clan not found"
+                            });
+                        } else {
+                            res.json({
+                                ...v,
+                                members: JSON.parse(v.members)
+                            });
+                        }
+                    }
+                })
+                .catch((err: any) => {
+                    res.status(500);
+                    res.json({
+                        message: "An error occurred",
+                        error: err.toString()
                     });
-            }
+                });
         });
         
         // GET Endpoint: /api/executeSQL/:method
