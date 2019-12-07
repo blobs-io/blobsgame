@@ -136,8 +136,29 @@ export default class APIController {
 
         // (TODO) DELETE Endpoint: /api/clans/:name
         // Deletes a clan by its name (a clan can only be deleted by its leader)
-        this.app.delete("/api/clans/:name", (req: express.Request, res: express.Response) => {
+        this.app.delete("/api/clans/:name", async (req: express.Request, res: express.Response) => {
+            const { session } = req.headers;
+            if (!session) return res.status(400).json({
+                message: "No session header provided"
+            });
 
+            const requester: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
+            if (!requester) return res.status(400).json({
+                message: "Invalid session ID provided"
+            });
+
+            const clan: ClanData | undefined = await this.base.db.get("SELECT members FROM clans WHERE name = ?", req.params.name);
+            if (!clan) return res.status(404).json({
+                message: "Clan not found"
+            });
+            if (clan.leader !== requester.username || requester.role === Role.ADMIN) return res.status(403).json({
+                message: "Only the clean leader and administrators can delete this clan"
+            });
+
+            
+            await this.base.db.run("UPDATE accounts SET clan = null WHERE clan = ?", req.params.name);
+            await this.base.db.run("DELETE FROM clans WHERE clan = ?", req.params.name)
+            res.json(clan);
         });
 
         // (TODO) POST Endpoint: /api/clans/:name
