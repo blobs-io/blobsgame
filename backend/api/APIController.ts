@@ -11,6 +11,7 @@ import * as DateFormatter from "../utils/DateFormatter";
 import EliminationRoom from "../structures/EliminationRoom";
 import { Role } from "../structures/Player";
 import ClanController from "../clans/ClanController";
+import Clan, {ClanData} from "../structures/Clan";
 
 // Used for listening to requests that are related to the API
 export default class APIController {
@@ -39,9 +40,9 @@ export default class APIController {
             "SELECT members, cr, name, joinable, tag FROM clans ORDER BY cr DESC LIMIT 10"
             : "SELECT members, cr, leader, joinable, tag FROM clans WHERE name = ?"
             this.base.db[req.params.name !== "list" ? "get" : "all"](query, req.params.name !== "list" ? req.params.name : undefined)
-                .then((v: Array<any> | any) => {
+                .then((v: Array<ClanData> | ClanData) => {
                     if (Array.isArray(v)) {
-                        res.json(v.map((r: any) => ({
+                        res.json(v.map((r: ClanData) => ({
                             ...r,
                             members: JSON.parse(r.members)
                         })));
@@ -82,7 +83,7 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: any = await this.base.db.get("SELECT members, cr, leader, joinable FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.get("SELECT members, cr, leader, joinable FROM clans WHERE name = ?", req.params.name);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
@@ -90,7 +91,7 @@ export default class APIController {
                 message: "This clan is not joinable"
             });
 
-            const members: Array<any> = JSON.parse(clan.members);
+            const members: Array<string> = JSON.parse(clan.members);
             if (members.includes(requester.username)) return res.status(400).json({
                 message: "Requested user is already in this clan"
             });
@@ -118,12 +119,12 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: any = await this.base.db.get("SELECT members FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.get("SELECT members FROM clans WHERE name = ?", req.params.name);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
 
-            const members: Array<any> = JSON.parse(clan.members);
+            const members: Array<string> = JSON.parse(clan.members);
             if (!members.includes(requester.username)) return res.status(400).json({
                 message: "Requested user is not a member of this clan"
             });
