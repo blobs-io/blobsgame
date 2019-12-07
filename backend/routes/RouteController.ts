@@ -242,7 +242,7 @@ export default class RouteController {
 
             const hash: string = bcrypt.hashSync(req.body.password, 10);
 
-            base.db.prepare("INSERT INTO accounts VALUES (?, ?, 1000, ?, 0, 0, 0, 0, ?, ?, null, 0, 0, 0, 0)")
+            base.db.prepare("INSERT INTO accounts VALUES (?, ?, 1000, ?, 0, 0, 0, 0, ?, ?, null, 0, 0, 0)")
                 .then((v: any) => v.run([
                     req.body.username,
                     hash,
@@ -254,7 +254,7 @@ export default class RouteController {
                     res.send("Account successfully created! Redirecting in 5 seconds...<script>setTimeout(()=>document.location.href='/',5000);</script>");
                 })
                 .catch((err: any) => {
-                    return readFile("./public/register.html", "utf8", (err: any, data: any) => {
+                    return readFile("./public/register.html", "utf8", (error: any, data: any) => {
                         res.send("<script>alert('A server error occurred: " + err + "');</script>" + data);
                     });
                 });
