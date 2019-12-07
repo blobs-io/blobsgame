@@ -156,13 +156,13 @@ export default class APIController {
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
-            if (clan.leader !== requester.username || requester.role === Role.ADMIN) return res.status(403).json({
-                message: "Only the clean leader and administrators can delete this clan"
+            if (clan.leader !== requester.username && requester.role !== Role.ADMIN) return res.status(403).json({
+                message: "Only clean leader and administrators can delete this clan"
             });
 
             
             await this.base.db.run("UPDATE accounts SET clan = null WHERE clan = ?", req.params.name);
-            await this.base.db.run("DELETE FROM clans WHERE clan = ?", req.params.name)
+            await this.base.db.run("DELETE FROM clans WHERE name = ?", req.params.name)
             res.json(clan);
         });
 
@@ -209,6 +209,7 @@ export default class APIController {
                 newClan.description, // clan description
                 newClan.tag // clan tag
             );
+            await this.base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", newClan.name, requester.username);
             res.json(newClan);
         });
         
