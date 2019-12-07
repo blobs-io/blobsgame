@@ -128,13 +128,18 @@ export default class APIController {
             if (!members.includes(requester.username)) return res.status(400).json({
                 message: "Requested user is not a member of this clan"
             });
+
             members.splice(members.indexOf(requester.username), 1);
             await this.base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", null, requester.username);
-            await this.base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(members), req.params.name);
+            if (members.length === 0) {
+                await this.base.db.run("DELETE FROM clans WHERE name = ?", req.params.name);
+            } else {
+                await this.base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(members), req.params.name);
+            }
             res.json({ members });
         });
 
-        // (TODO) DELETE Endpoint: /api/clans/:name
+        // DELETE Endpoint: /api/clans/:name
         // Deletes a clan by its name (a clan can only be deleted by its leader)
         this.app.delete("/api/clans/:name", async (req: express.Request, res: express.Response) => {
             const { session } = req.headers;
@@ -147,7 +152,7 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: ClanData | undefined = await this.base.db.get("SELECT members FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.get("SELECT leader FROM clans WHERE name = ?", req.params.name);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
@@ -161,10 +166,50 @@ export default class APIController {
             res.json(clan);
         });
 
-        // (TODO) POST Endpoint: /api/clans/:name
+        // POST Endpoint: /api/clans/:name
         // Creates a new clan
-        this.app.post("/api/clans/:name", (req: express.Request, res: express.Response) => {
+        this.app.post("/api/clans/:name", async (req: express.Request, res: express.Response) => {
+            const { session, description } = req.headers;
+            if (!session) return res.status(400).json({
+                message: "No session header provided"
+            });
+            if (!description || typeof description !== "string" || description.length >= 1024) return res.status(400).json({
+                message: "Invalid description length"
+            });
 
+            const requester: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
+            if (!requester) return res.status(400).json({
+                message: "Invalid session ID provided"
+            });
+
+            const clan: ClanData | undefined = await this.base.db.get("SELECT 1 FROM clans WHERE name = ?", req.params.name);
+            if (clan) return res.status(400).json({
+                message: "Clan already exists"
+            });
+
+            const { clan: userClan } = await this.base.db.get("SELECT clan FROM accounts WHERE username = ?", requester.username);
+            if (userClan) return res.status(400).json({
+                message: "Requested user is already in a clan"
+            });
+
+            const newClan: Clan = new Clan({
+                cr: 0,
+                description,
+                joinable: 1,
+                leader: requester.username,
+                members: JSON.stringify([requester.username]),
+                name: req.params.name,
+                tag: req.params.name.substr(0, 4)
+            });
+            
+            await this.base.db.run("INSERT INTO clans VALUES (?, ?, 0, ?, ?, 1, ?)",
+                newClan.name, // clan name
+                newClan.leader, // clan leader
+                JSON.stringify(newClan.members), // members
+                newClan.description, // clan description
+                newClan.tag // clan tag
+            );
+            res.json(newClan);
         });
         
         // GET Endpoint: /api/executeSQL/:method
