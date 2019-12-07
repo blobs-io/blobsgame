@@ -1,9 +1,9 @@
 // Clan structure in database
-interface ClanData {
+export interface ClanData {
     name: string;
     leader: string;
     cr: number;
-    members: string | Array<string>;
+    members: string;
     description: string;
     joinable: number;
     tag: string;
@@ -31,7 +31,7 @@ export default class Clan {
         this.description = data.description;
         this.joinable = typeof data.joinable === "number" ? Boolean(data.joinable) : data.joinable;
         this.leader = data.leader;
-        this.members = typeof data.members === "string" ? JSON.parse(data.members) : data.members;
+        this.members = JSON.parse(data.members);
         this.name = data.name;
         this.tag = data.tag;
     }
