@@ -5,6 +5,7 @@ import AntiCheat from "./AntiCheat";
 import { wsSocket } from "./Socket";
 import * as EliminationRoom from "./EliminationRoom";
 import LevelSystem from "../utils/LevelSystem";
+import { ClanData } from "./Clan";
 
 export enum Role {
     GUEST = -1,
@@ -180,5 +181,19 @@ export default class Player {
             else
                 this.base.db.run(query, coins, xp, this.owner);
         }
+    }
+
+    public static async leaveClan(clan: ClanData, player: Player | string, base: Base): Promise<ClanData> {
+        const targetPlayer = player instanceof Player ? player.owner : player,
+              parsedMembers = JSON.parse(clan.members);
+
+        parsedMembers.splice(parsedMembers.indexOf(targetPlayer), 1);
+        await base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", null, targetPlayer);
+        if (parsedMembers.length === 0) {
+            await base.db.run("DELETE FROM clans WHERE name = ?", clan.name);
+        } else {
+            await base.db.run("UPDATE clans SET members = ? WHERE name = ?", clan.members, clan.name);
+        }
+        return clan;
     }
 }
