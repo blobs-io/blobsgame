@@ -1,3 +1,5 @@
+import Base from "./Base";
+
 // Clan structure in database
 export interface ClanData {
     name: string;
@@ -34,5 +36,13 @@ export default class Clan {
         this.members = JSON.parse(data.members);
         this.name = data.name;
         this.tag = data.tag;
+    }
+
+    public static delete(data: ClanData | string, base: Base): Promise<Array<any>> {
+        const target: string = typeof data !== "string" ? data.name : data;
+        return Promise.all([
+            base.db.run("DELETE FROM clans WHERE name = ?", target),
+            base.db.run("UPDATE accounts SET clan = ? WHERE clan = ?", null, target)
+        ]);
     }
 }
