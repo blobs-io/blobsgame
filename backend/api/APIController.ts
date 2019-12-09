@@ -9,7 +9,7 @@ import Jimp = require("jimp");
 import Captcha, {CAPTCHA_LIMIT} from "../structures/Captcha";
 import * as DateFormatter from "../utils/DateFormatter";
 import EliminationRoom from "../structures/EliminationRoom";
-import { Role } from "../structures/Player";
+import Player, { Role } from "../structures/Player";
 import ClanController from "../clans/ClanController";
 import Clan, {ClanData} from "../structures/Clan";
 
@@ -129,14 +129,7 @@ export default class APIController {
                 message: "Requested user is not a member of this clan"
             });
 
-            members.splice(members.indexOf(requester.username), 1);
-            await this.base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", null, requester.username);
-            if (members.length === 0) {
-                await this.base.db.run("DELETE FROM clans WHERE name = ?", req.params.name);
-            } else {
-                await this.base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(members), req.params.name);
-            }
-            res.json({ members });
+            Player.leaveClan(clan, requester.username, this.base).then(res.json);
         });
 
         // DELETE Endpoint: /api/clans/:name
