@@ -161,8 +161,7 @@ export default class APIController {
             });
 
             
-            await this.base.db.run("UPDATE accounts SET clan = null WHERE clan = ?", req.params.name);
-            await this.base.db.run("DELETE FROM clans WHERE name = ?", req.params.name)
+            await Clan.delete(clan, this.base);
             res.json(clan);
         });
 
