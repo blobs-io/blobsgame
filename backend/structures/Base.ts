@@ -197,6 +197,7 @@ export default class Base {
         const { app } = this.server;
         // For accessing POST body
         app.use(bodyParser.urlencoded({ extended: true }));
+        app.use(bodyParser.json());
 
         // Assets / JS / CSS
         app.use("/assets", express.static("./public/assets"));
