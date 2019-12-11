@@ -25,7 +25,7 @@ export default class ClanController {
         // Returns the clans page (a list of some existing clans)
         this.app.get("/clans/", (req: express.Request, res: express.Response) => {
             res.send(
-                readFileSync(__dirname + "/index_anon_templ.html", "utf8")
+                readFileSync("./public/clans/index.html", "utf8")
             );
         });
 
@@ -33,17 +33,15 @@ export default class ClanController {
         // Retrieve information about a specific clan
         this.app.get("/clans/view/:clan", async (req: express.Request, res: express.Response) => {
             if (Array.isArray(req.params)) return;
-            if (!req.params.clan) return res.send("Please specify a clan");
+            if (!req.params.clan) return res.send(
+                readFileSync("./public/errors/404.html", "utf8")
+            );
             const clan: ClanData | undefined = await this.db.get("SELECT * FROM clans WHERE name=?", req.params.clan);
-            if (!clan) return res.send("Clan was not found");
+            if (!clan) return res.send(
+                readFileSync("./public/errors/404.html", "utf8")
+            );
             res.send(
-                readFileSync(__dirname + "/clan_view_anon_templ.html", "utf8")
-                    .replace(/{leader}/g, clan.leader)
-                    .replace(/{cr}/g, String(clan.cr))
-                    .replace(/{members}/g, clan.members.split(",").join(", ").slice(1, -1))
-                    .replace(/{description}/g, (clan.description || "-")
-                        .replace(/</g, "&lt;")
-                        .replace(/>/g, "&gt;"))
+                readFileSync("./public/clans/clan.html", "utf8")
             );
         });
     }
