@@ -73,6 +73,7 @@ export default class APIController {
         // Joins a specific clan by its name
         // Returns the joined clan
         this.app.post("/api/clans/:name/join", async (req: express.Request, res: express.Response) => {
+            // todo: this fails if :name doesn't exist
             const { session } = req.headers;
             if (!session) return res.status(400).json({
                 message: "No session header provided"
@@ -84,25 +85,14 @@ export default class APIController {
             });
 
             const clan: ClanData | undefined = await this.base.db.get("SELECT members, cr, leader, joinable FROM clans WHERE name = ?", req.params.name);
-            if (!clan) return res.status(404).json({
-                message: "Clan not found"
-            });
-            if (!clan.joinable) return res.status(403).json({
-                message: "This clan is not joinable"
-            });
-
-            const members: Array<string> = JSON.parse(clan.members);
-            if (members.includes(requester.username)) return res.status(400).json({
-                message: "Requested user is already in this clan"
-            });
-            if (members.length >= ClanController.MemberLimit) return res.status(403).json({
-                message: `Clan already has ${ClanController.MemberLimit} members`
-            });
-
-            members.push(requester.username);
-            await this.base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", req.params.name, requester.username);
-            await this.base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(members), req.params.name);
-            res.json(clan);
+            try {
+                Player.joinClan(clan, requester.username, this.base)
+                .then(v => res.json(v));
+            } catch(e) {
+                res.status(400).json({
+                    message: e.toString()
+                });
+            }
         });
 
         // POST Endpoint: /api/clans/:name/leave
