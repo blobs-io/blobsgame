@@ -5,7 +5,8 @@ import AntiCheat from "./AntiCheat";
 import { wsSocket } from "./Socket";
 import * as EliminationRoom from "./EliminationRoom";
 import LevelSystem from "../utils/LevelSystem";
-import { ClanData } from "./Clan";
+import Clan, { ClanData } from "./Clan";
+import ClanController from "../clans/ClanController";
 
 export enum Role {
     GUEST = -1,
@@ -181,6 +182,21 @@ export default class Player {
             else
                 this.base.db.run(query, coins, xp, this.owner);
         }
+    }
+
+    public static async joinClan(clan: ClanData, player: Player | String, base: Base): Promise<ClanData> {
+        const targetPlayer = player instanceof Player ? player.owner : player,
+              parsedMembers = JSON.parse(clan.members);
+
+        if (!clan.joinable) throw new Error("This clan is not joinable");
+        if (parsedMembers.includes(targetPlayer)) throw new Error("Requested user is already in this clan");
+        if (parsedMembers.length >= ClanController.MemberLimit) throw new Error("Clan is full");
+        if (await base.db.get("SELECT clan FROM accounts WHERE clan = ?", clan.name)) throw new Error("Requested user is already in another clan");
+
+        parsedMembers.push(targetPlayer);
+        await base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", clan.name, targetPlayer);
+        await base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(parsedMembers), clan.name);
+        return clan;
     }
 
     public static async leaveClan(clan: ClanData, player: Player | string, base: Base): Promise<ClanData> {
