@@ -208,7 +208,7 @@ export default class Player {
         if (parsedMembers.length === 0) {
             await base.db.run("DELETE FROM clans WHERE name = ?", clan.name);
         } else {
-            await base.db.run("UPDATE clans SET members = ? WHERE name = ?", clan.members, clan.name);
+            await base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(parsedMembers), clan.name);
         }
         return clan;
     }

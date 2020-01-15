@@ -84,15 +84,15 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: ClanData | undefined = await this.base.db.get("SELECT members, cr, leader, joinable FROM clans WHERE name = ?", req.params.name);
-            try {
-                Player.joinClan(clan, requester.username, this.base)
-                .then(v => res.json(v));
-            } catch(e) {
-                res.status(400).json({
-                    message: e.toString()
-                });
-            }
+            const clan: ClanData | undefined = await this.base.db.get("SELECT name, members, cr, leader, joinable FROM clans WHERE name = ?", req.params.name);
+            if (!clan) return res.status(404).json({
+                message: "Clan not found"
+            });
+            Player.joinClan(clan, requester.username, this.base)
+                .then(v => res.json(v))
+                .catch(e => res.status(500).json({
+                    message: e.message
+                }));
         });
 
         // POST Endpoint: /api/clans/:name/leave
@@ -109,7 +109,7 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: ClanData | undefined = await this.base.db.get("SELECT members FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.get("SELECT name, members FROM clans WHERE name = ?", req.params.name);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
@@ -119,7 +119,7 @@ export default class APIController {
                 message: "Requested user is not a member of this clan"
             });
 
-            Player.leaveClan(clan, requester.username, this.base).then(res.json);
+            Player.leaveClan(clan, requester.username, this.base).then(v => res.json(v));
         });
 
         // DELETE Endpoint: /api/clans/:name
@@ -135,7 +135,7 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: ClanData | undefined = await this.base.db.get("SELECT leader FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.get("SELECT name, leader FROM clans WHERE name = ?", req.params.name);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
