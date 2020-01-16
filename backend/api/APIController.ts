@@ -9,8 +9,9 @@ import Jimp = require("jimp");
 import Captcha, {CAPTCHA_LIMIT} from "../structures/Captcha";
 import * as DateFormatter from "../utils/DateFormatter";
 import EliminationRoom from "../structures/EliminationRoom";
-import { Role } from "../structures/Player";
+import Player, { Role } from "../structures/Player";
 import ClanController from "../clans/ClanController";
+import Clan, {ClanData} from "../structures/Clan";
 
 // Used for listening to requests that are related to the API
 export default class APIController {
@@ -39,9 +40,9 @@ export default class APIController {
             "SELECT members, cr, name, joinable, tag FROM clans ORDER BY cr DESC LIMIT 10"
             : "SELECT members, cr, leader, joinable, tag FROM clans WHERE name = ?"
             this.base.db[req.params.name !== "list" ? "get" : "all"](query, req.params.name !== "list" ? req.params.name : undefined)
-                .then((v: Array<any> | any) => {
+                .then((v: Array<ClanData> | ClanData) => {
                     if (Array.isArray(v)) {
-                        res.json(v.map((r: any) => ({
+                        res.json(v.map((r: ClanData) => ({
                             ...r,
                             members: JSON.parse(r.members)
                         })));
@@ -72,6 +73,7 @@ export default class APIController {
         // Joins a specific clan by its name
         // Returns the joined clan
         this.app.post("/api/clans/:name/join", async (req: express.Request, res: express.Response) => {
+            // todo: this fails if :name doesn't exist
             const { session } = req.headers;
             if (!session) return res.status(400).json({
                 message: "No session header provided"
@@ -82,26 +84,15 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: any = await this.base.db.get("SELECT members, cr, leader, joinable FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.get("SELECT name, members, cr, leader, joinable FROM clans WHERE name = ?", req.params.name);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
-            if (!clan.joinable) return res.status(403).json({
-                message: "This clan is not joinable"
-            });
-
-            const members: Array<any> = JSON.parse(clan.members);
-            if (members.includes(requester.username)) return res.status(400).json({
-                message: "Requested user is already in this clan"
-            });
-            if (members.length >= ClanController.MemberLimit) return res.status(403).json({
-                message: `Clan already has ${ClanController.MemberLimit} members`
-            });
-
-            members.push(requester.username);
-            await this.base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", req.params.name, requester.username);
-            await this.base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(members), req.params.name);
-            res.json(clan);
+            Player.joinClan(clan, requester.username, this.base)
+                .then(v => res.json(v))
+                .catch(e => res.status(500).json({
+                    message: e.message
+                }));
         });
 
         // POST Endpoint: /api/clans/:name/leave
@@ -118,31 +109,90 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: any = await this.base.db.get("SELECT members FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.get("SELECT name, members FROM clans WHERE name = ?", req.params.name);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
 
-            const members: Array<any> = JSON.parse(clan.members);
+            const members: Array<string> = JSON.parse(clan.members);
             if (!members.includes(requester.username)) return res.status(400).json({
                 message: "Requested user is not a member of this clan"
             });
-            members.splice(members.indexOf(requester.username), 1);
-            await this.base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", null, requester.username);
-            await this.base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(members), req.params.name);
-            res.json({ members });
+
+            Player.leaveClan(clan, requester.username, this.base).then(v => res.json(v));
         });
 
-        // (TODO) DELETE Endpoint: /api/clans/:name
+        // DELETE Endpoint: /api/clans/:name
         // Deletes a clan by its name (a clan can only be deleted by its leader)
-        this.app.delete("/api/clans/:name", (req: express.Request, res: express.Response) => {
+        this.app.delete("/api/clans/:name", async (req: express.Request, res: express.Response) => {
+            const { session } = req.headers;
+            if (!session) return res.status(400).json({
+                message: "No session header provided"
+            });
 
+            const requester: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
+            if (!requester) return res.status(400).json({
+                message: "Invalid session ID provided"
+            });
+
+            const clan: ClanData | undefined = await this.base.db.get("SELECT name, leader FROM clans WHERE name = ?", req.params.name);
+            if (!clan) return res.status(404).json({
+                message: "Clan not found"
+            });
+            if (clan.leader !== requester.username && requester.role !== Role.ADMIN) return res.status(403).json({
+                message: "Only clean leader and administrators can delete this clan"
+            });
+
+            
+            await Clan.delete(clan, this.base);
+            res.json(clan);
         });
 
-        // (TODO) POST Endpoint: /api/clans/:name
+        // POST Endpoint: /api/clans/:name
         // Creates a new clan
-        this.app.post("/api/clans/:name", (req: express.Request, res: express.Response) => {
+        this.app.post("/api/clans/:name", async (req: express.Request, res: express.Response) => {
+            const { session, description } = req.headers;
+            if (!session) return res.status(400).json({
+                message: "No session header provided"
+            });
+            if (!description || typeof description !== "string" || description.length >= 1024) return res.status(400).json({
+                message: "Invalid description length"
+            });
 
+            const requester: Socket | undefined = this.base.sockets.find((v: Socket) => v.sessionid === session);
+            if (!requester) return res.status(400).json({
+                message: "Invalid session ID provided"
+            });
+
+            const clan: ClanData | undefined = await this.base.db.get("SELECT 1 FROM clans WHERE name = ?", req.params.name);
+            if (clan) return res.status(400).json({
+                message: "Clan already exists"
+            });
+
+            const { clan: userClan } = await this.base.db.get("SELECT clan FROM accounts WHERE username = ?", requester.username);
+            if (userClan) return res.status(400).json({
+                message: "Requested user is already in a clan"
+            });
+
+            const newClan: Clan = new Clan({
+                cr: 0,
+                description,
+                joinable: 1,
+                leader: requester.username,
+                members: JSON.stringify([requester.username]),
+                name: req.params.name,
+                tag: req.params.name.substr(0, 4)
+            });
+            
+            await this.base.db.run("INSERT INTO clans VALUES (?, ?, 0, ?, ?, 1, ?)",
+                newClan.name, // clan name
+                newClan.leader, // clan leader
+                JSON.stringify(newClan.members), // members
+                newClan.description, // clan description
+                newClan.tag // clan tag
+            );
+            await this.base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", newClan.name, requester.username);
+            res.json(newClan);
         });
         
         // GET Endpoint: /api/executeSQL/:method
