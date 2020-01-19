@@ -1,11 +1,11 @@
-import * as WebSocket from "ws";
+import WebSocket from "ws";
 
 export default class Loadbalancer {
     public host: string;
     public accessToken: string;
     public interval?: number;
     public gateway?: WebSocket;
-    public _interval?: NodeJS.Timer;
+    public _interval?: number;
     public static OpcodeHello: number = 10;
 
     constructor(accessToken: string, host: string) {
@@ -34,7 +34,7 @@ export default class Loadbalancer {
             const parsed: any = JSON.parse(data.toString());
             if (parsed.op === Loadbalancer.OpcodeHello) {
                 this.interval = parseInt(parsed.d);
-                this._interval = setInterval(() => this.emitStats(), this.interval);
+                this._interval = <any>setInterval(() => this.emitStats(), this.interval);
             }
         });
 

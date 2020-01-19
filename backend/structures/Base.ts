@@ -2,10 +2,12 @@
 import * as express from "express";
 import * as ws from "ws";
 import * as http from "http";
-import {existsSync} from "fs";
+import {readFileSync} from "fs";
 import bodyParser = require("body-parser");
-import {exec} from "child_process";
+import sqlite from "sqlite";
 // Import structures
+const LoadbalancerConfig = require("../../configs/lb");
+import Loadbalancer from "./Loadbalancer";
 import * as SessionIDManager from "./SessionIDManager";
 import WS, * as WSEvents from "../WSEvents";
 import {EventTypes, OPCODE} from "../WSEvents";
@@ -19,9 +21,10 @@ import RouteController from "../routes/RouteController";
 import Captcha from "./Captcha";
 import Player from "./Player";
 import EliminationRoom, {State} from "./EliminationRoom";
+import cookieParser = require("cookie-parser");
 
 // Represents an http server that is used
-interface Server {
+export interface Server {
     // The express router
     app: express.Application;
     // Actual HTTP server (may be undefined)
@@ -34,10 +37,7 @@ interface Server {
 
 // Represents options that may be used when instantiating Base
 interface BaseOptions {
-    // The server
-    server: Server;
-    // The database driver (sqlite)
-    database?: any;
+    useLoadbalancer?: boolean;
 }
 
 // Represents a Maintenance
@@ -51,9 +51,9 @@ interface Maintenance {
 // Used for sharing required data across all modules
 export default class Base {
     // The server
-    public server: Server;
+    public server?: Server;
     // The WebSocket server
-    public wsServer: ws.Server;
+    public wsServer?: ws.Server;
     // The database driver
     public db: any;
     // A 45-characters long token that is used to access the database
@@ -67,7 +67,7 @@ export default class Base {
         enabled: false
     };
     // The HTTP Server for the express router
-    public _server: http.Server;
+    public _server?: http.Server;
     // The WebSocket handler (for handling websocket messages)
     public WSHandler: WS;
     // All existing rooms
@@ -77,31 +77,28 @@ export default class Base {
     // An array that includes all connected sockets
     public sockets: Socket.default[];
     // The API Controller (handles API requests)
-    public APIController: APIController;
+    public APIController?: APIController;
     // The Clan Controller (handles clan requests)
-    public ClanController: ClanController;
+    public ClanController?: ClanController;
     // All requested captchas
     public captchas: Captcha[];
     // The Route Controller (handles all incoming requests)
-    public RouteController: RouteController;
+    public RouteController?: RouteController;
     // All websocket connections (game)
     public wsSockets: Socket.wsSocket[];
+    // The loadbalancer
+    public loadbalancer?: Loadbalancer;
 
-    constructor(options: BaseOptions) {
+    constructor(options?: BaseOptions) {
         // Assign all local variables
-        this.server = options.server;
-        this._server = this.server.app.listen(options.server.port, options.server.readyCallback);
-        this.wsServer = new ws.Server({
-            server: this._server
-        });
+        if (options && options.useLoadbalancer) {
+            this.loadbalancer = new Loadbalancer(LoadbalancerConfig.token, LoadbalancerConfig.host);
+            this.loadbalancer.connect();
+        }
         this.wsSockets = [];
-        this.db = options.database;
         this.sockets = [];
         this.WSHandler = new WS(this);
         this.maps = new Maps();
-        this.APIController = new APIController(this.server.app, this);
-        this.ClanController = new ClanController(this.server.app, this.db);
-        this.RouteController = new RouteController(this.server.app, this);
         this.captchas = [];
         this.rooms = [];
 
@@ -118,9 +115,38 @@ export default class Base {
             );
         }
 
-
         // Generates a "session ID", which is used to access the database
         this.dbToken = SessionIDManager.generateSessionID(24);
+    }
+
+    /**
+     * Initializes the webserver & websocket server
+     * 
+     * @param server The server
+     */
+    public initializeServer(server: Server): void {
+        this.server = server;
+        this._server = server.app.listen(server.port);
+        this.wsServer = new ws.Server({
+            server: this._server
+        });
+
+        this.server.app.use(cookieParser());
+    }
+
+    /**
+     * Initializes all controllers
+     */
+    public initializeControllers(): void {
+        if (!this.server) return;
+        this.APIController = new APIController(this.server.app, this);
+        this.APIController.listen();
+
+        this.ClanController = new ClanController(this.server.app, this.db);
+        this.ClanController.listen();
+
+        this.RouteController = new RouteController(this.server.app, this);
+        this.RouteController.listen();
     }
 
     /**
@@ -130,15 +156,15 @@ export default class Base {
      * @returns {Promise<void>}
      */
     public async initializeDatabase(path: string): Promise<void> {
-        const { db } = this;
+        this.db = sqlite;
         this.dbPath = path;
         // Open database
-        await db.open(path);
+        await this.db.open(path);
         // Create all required tables if they don't exist
-        await db.run("CREATE TABLE IF NOT EXISTS logs (" +
+        await this.db.run("CREATE TABLE IF NOT EXISTS logs (" +
             "`name` TEXT, " +
             "`amount` INTEGER);");
-        await db.run("CREATE TABLE IF NOT EXISTS clans (" +
+        await this.db.run("CREATE TABLE IF NOT EXISTS clans (" +
             "`name` TEXT, " +
             "`leader` TEXT, " +
             "`cr` INTEGER DEFAULT 0, " +
@@ -146,20 +172,20 @@ export default class Base {
             "`description` TEXT, " +
             "`joinable` INTEGER, " +
             "`tag` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS verifications (" +
+        await this.db.run("CREATE TABLE IF NOT EXISTS verifications (" +
             "`user` TEXT," +
             "`code` TEXT, " +
             "`requestedAt` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS recentPromotions (" +
+        await this.db.run("CREATE TABLE IF NOT EXISTS recentPromotions (" +
             "`user` TEXT, " +
             "`newTier` TEXT, " +
             "`drop` INTEGER, " +
             "`promotedAt` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS news (" +
+        await this.db.run("CREATE TABLE IF NOT EXISTS news (" +
             "`headline` TEXT," +
             "`content` TEXT, " +
             "`createdAt` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS accounts (" +
+        await this.db.run("CREATE TABLE IF NOT EXISTS accounts (" +
             "`username` TEXT, " +
             "`password` TEXT, " +
             "`br` INTEGER, " +
@@ -174,18 +200,16 @@ export default class Base {
             "`wins` INTEGER, " +
             "`losses` INTEGER," +
             "`xp` INTEGER)");
-        await db.run("CREATE TABLE IF NOT EXISTS sessionids (" +
+        await this.db.run("CREATE TABLE IF NOT EXISTS sessionids (" +
             "`username` TEXT, " +
             "`sessionid` TEXT, " +
             "`expires` TEXT)");
-        await db.run("CREATE TABLE IF NOT EXISTS bans (" +
+        await this.db.run("CREATE TABLE IF NOT EXISTS bans (" +
             "`username` TEXT, " +
             "`reason` TEXT, " +
             "`bannedAt` TEXT, " +
             "`expires` TEXT, " +
             "`moderator` TEXT)");
-        // Log number of existing accounts in database
-        await db.get("SELECT count(*) FROM accounts").then(console.log.bind(null, "Accounts: "));
     }
 
     /**
@@ -194,6 +218,7 @@ export default class Base {
      * @returns {Promise<void>}
      */
     public async initializeRoutes(): Promise<void> {
+        if (!this.server) return;
         const { app } = this.server;
         // For accessing POST body
         app.use(bodyParser.urlencoded({ extended: true }));
@@ -205,7 +230,11 @@ export default class Base {
         app.use("/css", express.static("./public/css"));
     }
 
+    /**
+     * Initializes all events
+     */
     public async initializeEvents(): Promise<void> {
+        if (!this.wsServer) return;
         // Maintenance check
         if (this.maintenance.enabled) throw new Error(this.maintenance.reason || "Maintenance");
 
@@ -273,5 +302,33 @@ export default class Base {
                 });
             }
         }, 20);
+    }
+
+    /**
+     * Initializes all controllers and components
+     */
+    public async run(server?: Server): Promise<Base> {
+        await this.initializeServer(server || {
+            app: express.default(),
+            port: Number(process.env.PORT) || 80
+        });
+        await this.initializeDatabase("./db.sqlite");
+        await this.initializeRoutes();
+
+        if (!this.server) return this;
+        this.server.app.use((_: express.Request, res: express.Response, next: () => void) => {
+            if (this.maintenance.enabled) {
+                res.send(
+                    readFileSync("./backend/Maintenance.html", "utf8")
+                        .replace(/{comment}/g, this.maintenance.reason || "")
+                );
+                return;
+            }
+            return next();
+        });
+
+        await this.initializeEvents();
+        await this.initializeControllers();
+        return this;
     }
 }
