@@ -4,9 +4,10 @@ import * as ws from "ws";
 import * as http from "http";
 import {readFileSync} from "fs";
 import bodyParser = require("body-parser");
-import sqlite from "sqlite";
 // Import structures
 const LoadbalancerConfig = require("../../configs/lb");
+const DatabaseConfig = require("../../configs/database");
+import Database from "./Database";
 import Loadbalancer from "./Loadbalancer";
 import * as SessionIDManager from "./SessionIDManager";
 import WS, * as WSEvents from "../WSEvents";
@@ -55,7 +56,7 @@ export default class Base {
     // The WebSocket server
     public wsServer?: ws.Server;
     // The database driver
-    public db: any;
+    public db?: Database;
     // A 45-characters long token that is used to access the database
     // WARNING: Do not give this to anyone
     // It will be logged to the console when the database is ready to execute queries
@@ -151,65 +152,9 @@ export default class Base {
 
     /**
      * Initializes database
-     *
-     * @param {string} path
-     * @returns {Promise<void>}
      */
-    public async initializeDatabase(path: string): Promise<void> {
-        this.db = sqlite;
-        this.dbPath = path;
-        // Open database
-        await this.db.open(path);
-        // Create all required tables if they don't exist
-        await this.db.run("CREATE TABLE IF NOT EXISTS logs (" +
-            "`name` TEXT, " +
-            "`amount` INTEGER);");
-        await this.db.run("CREATE TABLE IF NOT EXISTS clans (" +
-            "`name` TEXT, " +
-            "`leader` TEXT, " +
-            "`cr` INTEGER DEFAULT 0, " +
-            "`members` TEXT, " +
-            "`description` TEXT, " +
-            "`joinable` INTEGER, " +
-            "`tag` TEXT)");
-        await this.db.run("CREATE TABLE IF NOT EXISTS verifications (" +
-            "`user` TEXT," +
-            "`code` TEXT, " +
-            "`requestedAt` TEXT)");
-        await this.db.run("CREATE TABLE IF NOT EXISTS recentPromotions (" +
-            "`user` TEXT, " +
-            "`newTier` TEXT, " +
-            "`drop` INTEGER, " +
-            "`promotedAt` TEXT)");
-        await this.db.run("CREATE TABLE IF NOT EXISTS news (" +
-            "`headline` TEXT," +
-            "`content` TEXT, " +
-            "`createdAt` TEXT)");
-        await this.db.run("CREATE TABLE IF NOT EXISTS accounts (" +
-            "`username` TEXT, " +
-            "`password` TEXT, " +
-            "`br` INTEGER, " +
-            "`createdAt` TEXT," +
-            "`role` INTEGER, " +
-            "`blobcoins` INTEGER, " +
-            "`lastDailyUsage` TEXT," +
-            "`distance` INTEGER," +
-            "`blobs` TEXT," +
-            "`activeBlob` TEXT, " +
-            "`clan` TEXT, " +
-            "`wins` INTEGER, " +
-            "`losses` INTEGER," +
-            "`xp` INTEGER)");
-        await this.db.run("CREATE TABLE IF NOT EXISTS sessionids (" +
-            "`username` TEXT, " +
-            "`sessionid` TEXT, " +
-            "`expires` TEXT)");
-        await this.db.run("CREATE TABLE IF NOT EXISTS bans (" +
-            "`username` TEXT, " +
-            "`reason` TEXT, " +
-            "`bannedAt` TEXT, " +
-            "`expires` TEXT, " +
-            "`moderator` TEXT)");
+    public initializeDatabase(): void {
+        this.db = new Database(DatabaseConfig);
     }
 
     /**
@@ -312,7 +257,7 @@ export default class Base {
             app: express.default(),
             port: Number(process.env.PORT) || 80
         });
-        await this.initializeDatabase("./db.sqlite");
+        await this.initializeDatabase();
         await this.initializeRoutes();
 
         if (!this.server) return this;

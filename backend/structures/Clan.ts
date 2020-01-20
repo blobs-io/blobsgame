@@ -38,11 +38,12 @@ export default class Clan {
         this.tag = data.tag;
     }
 
-    public static delete(data: ClanData | string, base: Base): Promise<Array<any>> {
+    public static async delete(data: ClanData | string, base: Base): Promise<Array<any> | undefined> {
+        if (!base.db) return;
         const target: string = typeof data !== "string" ? data.name : data;
         return Promise.all([
-            base.db.run("DELETE FROM clans WHERE name = ?", target),
-            base.db.run("UPDATE accounts SET clan = ? WHERE clan = ?", null, target)
+            base.db.query(`DELETE FROM clans WHERE "name" = $1`, [target]),
+            base.db.query(`UPDATE accounts SET "clan" = $1 WHERE "clan" = $2`, [null, target])
         ]);
     }
 }

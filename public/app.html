@@ -106,11 +106,8 @@
     void (function() {
         function parseDistance(dist) {
             if (dist > 1000)
-                return (dist / 1000).toFixed(2) + "M";
-            else if (dist > 1) {
-                return dist.toFixed(2) + "K";
-            }
-            else return (dist * 1000).toFixed(0);
+                return (dist / 1000).toFixed(2) + "K";
+            else return (dist).toFixed(0);
         }
 
         const session = document.cookie.split(/; */).find(v => v.startsWith("session=")).split("=")[1];

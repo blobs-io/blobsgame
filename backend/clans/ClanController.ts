@@ -36,7 +36,7 @@ export default class ClanController {
             if (!req.params.clan) return res.send(
                 readFileSync("./public/errors/404.html", "utf8")
             );
-            const clan: ClanData | undefined = await this.db.get("SELECT * FROM clans WHERE name=?", req.params.clan);
+            const clan: ClanData | undefined = await this.db.query("SELECT * FROM clans WHERE name = $1", [req.params.clan]).then((v: any) => v.rows[0]);
             if (!clan) return res.send(
                 readFileSync("./public/errors/404.html", "utf8")
             );

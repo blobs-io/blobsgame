@@ -5,6 +5,8 @@ import * as SessionIDManager from "../structures/SessionIDManager";
 import {readFile, appendFile, existsSync} from "fs";
 import * as bcrypt from "bcrypt";
 import Captcha from "../structures/Captcha";
+import { Role } from "../structures/Player";
+import Database from "../structures/Database";
 
 // Used for listening to requests that are related to regular routing (normal pages)
 export default class RouteController {
@@ -29,6 +31,7 @@ export default class RouteController {
         // Returns the landing page for after logging in
         // On this page, a daily bonus can be requested every 24h, a room can be joined or the current blob can be switched
         this.app.get("/app", async (req: express.Request, res: express.Response) => {
+            if (!base.db) return;
             const { session } = req.cookies;
             if (!session)
                 return res.send("<script>document.location.href='/login?nr';</script>");
@@ -37,8 +40,10 @@ export default class RouteController {
                 type: "session",
                 value: session
             });
-            const user: any = await base.db.get("SELECT * FROM accounts WHERE username = ?", dbSession.username);
-            const promotions: any = await base.db.all("SELECT * FROM recentPromotions ORDER BY promotedAt DESC LIMIT 10");
+            if (!dbSession)
+                return res.send("<script>document.location.href='/login?nr';</script>");
+            const user: any = await base.db.query(`SELECT * FROM accounts WHERE "username" = $1`, [dbSession.username]).then((v: any) => v.rows[0]);
+            const promotions: any = await base.db.query(`SELECT * FROM recentPromotions ORDER BY "promotedAt" DESC LIMIT 10`).then((v: any) => v.rows);
             base.sockets.push({
                 username: dbSession.username,
                 br: user.br,
@@ -64,6 +69,7 @@ export default class RouteController {
         // You are required to authorize by using a 45-characters long database token 
         // that is logged to the console when the process is started as GET parameter `token`
         this.app.get("/db.sqlite", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             if (req.query.auth === "cookie") {
                 const { session } = req.cookies;
 
@@ -90,7 +96,7 @@ export default class RouteController {
                     return;
                 }
 
-                const { role } = await this.base.db.get("SELECT role FROM accounts WHERE username = ?", dbSession.username);
+                const { role } = await this.base.db.query(`SELECT "role" FROM accounts WHERE username = $1`, [dbSession.username]).then((v: any) => v.rows[0]);
 
                 if (role !== 1) {
                     try {
@@ -138,6 +144,7 @@ export default class RouteController {
         // POST /login
         // Validates login data, sets a session cookie when successfully logged in and stores session ID
         this.app.post("/login", async (req: express.Request, res: express.Response) => {
+            if (!base.db) return;
             const { username, password } = req.body;
             if (!username || !password || typeof username !== "string" || typeof password !== "string")
                 return readFile("./public/login.html", "utf8", (err: any, data: any) => {
@@ -147,24 +154,25 @@ export default class RouteController {
             const banned: { is: boolean, reason?: string, expires?: number } = {
                 is: false
             };
-            await base.db.prepare("SELECT reason, expires FROM bans WHERE username = ?").then((prepare: { get: (query: Array<string>) => any }) => {
-                prepare.get([username]).then((result: { expires: string, reason: string } | undefined) => {
-                    if (typeof result === "undefined") return;
-                    if (Date.now() > Number(result.expires))
-                        return base.db.prepare("DELETE FROM bans WHERE username=?")
-                            .then((prepared: { run: (query: Array<string>) => any }) => prepared.run([username]));
+            
+            const banQuery = await base.db.query(`SELECT "reason", "expires" FROM bans WHERE username = $1`, [username]).then((v: any) => v.rows[0]);
+            if (banQuery) {
+                if (Date.now() > Number(banQuery.expires)) {
+                    await base.db.query("DELETE FROM bans WHERE username = $1", [username]);
+                } else {
                     banned.is = true;
-                    banned.reason = result.reason;
-                    banned.expires = Number(result.expires);
-                });
-            });
+                    banned.reason = banQuery.reason;
+                    banned.expires = Number(banQuery.expires);
+                }
+            }
+            
             if (banned.is && banned.expires)
                 return readFile("./public/login.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('You are banned: " + banned.reason + "\\nExpires: " + new Date(Number(banned.expires)).toLocaleString() + "');</script>" + data);
                 });
 
-            base.db.prepare("SELECT * FROM accounts WHERE upper(username) = ?")
-                .then((prepare: any) => prepare.get([ username.toUpperCase() ]))
+            base.db.query("SELECT * FROM accounts WHERE upper(username) = $1", [username.toUpperCase()])
+                .then((v: any) => v.rows[0])
                 .then(async (result: any) => {
                     if (!result)
                         return readFile("./public/login.html", "utf8", (err: any, data: any) => {
@@ -175,18 +183,18 @@ export default class RouteController {
                             res.send("<script>alert('Invalid username or password.');</script>" + data);
                         });
 
-                    const sessionExists: boolean = await SessionIDManager.exists(base.db, {
+                    const sessionExists: boolean = await SessionIDManager.exists(<Database>base.db, {
                         type: "username",
                         value: username
                     });
 
                     if (sessionExists)
-                        await SessionIDManager.deleteSession(base.db, {
+                        await SessionIDManager.deleteSession(<Database>base.db, {
                             type: "username",
                             value: username
                         });
 
-                    const sessionID: string = await SessionIDManager.registerID(base.db, username)
+                    const sessionID: string = await SessionIDManager.registerID(<Database>base.db, username)
 
 
                     // Successfully logged in
@@ -213,6 +221,7 @@ export default class RouteController {
         // POST /register
         // Validates registration data and sets a cookie if successful registration
         this.app.post("/register", async (req: express.Request, res: express.Response) => {
+            if (!base.db) return;
             if (typeof req.body.username !== "string" || typeof req.body.password !== "string" || typeof req.body["captcha-input"] !== "string")
                 return readFile("./public/register.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('Please enter a username, password and the given captcha.');</script>" + data);
@@ -234,7 +243,7 @@ export default class RouteController {
                     res.send("<script>alert('Wrong captcha.');</script>" + data);
                 });
 
-            const testQuery: any = await base.db.get("SELECT * FROM accounts WHERE upper(username) = ?", req.body.username.toUpperCase());
+            const testQuery: any = await base.db.query("SELECT * FROM accounts WHERE upper(username) = $1", [req.body.username.toUpperCase()]).then((v: any) => v.rows[0]);
             if (testQuery)
                 return readFile("./public/register.html", "utf8", (err: any, data: any) => {
                     res.send("<script>alert('Username is already taken.');</script>" + data);
@@ -242,14 +251,28 @@ export default class RouteController {
 
             const hash: string = bcrypt.hashSync(req.body.password, 10);
 
-            base.db.prepare("INSERT INTO accounts VALUES (?, ?, 1000, ?, 0, 0, 0, 0, ?, ?, null, 0, 0, 0)")
-                .then((v: any) => v.run([
-                    req.body.username,
-                    hash,
-                    Date.now(),
-                    "blobowo",
-                    "blobowo"
-                ]))
+            await base.db.query(`
+                INSERT INTO accounts 
+                ("username", "password", "br", "createdAt", "role", "blobcoins", "lastDailyUsage", "distance", "blobs", "activeBlob", "clan", "wins", "losses", "xp")
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            `, [
+                req.body.username,
+                hash,
+                // TODO: use constants instead of hardcoded values
+                // should be added to user model (if we ever get to that point...)
+                1000,
+                Date.now(),
+                Role.USER,
+                0,
+                0,
+                0,
+                "blobowo",
+                "blobowo",
+                null,
+                0,
+                0,
+                0
+            ])
                 .then(() => {
                     res.send("Account successfully created! Redirecting in 5 seconds...<script>setTimeout(()=>document.location.href='/',5000);</script>");
                 })
@@ -297,11 +320,12 @@ export default class RouteController {
         // GET /verify
         // Returns a page where an authenticated user may link their Discord account
         this.app.get("/verify", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             const { session } = req.cookies;
             if (!session)
                 return res.send("<script>document.location.href='/login';</script>");
 
-            const dbSession: any = await SessionIDManager.getSession(base.db, {
+            const dbSession: any = await SessionIDManager.getSession(<Database>base.db, {
                 type: "session",
                 value: session
             });
@@ -316,6 +340,7 @@ export default class RouteController {
         // GET /cms
         // Returns the content management system page where administrators can access the database
         this.app.get("/cms", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             const { session } = req.cookies;
 
             if (!session) {
@@ -341,7 +366,7 @@ export default class RouteController {
                 return;
             }
 
-            const { role } = await this.base.db.get("SELECT role FROM accounts WHERE username = ?", dbSession.username);
+            const { role } = await this.base.db.query(`SELECT "role" FROM accounts WHERE username = $1`, [dbSession.username]).then((v: any) => v.rows[0]);
 
             if (role !== 1) {
                 try {
