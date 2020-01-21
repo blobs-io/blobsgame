@@ -92,7 +92,7 @@ export default class APIController {
             });
             Player.joinClan(clan, requester.username, this.base)
                 .then(v => res.json(v))
-                .catch(e => res.status(500).json({
+                .catch(e => res.status(400).json({
                     message: e.message
                 }));
         });

@@ -197,17 +197,11 @@ export default class Player {
         if (!clan.joinable) throw new Error("This clan is not joinable");
         if (parsedMembers.includes(targetPlayer)) throw new Error("Requested user is already in this clan");
         if (parsedMembers.length >= ClanController.MemberLimit) throw new Error("Clan is full");
-        if (((await base.db.query(`SELECT "clan" FROM accounts WHERE "username" = $1`)).rows[0] || {}).clan) throw new Error("Requested user is already in another clan");
+        if (((await base.db.query(`SELECT "clan" FROM accounts WHERE "username" = $1`, [targetPlayer])).rows[0] || {}).clan) throw new Error("Requested user is already in another clan");
 
         parsedMembers.push(targetPlayer);
-        await base.db.query(`
-            UPDATE accounts SET "clan" = $1 WHERE "username" = $2;
-            UPDATE clans SET "members" = $3 WHERE "name" = $1;
-        `, [
-            clan.name,
-            targetPlayer,
-            JSON.stringify(parsedMembers),
-        ]);
+        await base.db.query(`UPDATE accounts SET "clan" = $1 WHERE "username" = $2`, [clan.name, targetPlayer]);
+        await base.db.query(`UPDATE clans SET "members" = $1 WHERE "name" = $2`, [JSON.stringify(parsedMembers), clan.name]);
         return clan;
     }
 
