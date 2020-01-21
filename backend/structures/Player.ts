@@ -159,7 +159,12 @@ export default class Player {
 
     // Updates the distance in database
     public async saveDistance(customDistance: number = this.distance): Promise<any> {
-        return this.base.db.run("UPDATE accounts SET distance = distance + ?, xp = xp + ? WHERE username = ?", customDistance / 1000, customDistance / 12, this.owner);
+        if (!this.base.db) return;
+        return this.base.db.query(`UPDATE accounts SET "distance" = "distance" + $1, "xp" = "xp" + $2 WHERE "username" = $3`, [
+            Math.floor(customDistance),
+            Math.floor(customDistance / 12),
+            this.owner
+        ]);
     }
 
     // Sends a websocket message to this player
@@ -173,42 +178,44 @@ export default class Player {
     // TODO: change arguments to object and make properties optional
     // dynamically add columns to query that are needed for update
     public update(br: number, coins: number, xp: number): void {
-        if (!this.guest) {
-            let query = "UPDATE accounts SET blobcoins = blobcoins + ?, br = br + ?, xp = xp + ? WHERE username = ?";
-            if (this.br + br > 9999) query = query.replace(", br = br + ?", ", br = 9999");
+        if (!this.guest && this.base.db) {
+            let query = `UPDATE accounts SET "blobcoins" = "blobcoins" + $1, "br" = "br" + $2, "xp" = "xp" + $3 WHERE "username" = $4`;
+            if (this.br + br > 9999) query = query.replace(`, "br" = "br" + $2`, `, "br" = 9999`);
             
-            if (query.includes(", br = br + ?"))
-                this.base.db.run(query, coins, br, xp, this.owner);
+            if (query.includes(`, "br" = "br" + $2`))
+                this.base.db.query(query, [coins, br, xp, this.owner]);
             else
-                this.base.db.run(query, coins, xp, this.owner);
+                this.base.db.query(query, [coins, xp, this.owner]);
         }
     }
 
-    public static async joinClan(clan: ClanData, player: Player | String, base: Base): Promise<ClanData> {
+    public static async joinClan(clan: ClanData, player: Player | String, base: Base): Promise<ClanData | undefined> {
+        if (!base.db) throw new Error("DB instance not present");
         const targetPlayer = player instanceof Player ? player.owner : player,
               parsedMembers = JSON.parse(clan.members);
 
         if (!clan.joinable) throw new Error("This clan is not joinable");
         if (parsedMembers.includes(targetPlayer)) throw new Error("Requested user is already in this clan");
         if (parsedMembers.length >= ClanController.MemberLimit) throw new Error("Clan is full");
-        if (await base.db.get("SELECT clan FROM accounts WHERE clan = ?", clan.name)) throw new Error("Requested user is already in another clan");
+        if (((await base.db.query(`SELECT "clan" FROM accounts WHERE "username" = $1`, [targetPlayer])).rows[0] || {}).clan) throw new Error("Requested user is already in another clan");
 
         parsedMembers.push(targetPlayer);
-        await base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", clan.name, targetPlayer);
-        await base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(parsedMembers), clan.name);
+        await base.db.query(`UPDATE accounts SET "clan" = $1 WHERE "username" = $2`, [clan.name, targetPlayer]);
+        await base.db.query(`UPDATE clans SET "members" = $1 WHERE "name" = $2`, [JSON.stringify(parsedMembers), clan.name]);
         return clan;
     }
 
     public static async leaveClan(clan: ClanData, player: Player | string, base: Base): Promise<ClanData> {
+        if (!base.db) throw new Error("DB instance not present");
         const targetPlayer = player instanceof Player ? player.owner : player,
               parsedMembers = JSON.parse(clan.members);
 
         parsedMembers.splice(parsedMembers.indexOf(targetPlayer), 1);
-        await base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", null, targetPlayer);
+        await base.db.query(`UPDATE accounts SET "clan" = $1 WHERE "username" = $2`, [null, targetPlayer]);
         if (parsedMembers.length === 0) {
-            await base.db.run("DELETE FROM clans WHERE name = ?", clan.name);
+            await base.db.query(`DELETE FROM clans WHERE "name" = $1`, [clan.name]);
         } else {
-            await base.db.run("UPDATE clans SET members = ? WHERE name = ?", JSON.stringify(parsedMembers), clan.name);
+            await base.db.query(`UPDATE clans SET "members" = $1 WHERE "name" = $2`, [JSON.stringify(parsedMembers), clan.name]);
         }
         return clan;
     }

@@ -66,7 +66,7 @@ export default class WSHandler {
             return;
         }
         const { op, d, t } = parsed;
-        if (typeof op !== "number" || typeof d !== "object") return;
+        if (typeof op !== "number" || typeof d !== "object" || !this.base.db) return;
         if (op === OPCODE.HELLO) {
             const session: any = d.session;
             const room: EliminationRoom.default | Room | undefined = this.base.rooms.find((r: Room) => r.id === d.room && r.mode === d.mode);
@@ -120,7 +120,7 @@ export default class WSHandler {
                 blob = "blobowo";
                 coins = 0;
             } else {
-                const user: any = await this.base.db.get("SELECT activeBlob, blobcoins FROM accounts WHERE username = ?", socket.username);
+                const user: any = await this.base.db.query(`SELECT "activeBlob", "blobcoins" FROM accounts WHERE username = $1`, [socket.username]).then(v => v.rows[0]);
                 blob = user.activeBlob;
                 coins = user.blobcoins;
                 socket.guest = false;
@@ -342,10 +342,8 @@ export default class WSHandler {
                                         winner.br = winner.br + result > 9999 ? 9999 : winner.br + result;
                                         loser.br = loser.br - ((result % 10) + 1) <= 0 ? 1 : loser.br - ((result % 9) + 1);
 
-                                        this.base.db.run("UPDATE accounts SET br = ? WHERE username = ?", loser.br, loser.owner).catch(console.log);
-                                        this.base.db.run("UPDATE accounts SET br = ? WHERE username = ?", winner.br, winner.owner).catch(console.log);
-                                        this.base.db.run("UPDATE accounts SET wins = wins + 1 WHERE username = ?", winner.owner).catch(console.log);
-                                        this.base.db.run("UPDATE accounts SET losses = losses + 1 WHERE username = ?", loser.owner).catch(console.log);
+                                        await this.base.db.query(`UPDATE accounts SET "br" = $1, "wins" = "wins" + 1 WHERE "username" = $2`, [winner.br, winner.owner]);
+                                        await this.base.db.query(`UPDATE accounts SET "br" = $1, "losses" = "losses" + 1 WHERE "username" = $2`, [loser.br, loser.owner]);
 
                                         const dropResult: {
                                             winner: TierHelper.Promotion | void,
@@ -356,10 +354,22 @@ export default class WSHandler {
                                         };
 
                                         if (dropResult.winner) {
-                                            this.base.db.run("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)", winner.owner, dropResult.winner.newTier, dropResult.winner.drop, Date.now()).catch(console.log);
+                                            await this.base.db.query(`INSERT INTO recentPromotions ("user", "newTier", "drop", "promotedAt") VALUES ($1, $2, $3, $4)`,
+                                            [
+                                                winner.owner,
+                                                dropResult.winner.newTier,
+                                                dropResult.winner.drop,
+                                                Date.now()
+                                            ]);
                                         }
                                         if (dropResult.loser) {
-                                            this.base.db.run("INSERT INTO recentPromotions VALUES (?, ?, ?, ?)", loser.owner, dropResult.loser.newTier, dropResult.loser.drop, Date.now()).catch(console.log);
+                                            await this.base.db.query(`INSERT INTO recentPromotions("user", "newTier", "drop", "promotedAt") VALUES ($1, $2, $3, $4)`,
+                                            [
+                                                loser.owner,
+                                                dropResult.loser.newTier,
+                                                dropResult.loser.drop,
+                                                Date.now()
+                                            ]);
                                         }
                                     }
 
@@ -428,7 +438,11 @@ export default class WSHandler {
                     } else
                         value = 3;
 
-                    this.base.db.run("UPDATE accounts SET blobcoins = ? WHERE username = ?", player.coins += value, player.owner);
+                    await this.base.db.query("UPDATE accounts SET blobcoins = $1 WHERE username = $2", 
+                    [
+                        player.coins += value,
+                        player.owner
+                    ]);
                     player.wsSend(JSON.stringify({
                         op: OPCODE.EVENT,
                         t: EventTypes.STATSCHANGE,

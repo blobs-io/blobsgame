@@ -98,13 +98,6 @@ export default class EliminationRoom extends Room.default {
             if (!winner.guest) {
                 winner.saveDistance();
                 winner.update(result, coinChange, 250);
-                /*let query = "UPDATE accounts SET blobcoins = blobcoins + ?, br = br + ? WHERE username = ?";
-                if (winner.br + result > 9999) query = query.replace(", br = br + ?", ", br = 9999");
-
-                if (query.includes(", br = br + ?"))
-                    this.base.db.run(query, coinChange, result, winner.owner);
-                else
-                    this.base.db.run(query, coinChange, winner.owner);*/
             }
 
             // Emit WIN KickType to winning player

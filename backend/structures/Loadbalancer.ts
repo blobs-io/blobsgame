@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import {redBright} from "chalk";
 
 export default class Loadbalancer {
     public host: string;
@@ -41,6 +42,10 @@ export default class Loadbalancer {
         this.gateway.on("close", () => {
             clearInterval(this._interval);
         });
+
+        this.gateway.on("error", e => {
+            console.log(redBright("Loadbalance error!"), e);
+        })
 
         return this.gateway;
     }

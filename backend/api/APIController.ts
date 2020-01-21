@@ -32,14 +32,16 @@ export default class APIController {
         // GET Endpoint: /api/clans/:name
         // Retrieve information about a specific clan or get an array of clans by using `list` as name parameter
         this.app.get("/api/clans/:name", (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             if (Array.isArray(req.params)) return;
             if (!req.params.name) return res.status(400).json({
                 message: "Invalid parameter provided"
             });
             const query: string = req.params.name === "list" ? 
-            "SELECT members, cr, name, joinable, tag FROM clans ORDER BY cr DESC LIMIT 10"
-            : "SELECT members, cr, leader, joinable, tag FROM clans WHERE name = ?"
-            this.base.db[req.params.name !== "list" ? "get" : "all"](query, req.params.name !== "list" ? req.params.name : undefined)
+            `SELECT "members", "cr", "name", "joinable", "tag" FROM clans ORDER BY cr DESC LIMIT 10`
+            : `SELECT "members", "cr", "leader", "joinable", "tag" FROM clans WHERE name = $1`;
+            this.base.db.query(query, req.params.name === "list" ? [] : [req.params.name])
+                .then(v => v.rows)
                 .then((v: Array<ClanData> | ClanData) => {
                     if (Array.isArray(v)) {
                         res.json(v.map((r: ClanData) => ({
@@ -73,7 +75,7 @@ export default class APIController {
         // Joins a specific clan by its name
         // Returns the joined clan
         this.app.post("/api/clans/:name/join", async (req: express.Request, res: express.Response) => {
-            // todo: this fails if :name doesn't exist
+            if (!this.base.db) return;
             const { session } = req.headers;
             if (!session) return res.status(400).json({
                 message: "No session header provided"
@@ -84,13 +86,13 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: ClanData | undefined = await this.base.db.get("SELECT name, members, cr, leader, joinable FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.query(`SELECT "name", "members", "cr", "leader", "joinable" FROM clans WHERE name = $1`, [req.params.name]).then((v: any) => v.rows[0]);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
             Player.joinClan(clan, requester.username, this.base)
                 .then(v => res.json(v))
-                .catch(e => res.status(500).json({
+                .catch(e => res.status(400).json({
                     message: e.message
                 }));
         });
@@ -99,6 +101,7 @@ export default class APIController {
         // Leaves a specific clan by its name
         // Returns all members of the clan after leaving
         this.app.post("/api/clans/:name/leave", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             const { session } = req.headers;
             if (!session) return res.status(400).json({
                 message: "No session header provided"
@@ -109,7 +112,7 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: ClanData | undefined = await this.base.db.get("SELECT name, members FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.query(`SELECT "name", "members" FROM clans WHERE name = $1`, [req.params.name]).then((v: any) => v.rows[0]);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
@@ -125,6 +128,7 @@ export default class APIController {
         // DELETE Endpoint: /api/clans/:name
         // Deletes a clan by its name (a clan can only be deleted by its leader)
         this.app.delete("/api/clans/:name", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             const { session } = req.headers;
             if (!session) return res.status(400).json({
                 message: "No session header provided"
@@ -135,7 +139,7 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: ClanData | undefined = await this.base.db.get("SELECT name, leader FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.query(`SELECT "name", "leader" FROM clans WHERE name = $1`, [req.params.name]).then((v: any) => v.rows[0]);
             if (!clan) return res.status(404).json({
                 message: "Clan not found"
             });
@@ -151,6 +155,7 @@ export default class APIController {
         // POST Endpoint: /api/clans/:name
         // Creates a new clan
         this.app.post("/api/clans/:name", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             const { session, description } = req.headers;
             if (!session) return res.status(400).json({
                 message: "No session header provided"
@@ -164,12 +169,12 @@ export default class APIController {
                 message: "Invalid session ID provided"
             });
 
-            const clan: ClanData | undefined = await this.base.db.get("SELECT 1 FROM clans WHERE name = ?", req.params.name);
+            const clan: ClanData | undefined = await this.base.db.query("SELECT 1 FROM clans WHERE name = $1", [req.params.name]).then((v: any) => v.rows[0]);
             if (clan) return res.status(400).json({
                 message: "Clan already exists"
             });
 
-            const { clan: userClan } = await this.base.db.get("SELECT clan FROM accounts WHERE username = ?", requester.username);
+            const { clan: userClan } = await this.base.db.query(`SELECT "clan" FROM accounts WHERE username = $1`, [requester.username]).then((v: any) => v.rows[0]);
             if (userClan) return res.status(400).json({
                 message: "Requested user is already in a clan"
             });
@@ -184,14 +189,16 @@ export default class APIController {
                 tag: req.params.name.substr(0, 4)
             });
             
-            await this.base.db.run("INSERT INTO clans VALUES (?, ?, 0, ?, ?, 1, ?)",
-                newClan.name, // clan name
-                newClan.leader, // clan leader
-                JSON.stringify(newClan.members), // members
-                newClan.description, // clan description
-                newClan.tag // clan tag
+            await this.base.db.query(`INSERT INTO clans ("name", "leader", "cr", "members", "description", "joinable", "tag") VALUES ($1, $2, 0, $3, $4, 1, $5)`,
+                [
+                    newClan.name,
+                    newClan.leader,
+                    JSON.stringify(newClan.members),
+                    newClan.description,
+                    newClan.tag
+                ]
             );
-            await this.base.db.run("UPDATE accounts SET clan = ? WHERE username = ?", newClan.name, requester.username);
+            await this.base.db.query("UPDATE accounts SET clan = $1 WHERE username = $2", [newClan.name, requester.username]);
             res.json(newClan);
         });
         
@@ -202,7 +209,7 @@ export default class APIController {
         // run: Executes a query (inserting, updating, ...)
         // all: Executes a query and returns all occurrences
         this.app.get("/api/executeSQL/:method", async (req: express.Request, res: express.Response) => {
-            if (Array.isArray(req.params)) return;
+            if (Array.isArray(req.params) || !this.base.db) return;
             if (typeof req.headers.sessionid !== "string" || typeof req.headers.query !== "string") {
                 res.status(400);
                 res.json({
@@ -228,7 +235,7 @@ export default class APIController {
             }
             let result;
             try {
-                result = await this.base.db[req.params.method](req.headers.query);
+                result = await this.base.db.query(req.headers.query).then(v => v.rows);
             } catch(e) {
                 res.status(500);
                 res.json({
@@ -314,7 +321,7 @@ export default class APIController {
         // Retrieve information about a specific user
         // Returns: username, br, createdAt, role
         this.app.get("/api/player/:username", async (req: express.Request, res: express.Response) => {
-            if (Array.isArray(req.params)) return;
+            if (Array.isArray(req.params) || !this.base.db) return;
             if (typeof req.params.username === "undefined") {
                 res.status(400);
                 res.json({
@@ -323,7 +330,7 @@ export default class APIController {
                 return;
             }
 
-            const result = await this.base.db.get("SELECT username, br, createdAt, role FROM accounts WHERE username = ?", req.params.username);
+            const result = await this.base.db.query(`SELECT "username", "br", "createdAt", "role" FROM accounts WHERE username = $1`, [req.params.username]).then((v: any) => v.rows[0]);
             if (!result) {
                 res.status(400);
                 res.json({
@@ -340,7 +347,9 @@ export default class APIController {
         // GET Endpoint: /api/players
         // Returns an array of top 25 players, sorted by BR
         this.app.get("/api/players", (req: express.Request, res: express.Response) => {
-            this.base.db.all("SELECT username, br, createdAt, role, wins, losses FROM accounts ORDER BY br DESC LIMIT 25")
+            if (!this.base.db) return;
+            this.base.db.query(`SELECT "username", "br", "createdAt", "role", "wins", "losses" FROM accounts ORDER BY br DESC LIMIT 25`)
+                .then((v: any) => v.rows)
                 .then((result: any) => {
                     res.json({ result });
                 });
@@ -349,6 +358,7 @@ export default class APIController {
         // GET Endpoint: /api/verify
         // This is used to link a Discord account to your blobs account
         this.app.get("/api/verify", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             if (typeof req.headers.code === "undefined") {
                 if (typeof req.headers.sessionid === "undefined") {
                     res.status(400);
@@ -367,7 +377,7 @@ export default class APIController {
                 }
 
                 if (req.query.request === "true") {
-                    const query = await this.base.db.get("SELECT code FROM verifications WHERE user = ?", requester.username);
+                    const query = await this.base.db.query(`SELECT "code" FROM verifications WHERE "user" = $1`, [requester.username]).then((v: any) => v.rows[0]);
                     if (!query) {
                         res.status(400);
                         res.json({
@@ -382,7 +392,7 @@ export default class APIController {
                     return;
                 }
 
-                const query: any = await this.base.db.get("SELECT * FROM verifications WHERE user = ?", requester.username);
+                const query: any = await this.base.db.query(`SELECT * FROM verifications WHERE "user" = $1`, [requester.username]).then((v: any) => v.rows[0]);
                 if (query) {
                     res.status(403);
                     res.json({
@@ -393,15 +403,15 @@ export default class APIController {
                 let verificationCode;
                 while(true) {
                     verificationCode = SessionIDManager.generateSessionID(16);
-                    const code = await this.base.db.get("SELECT code FROM verifications WHERE code = ?", verificationCode);
+                    const code = await this.base.db.query(`SELECT 1 FROM verifications WHERE "code" = $1`, [verificationCode]).then((v: any) => v.rows[0]);
                     if (!code) break;
                 }
-                await this.base.db.run("INSERT INTO verifications VALUES (?, ?, ?)", requester.username, verificationCode, Date.now());
+                await this.base.db.query("INSERT INTO verifications VALUES ($1, $2, $3)", [requester.username, verificationCode, Date.now()]);
                 res.json({
                     code: verificationCode
                 });
             } else if (typeof req.headers.code === "string") {
-                const result: {code: string, user: string} | undefined = await this.base.db.get("SELECT user FROM verifications WHERE code = ?", req.headers.code);
+                const result: {code: string, user: string} | undefined = await this.base.db.query(`SELECT "user" FROM verifications WHERE code = $1`, [req.headers.code]).then((v: any) => v.rows[0]);
                 if (!result) {
                     res.status(400);
                     res.json({
@@ -409,7 +419,7 @@ export default class APIController {
                     });
                     return;
                 }
-                await this.base.db.run("DELETE FROM verifications WHERE code = ?", req.headers.code);
+                await this.base.db.query("DELETE FROM verifications WHERE code = $1", [req.headers.code]);
                 res.json({
                     user: result.user
                 });
@@ -475,6 +485,7 @@ export default class APIController {
         // Note: This may only be requested every 24 hours
         // Every user is able to request a daily bonus by POSTing to this endpoint
         this.app.post("/api/daily", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             const { session } = req.headers;
             if (!session) return res.status(400).json({
                 message: "No session ID provided. Check session header."
@@ -484,12 +495,12 @@ export default class APIController {
                 return res.status(400).json({
                     message: "Socket not found. Try logging in again and retry."
                 });
-            const dbUser: any = await this.base.db.get("SELECT * FROM accounts WHERE username = ?", socket.username);
+            const dbUser: any = await this.base.db.query("SELECT * FROM accounts WHERE username = $1", [socket.username]).then((v: any) => v.rows[0]);
             if (Date.now() - dbUser.lastDailyUsage <= 86400000)
                 return res.status(400).json({
                     message: `Please wait ${DateFormatter.format(86400000 - (Date.now() - dbUser.lastDailyUsage))}`
                 });
-            this.base.db.run("UPDATE accounts SET lastDailyUsage = ?, blobcoins = blobcoins + 20 WHERE username = ?", Date.now(), socket.username)
+            await this.base.db.query(`UPDATE accounts SET "lastDailyUsage" = $1, "blobcoins" = "blobcoins" + 20 WHERE username = $2`, [Date.now(), socket.username])
                 .then(() => {
                     res.json({
                         message: "Successfully received daily bonus",
@@ -506,6 +517,7 @@ export default class APIController {
         // Used to switch blobs
         // To find a list of blobs, search in public/assets. All static images can be used (assuming the authenticated user has it unlocked)
         this.app.post("/api/switchBlob", async (req: express.Request, res: express.Response) => {
+            if (!this.base.db) return;
             const { blob: newBlob } = req.query;
             const { session } = req.headers;
             if (!newBlob) return res.status(400).json({
@@ -519,12 +531,12 @@ export default class APIController {
                 return res.status(400).json({
                     message: "Socket not found. Try logging in again and retry."
                 });
-            const dbUser: any = await this.base.db.get("SELECT blobs FROM accounts WHERE username = ?", socket.username);
+            const dbUser: any = await this.base.db.query("SELECT blobs FROM accounts WHERE username = $1", [socket.username]).then((v: any) => v.rows[0]);
             const availableBlobs: string[] = dbUser.blobs.split(",");
             if (!availableBlobs.includes(newBlob)) return res.status(400).json({
                 message: "You don't own this blob."
             });
-            this.base.db.run("UPDATE accounts SET activeBlob = ? WHERE username = ?", newBlob, socket.username)
+            await this.base.db.query(`UPDATE accounts SET "activeBlob" = $1 WHERE username = $2` , [newBlob, socket.username])
                 .then(() => {
                     res.json({
                         message: "Blob has been changed."
