@@ -1,10 +1,3 @@
-/*
-  await db.run("CREATE TABLE IF NOT EXISTS recentPromotions (" +
-            "`user` TEXT, " +
-            "`newTier` TEXT, " +
-            "`drop` INTEGER, " +
-            "`promotedAt` TEXT)");
-            */
 export default class Promotion {
     public user: string;
     public newTier: string;
