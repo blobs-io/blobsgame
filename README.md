@@ -6,13 +6,15 @@ The official repository for the browser game "blobs"<br/>
 **Note:** This game is still in development. It may not work yet. <br />
 ### Selfhosting notes
 If you plan to host this on your own you need to compile the rating system API using node-gyp. Please do not create any issues regarding compiling and other problems with the rating system in general on this repository. Instead, please use the other one.
-Internally it will send a request to the Discord API to execute a webhook. The authorization details (token and ID) are stored in the file `backend/Base.js`. If you do not wish to post traffic to Discord, leave values `undefined`.
-The backend code and some parts of the frontend code are in TypeScript, which means that you will have to transpile the TS Code into JavaScript. This can be done by installing `tsc` and running `npm run transpile`. The `transpile` npm script was made for Travis testing, but it can also be used to transpile. Here is an example on how you can install everything:<br/>
+Internally it will send a request to the Discord API to execute a webhook. The 
+The backend code and some parts of the frontend code are in TypeScript, which means that you will have to transpile the TS Code into JavaScript. This can be done by running `tsc`. Here is an example on how you can install everything:<br/>
 ```sh
-npm install
-npm run transpile
 chmod -R 777 scripts
-cd scripts && ./get-rs.sh && cd ..
+cd scripts
+./get-rs.sh
+cd ..
+npm install typescript -g
+tsc
 node-gyp configure build
 ```
 
