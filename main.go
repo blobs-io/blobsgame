@@ -30,5 +30,5 @@ func main() {
 	}
 	
 	// Init web server
-	go web.Init(config.MainConfig.Port)
+	web.Init(config.MainConfig.Port)
 }
