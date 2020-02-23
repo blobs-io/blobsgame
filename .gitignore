@@ -8,3 +8,4 @@ package-lock\.json
 .vscode
 rating-system/include
 build
+configs/database.json
