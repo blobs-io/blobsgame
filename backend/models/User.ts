@@ -10,7 +10,7 @@ export default class User {
     public xp: number;
     public blobs: string[];
     public activeBlob: string;
-    public clan: string;
+    public clan: string | null;
     public wins: number;
     public losses: number;
 

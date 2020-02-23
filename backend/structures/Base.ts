@@ -20,7 +20,7 @@ import APIController from "../api/APIController";
 import ClanController from "../clans/ClanController";
 import RouteController from "../routes/RouteController";
 import Captcha from "./Captcha";
-import Player from "./Player";
+import Player from "../models/Player";
 import EliminationRoom, {State} from "./EliminationRoom";
 import cookieParser = require("cookie-parser");
 

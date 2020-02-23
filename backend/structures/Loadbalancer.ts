@@ -21,8 +21,7 @@ export default class Loadbalancer {
             t: "stats",
             d: JSON.stringify({
                 accessToken: this.accessToken,
-                // todo...
-                mem: 0,
+                mem: process.memoryUsage().rss / 1024 ** 2,
                 cpu: 0
             })
         }));
@@ -30,7 +29,7 @@ export default class Loadbalancer {
 
     connect(customHost?: string): WebSocket {
         this.gateway = new WebSocket(customHost || this.host);
-
+	
         this.gateway.on("message", data => {
             const parsed: any = JSON.parse(data.toString());
             if (parsed.op === Loadbalancer.OpcodeHello) {
@@ -45,7 +44,7 @@ export default class Loadbalancer {
 
         this.gateway.on("error", e => {
             console.log(redBright("Loadbalance error!"), e);
-        })
+        });
 
         return this.gateway;
     }

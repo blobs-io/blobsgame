@@ -5,7 +5,7 @@ import * as SessionIDManager from "../structures/SessionIDManager";
 import {readFile, appendFile, existsSync} from "fs";
 import * as bcrypt from "bcrypt";
 import Captcha from "../structures/Captcha";
-import { Role } from "../structures/Player";
+import { Role } from "../models/Player";
 import Database from "../structures/Database";
 
 // Used for listening to requests that are related to regular routing (normal pages)

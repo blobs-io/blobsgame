@@ -27,6 +27,8 @@ export default class Clan {
     public joinable: boolean;
     // The tag of this clan (1-4 characteres)
     public tag: string;
+    // Maximum number of members a clan can have
+    public static MemberLimit: number = 20;
 
     constructor(data: ClanData) {
         this.cr = data.cr;

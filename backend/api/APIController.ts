@@ -9,7 +9,7 @@ import Jimp = require("jimp");
 import Captcha, {CAPTCHA_LIMIT} from "../structures/Captcha";
 import * as DateFormatter from "../utils/DateFormatter";
 import EliminationRoom from "../structures/EliminationRoom";
-import Player, { Role } from "../structures/Player";
+import Player, { Role } from "../models/Player";
 import ClanController from "../clans/ClanController";
 import Clan, {ClanData} from "../structures/Clan";
 

@@ -1,6 +1,6 @@
 // Imports
 import GameMap from "./GameMap";
-import Player from "./Player";
+import Player from "../models/Player";
 import {wsSocket} from "./Socket";
 import {EventTypes, OPCODE} from "../WSEvents";
 import Base from "./Base";

@@ -3,7 +3,7 @@ import * as Room from "./Room";
 import Socket, {wsSocket} from "./Socket";
 import {EventTypes, OPCODE, KickTypes} from "../WSEvents";
 import Base from "./Base";
-import Player from "./Player";
+import Player from "../models/Player";
 
 // Represents a state for an elimination room
 export enum State {

@@ -7,7 +7,7 @@ import * as EliminationRoom from "../structures/EliminationRoom";
 import LevelSystem from "../utils/LevelSystem";
 import Clan, { ClanData } from "../structures/Clan";
 import ClanController from "../clans/ClanController";
-import { Role } from "./User";
+import User, { Role } from "./User";
 
 export default class Player {
     public static regeneration = {
@@ -37,7 +37,7 @@ export default class Player {
     public lastRegeneration: number;
     public lastHeartbeat: number;
     public noms: number;
-    public user: Use
+    public user: User;
 
     constructor() {}
     public get inProtectedArea(): boolean {}

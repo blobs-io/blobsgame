@@ -1,7 +1,7 @@
 import Base from "./structures/Base";
 import Room, {Mode} from "./structures/Room";
 import Socket, {wsSocket} from "./structures/Socket"
-import Player, { Role } from "./structures/Player";
+import Player, { Role } from "./models/Player";
 import AntiCheat from "./structures/AntiCheat";
 import * as TierHelper from "./utils/TierHelper";
 import { execSync } from "child_process";
@@ -120,7 +120,7 @@ export default class WSHandler {
                 blob = "blobowo";
                 coins = 0;
             } else {
-                const user: any = await this.base.db.query(`SELECT "activeBlob", "blobcoins" FROM accounts WHERE username = $1`, [socket.username]).then(v => v.rows[0]);
+                const user: any = await this.base.db.fetchUser(socket.username);
                 blob = user.activeBlob;
                 coins = user.blobcoins;
                 socket.guest = false;
