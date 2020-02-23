@@ -1,0 +1,27 @@
+package main
+
+import (
+	"fmt"
+	"github.com/blobs-io/blobsgame/http/web"
+	"github.com/blobs-io/blobsgame/utils/config"
+	"os/exec"
+)
+
+func main() {
+	// Log commit hash
+	res, err := exec.Command("git", "rev-parse", "HEAD").Output()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Running hash %s\n", res)
+
+	// Parse config file
+	err = config.ParseConfig("configs/config.json")
+	if err != nil {
+		panic(err)
+	}
+
+
+	// Init web server
+	go web.Init(config.MainConfig.Port)
+}

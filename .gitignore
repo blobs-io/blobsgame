@@ -1,10 +1,5 @@
-node_modules
-db.sqlite
-**/*.js
-package-lock\.json
 *.exe
-.idea/*
-.eslintrc.json
+.idea
 .vscode
-rating-system/include
-build
+configs/config.json
+**/*.js

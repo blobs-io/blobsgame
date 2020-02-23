@@ -1,7 +1,0 @@
-language: node_js
-node_js:
-  - 9
-  - 10
-  - 11
-before_install: chmod -R 777 scripts && cd scripts && ./get-rs.sh && cd .. && npm install typescript -g
-script: tsc && node-gyp configure build
