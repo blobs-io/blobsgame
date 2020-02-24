@@ -30,6 +30,8 @@ func Init(port int) {
 	Router.HandleFunc(RegisterRoute, routes.Register).Methods("POST")
 	Router.HandleFunc(AppRoute, HandleStatic(AppRoute)).Methods("GET")
 	Router.HandleFunc(GameRoute, HandleStatic(GameRoute)).Methods("GET")
+	// Assets
+	Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public")))
 
 	fmt.Printf("Webserver running on port %d\n", port)
 	err := http.ListenAndServe(":" + strconv.Itoa(port), Router)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 type CacheEntry struct {
@@ -66,7 +65,7 @@ func HandleStatic(route string) func(w http.ResponseWriter, r *http.Request) {
 		res, err := ioutil.ReadFile(routeObj.Path)
 
 		if err != nil {
-			ServerError(w)
+			http.Error(w, http.StatusText(500), 500)
 			fmt.Println(route, err)
 			return
 		}
@@ -78,18 +77,5 @@ func HandleStatic(route string) func(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-	}
-}
-
-func ServerError(w http.ResponseWriter) {
-	_, err := w.Write([]byte(strings.TrimSpace(`
-<html>
-<body>
-<h1>500 Server Error</h1>
-</body>
-</html>
-	`)))
-	if err != nil {
-		fmt.Println(err)
 	}
 }
