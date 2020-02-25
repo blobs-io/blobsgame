@@ -4,3 +4,4 @@
 configs/config.json
 configs/database.json
 **/*.js
+**/*.gz

@@ -2,13 +2,10 @@ package web
 
 import (
 	"fmt"
-	"github.com/blobs-io/blobsgame/http/web/routes"
-	"github.com/gorilla/mux"
-	"net/http"
-	"strconv"
+	"github.com/gofiber/fiber"
 )
 
-var Router *mux.Router
+var App *fiber.App
 
 const (
 	HomeRoute = "/"
@@ -19,23 +16,28 @@ const (
 )
 
 func Init(port int) {
-	RouteCache = make(map[string][]byte)
-	Router = mux.NewRouter()
+	App = fiber.New(&fiber.Settings {
+		MaxRequestBodySize: 1024 * 500,
+	})
 
-	// Main routes
-	Router.HandleFunc(HomeRoute, HandleStatic(HomeRoute)).Methods("GET")
-	Router.HandleFunc(LoginRoute, HandleStatic(LoginRoute)).Methods("GET")
-	Router.HandleFunc(LoginRoute, routes.Login).Methods("POST")
-	Router.HandleFunc(RegisterRoute, HandleStatic(RegisterRoute)).Methods("GET")
-	Router.HandleFunc(RegisterRoute, routes.Register).Methods("POST")
-	Router.HandleFunc(AppRoute, HandleStatic(AppRoute)).Methods("GET")
-	Router.HandleFunc(GameRoute, HandleStatic(GameRoute)).Methods("GET")
-	// Assets
-	Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public")))
+	App.Get("/", func(ctx *fiber.Ctx) {
+		ctx.Redirect("/login")
+	})
+	App.Static("/api/v1/docs", "./public/api/docs")
+	App.Static("/app", "./public/app")
+	App.Static("/login", "./public/login")
+	App.Static("/assets", "./public/assets")
+	App.Static("/clans", "./public/clans")
+	App.Static("/css", "./public/css")
+	App.Static("/game", "./public/game")
+	App.Static("/js", "./public/js")
+	App.Static("/register", "./public/register")
+	App.Static("/sources", "./public/sources")
+	App.Static("/verify", "./public/verify")
 
-	fmt.Printf("Webserver running on port %d\n", port)
-	err := http.ListenAndServe(":" + strconv.Itoa(port), Router)
+	fmt.Printf("Webserver listening on port %d\n", port)
+	err := App.Listen(port)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }
