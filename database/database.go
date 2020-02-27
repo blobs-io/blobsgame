@@ -22,7 +22,8 @@ var Database *sql.DB
 
 // Init initializes SQL connection
 func Init(config DbConfig) error {
-	Database, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s sslmode=%s", config.Host, config.Port, config.DBName, config.User, config.Password, config.SSL))
+	var err error
+	Database, err = sql.Open("postgres", fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s sslmode=%s", config.Host, config.Port, config.DBName, config.User, config.Password, config.SSL))
 	if err != nil {
 		return err
 	}

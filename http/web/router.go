@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"github.com/blobs-io/blobsgame/http/web/routes"
 	"github.com/gofiber/fiber"
 )
 
@@ -16,14 +17,12 @@ const (
 )
 
 func Init(port int) {
-	App = fiber.New(&fiber.Settings {
-		MaxRequestBodySize: 1024 * 500,
-	})
+	App = fiber.New()
 
+	// Main routes
 	App.Get("/", func(ctx *fiber.Ctx) {
 		ctx.Redirect("/login")
 	})
-	App.Static("/api/v1/docs", "./public/api/docs")
 	App.Static("/app", "./public/app")
 	App.Static("/login", "./public/login")
 	App.Static("/assets", "./public/assets")
@@ -34,6 +33,8 @@ func Init(port int) {
 	App.Static("/register", "./public/register")
 	App.Static("/sources", "./public/sources")
 	App.Static("/verify", "./public/verify")
+
+	App.Post("/login", routes.Login)
 
 	fmt.Printf("Webserver listening on port %d\n", port)
 	err := App.Listen(port)
