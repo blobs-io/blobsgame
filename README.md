@@ -1,5 +1,7 @@
 # blobs game
 
+### Warning, read before submitting a pull request: the backend is currently being rewritten in go and changes are being made to the frontend, so we will most likely reject your pull request. Please open an issue and ask if a certain feature can be implemented in a pull request. The rewrite is happening under the go branch
+
 [![Build Status](https://travis-ci.org/blobs-io/blobsgame.svg?branch=master)](https://travis-ci.org/blobs-io/blobsgame)
 
 The official repository for the browser game "blobs"<br/>
