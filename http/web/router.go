@@ -35,6 +35,7 @@ func Init(port int) {
 	App.Static("/verify", "./public/verify")
 
 	App.Post("/login", routes.Login)
+	App.Post("/register", routes.Register)
 
 	fmt.Printf("Webserver listening on port %d\n", port)
 	err := App.Listen(port)

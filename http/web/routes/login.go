@@ -12,8 +12,6 @@ type LoginRequestBody struct {
 	Password string `json:"password"`
 }
 
-
-
 func Login(ctx *fiber.Ctx) {
 	var body LoginRequestBody
 	err := ctx.BodyParser(&body)
