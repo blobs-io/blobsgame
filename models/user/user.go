@@ -3,11 +3,14 @@ package user
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/blobs-io/blobsgame/database"
 	"github.com/blobs-io/blobsgame/models/ban"
 	"github.com/blobs-io/blobsgame/models/session"
 	"golang.org/x/crypto/bcrypt"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -31,16 +34,35 @@ type User struct {
 const (
 	BanText = "user is currently banned"
 	InvalidUserPass = "invalid username or password"
+	UserNotFound = "no user with that username was found"
+	InvalidUsernameLength = "username needs to be at least 3 characters long and must not exceed 14 characters"
+	InvalidPasswordLength = "password needs to be at least 4 characters long and must not exceed 128 characters"
+	InvalidUsernamePattern = "username does not match pattern. Please only use letters, numbers and spaces"
+	UsernameTaken = "username is already taken"
+	UnknownError = "an unknown error occurred"
+
+	// Properties
+	StartRating = 1000
+	StartCoins = 0
+	StartBlob = "blobowo"
+	StartXP = 0
+
+	// Roles
+	UserRole = 0
+)
+
+var (
+	UsernameRegex = regexp.MustCompile("^[\\w ]+$")
 )
 
 func GetUser(username string) (*User, error) {
-	rows, err := database.Database.Query("SELECT * FROM accounts WHERE username = $1", username)
+	rows, err := database.Database.Query("SELECT * FROM accounts WHERE upper(username) = $1", strings.ToUpper(username))
 	if err != nil {
 		return nil, err
 	}
 
 	if !rows.Next() {
-		return nil, errors.New("no user with that username was found")
+		return nil, errors.New(UserNotFound)
 	}
 	var user User
 	err = rows.Scan(&user.Username,
@@ -107,4 +129,78 @@ func Login(username string, password string) (*session.Session, error) {
 	}
 
 	return session.Register(username, (time.Now().UnixNano() / 1000000) + session.SessionDuration)
+}
+
+func Register(username string, password string) error {
+	// (req.body.username.length < 3 || req.body.username.length > 14)
+	if len(username) < 3 || len(username) > 14 {
+		return errors.New(InvalidUsernameLength)
+	}
+
+	if len(password) < 4 || len(password) > 128 {
+		return errors.New(InvalidPasswordLength)
+	}
+
+	if !UsernameRegex.Match([]byte(username)) {
+		return errors.New(InvalidUsernamePattern)
+	}
+
+	// TODO: captcha
+
+	_, err := GetUser(username)
+	if err != nil {
+		if err.Error() != UserNotFound {
+			fmt.Println(err)
+			return errors.New(UnknownError)
+		}
+	} else {
+		return errors.New(UsernameTaken)
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println(err)
+		return errors.New(UnknownError)
+	}
+
+	// Columns:
+	// ("username", "password", "br", "createdAt", "role", "blobcoins", "lastDailyUsage", "distance", "blobs", "activeBlob", "clan", "wins", "losses", "xp")
+	_, err = database.Database.Query("INSERT INTO accounts VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
+		// Username
+		username,
+		// Password hash
+		passwordHash,
+		// BR
+		StartRating,
+		// Creation timestamp
+		strconv.FormatInt(time.Now().UnixNano() / int64(time.Millisecond), 10),
+		// Role
+		UserRole,
+		// Coins
+		StartCoins,
+		// Last daily usage
+		0,
+		// Start distance
+		0,
+		// Blobs
+		"[\"" + StartBlob + "\"]",
+		// Active blob
+		StartBlob,
+		// Clan
+		nil,
+		// Wins
+		0,
+		// Losses
+		0,
+		// Start XP
+		StartXP,
+	)
+
+	if err != nil {
+		fmt.Println(err)
+		return errors.New(UnknownError)
+	}
+
+
+	return nil
 }
