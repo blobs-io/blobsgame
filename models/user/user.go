@@ -31,6 +31,22 @@ type User struct {
 	XP int `json:"xp"`
 }
 
+type ExposableUser struct { // this is sent to users
+	Username string `json:"username"`
+	BR int `json:"br"`
+	CreatedAt string `json:"createdAt"`
+	Role uint8 `json:"role"`
+	Blobcoins int `json:"blobcoins"`
+	LastDailyUsage string `json:"lastDailyUsage"`
+	Distance int `json:"distance"`
+	Blobs string `json:"blobs"` //TODO: use string[] instead of string (needs database change)
+	ActiveBlob string `json:"activeBlob"`
+	Clan sql.NullString `json:"clan"`
+	Wins int `json:"wins"`
+	Losses int `json:"losses"`
+	XP int `json:"xp"`
+}
+
 const (
 	BanText = "user is currently banned"
 	InvalidUserPass = "invalid username or password"
@@ -49,14 +65,25 @@ const (
 
 	// Roles
 	UserRole = 0
+
+	// GetUser flags
+	UserDefaultSearch = 1
+	UserSessionSearch = 2
 )
 
 var (
 	UsernameRegex = regexp.MustCompile("^[\\w ]+$")
 )
 
-func GetUser(username string) (*User, error) {
-	rows, err := database.Database.Query("SELECT * FROM accounts WHERE upper(username) = $1", strings.ToUpper(username))
+func GetUser(target string, flags uint32) (*User, error) {
+	var rows *sql.Rows
+	var err error
+	switch flags {
+	case UserDefaultSearch:
+		rows, err = database.Database.Query("SELECT * FROM accounts WHERE upper(username) = $1", strings.ToUpper(target))
+	case UserSessionSearch:
+		rows, err = database.Database.Query("SELECT * FROM accounts WHERE username = (SELECT username FROM sessionids WHERE sessionid = $1)", target)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +113,27 @@ func GetUser(username string) (*User, error) {
 	return &user, nil
 }
 
+func (u *User) Expose(showHiddenProperties bool) ExposableUser {
+	usr := ExposableUser {
+		Username:       u.Username,
+		BR:             u.BR,
+		CreatedAt:      u.CreatedAt,
+		Role:           u.Role,
+		Distance:       u.Distance,
+		ActiveBlob:     u.ActiveBlob,
+		Clan:           u.Clan,
+		Wins:           u.Wins,
+		Losses:         u.Losses,
+		XP:             u.XP,
+	}
+	if showHiddenProperties {
+		usr.Blobcoins = u.Blobcoins
+		usr.LastDailyUsage = u.LastDailyUsage
+		usr.Blobs = u.Blobs
+	}
+	return usr
+}
+
 func Login(username string, password string) (*session.Session, error) {
 	dbBan, err := ban.Get(username)
 	if err != nil {
@@ -107,7 +155,7 @@ func Login(username string, password string) (*session.Session, error) {
 		}
 	}
 
-	dbUser, err := GetUser(username)
+	dbUser, err := GetUser(username, UserDefaultSearch)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +195,7 @@ func Register(username string, password string) error {
 
 	// TODO: captcha
 
-	_, err := GetUser(username)
+	_, err := GetUser(username, UserDefaultSearch)
 	if err != nil {
 		if err.Error() != UserNotFound {
 			fmt.Println(err)
@@ -162,9 +210,6 @@ func Register(username string, password string) error {
 		fmt.Println(err)
 		return errors.New(UnknownError)
 	}
-
-	// Columns:
-	// ("username", "password", "br", "createdAt", "role", "blobcoins", "lastDailyUsage", "distance", "blobs", "activeBlob", "clan", "wins", "losses", "xp")
 	_, err = database.Database.Query("INSERT INTO accounts VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
 		// Username
 		username,
