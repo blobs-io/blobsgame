@@ -7,6 +7,15 @@ import (
 	"strings"
 )
 
+const (
+	Unauthorized = "401: Unauthorized"
+	NotFound = "404: Not Found"
+)
+
+type DefaultResponse struct {
+	Message string `json:"message"`
+}
+
 func Authorized(ctx *fiber.Ctx) *user.User {
 	if ctx.Get("Authorization") == "" {
 		return nil
