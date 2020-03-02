@@ -2,19 +2,12 @@ package web
 
 import (
 	"fmt"
+	v1 "github.com/blobs-io/blobsgame/http/api/v1"
 	"github.com/blobs-io/blobsgame/http/web/routes"
 	"github.com/gofiber/fiber"
 )
 
 var App *fiber.App
-
-const (
-	HomeRoute = "/"
-	LoginRoute = "/login"
-	RegisterRoute = "/register"
-	AppRoute = "/app"
-	GameRoute = "/game"
-)
 
 func Init(port int) {
 	App = fiber.New()
@@ -36,6 +29,9 @@ func Init(port int) {
 
 	App.Post("/login", routes.Login)
 	App.Post("/register", routes.Register)
+
+	// API
+	App.Get("/api/v1/users/:user", v1.GetUser)
 
 	fmt.Printf("Webserver listening on port %d\n", port)
 	err := App.Listen(port)
