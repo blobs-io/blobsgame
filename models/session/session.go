@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/blobs-io/blobsgame/database"
 	"strconv"
+	"strings"
 )
 
 type Session struct {
@@ -31,7 +32,7 @@ func Generate(length int) ([]byte, error) {
 		fmt.Println(err)
 		return nil, errors.New(CryptoError) // dont leak error, might be sensitive
 	}
-	str := base64.URLEncoding.EncodeToString(bytes)
+	str := strings.ReplaceAll(base64.URLEncoding.EncodeToString(bytes), "=", "")
 	return []byte(str), nil
 }
 
