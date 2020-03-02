@@ -103,7 +103,7 @@
         document.cookie = "session=null;expires=" + new Date(Date.now() - 1).toUTCString() + ";path=/";
         document.location.href = "/";
     });
-    void (function() {
+    void (async function() {
         function parseDistance(dist) {
             if (dist > 1000)
                 return (dist / 1000).toFixed(2) + "K";
@@ -111,22 +111,20 @@
         }
 
         const session = document.cookie.split(/; */).find(v => v.startsWith("session=")).split("=")[1];
-        const stats = {
-            br: parseInt("[!BLOBRATING]"),
-            blobcoins: parseInt("[!BLOBCOINS]"),
-            distance: parseFloat("[!DISTANCE]"),
-            blobs: "[!USERBLOBS]".split(","),
-            activeBlob: "[!ACTIVEBLOB]",
-            experience: parseFloat("[!XP]")
-        };
-        stats.level = Math.floor(xpToLevel(stats.experience));
-        const promotions = JSON.parse('[!PROMOTIONS]');
+        const stats = await fetch("/api/v1/users/@me", {
+            headers: {
+                Authorization: "Session " + session
+            }
+        }).then(v => v.json());
+        stats.level = Math.floor(xpToLevel(stats.xp));
+        const promotions = [];
 
         document.getElementById("br").innerHTML = `${stats.br} BR (${getTier(stats.br).tier})`;
         document.getElementById("blobcoins").innerHTML = `${stats.blobcoins} Blobcoins`;
         document.getElementById("distance").innerHTML = `Distance travelled: ${parseDistance(stats.distance)} pixels`;
-        document.getElementById("level").innerHTML = `Lv. ${stats.level} (${Math.floor(stats.experience / (((stats.level+1) / 0.09) ** 2) * 100) + "%"})`;
+        document.getElementById("level").innerHTML = `Lv. ${stats.level} (${Math.floor(stats.xp / (((stats.level+1) / 0.09) ** 2) * 100) + "%"})`;
         for (const blob of stats.blobs) {
+            // TODO: This doesn't work yet
             const blobElement = document.createElement("div");
             blobElement.className = "card bloblist-entry";
             blobElement.innerHTML = `
