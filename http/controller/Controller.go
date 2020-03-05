@@ -10,6 +10,8 @@ import (
 const (
 	Unauthorized = "401: Unauthorized"
 	NotFound = "404: Not Found"
+
+	BodyParseFailure = "body parsing failed"
 )
 
 type DefaultResponse struct {
