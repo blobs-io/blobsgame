@@ -48,6 +48,7 @@ type ExposableUser struct { // this is sent to users
 }
 
 const (
+	// Error texts
 	BanText = "user is currently banned"
 	InvalidUserPass = "invalid username or password"
 	UserNotFound = "no user with that username was found"
@@ -56,12 +57,15 @@ const (
 	InvalidUsernamePattern = "username does not match pattern. Please only use letters, numbers and spaces"
 	UsernameTaken = "username is already taken"
 	UnknownError = "an unknown error occurred"
+	BlobNoAccess = "you cannot use this blob"
+	DailyGiftFailed = "you have already requested your daily gift, come back later" // TODO: display time left
 
 	// Properties
 	StartRating = 1000
 	StartCoins = 0
 	StartBlob = "blobowo"
 	StartXP = 0
+	DailyCoins = 100
 
 	// Roles
 	UserRole = 0
@@ -132,6 +136,46 @@ func (u *User) Expose(showHiddenProperties bool) ExposableUser {
 		usr.Blobs = u.Blobs
 	}
 	return usr
+}
+
+func (u *User) SwitchBlob(newBlob string) error {
+	newBlob = strings.TrimSpace(newBlob)
+
+	parsedBlobs, ok := strings.Split(u.Blobs, ","), false
+
+	for _, blob := range parsedBlobs {
+		if strings.TrimSpace(blob) == newBlob {
+			ok = true
+			break
+		}
+	}
+
+	if !ok {
+		return errors.New(BlobNoAccess)
+	}
+
+	_, err := database.Database.Query("UPDATE accounts SET \"activeBlob\" = $1 WHERE username = $2", newBlob, u.Username)
+	return err
+}
+
+func (u *User) RedeemDailyGift() error {
+	parsedTime, err := strconv.ParseInt(u.LastDailyUsage, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now().UnixNano() / 1_000_000
+
+	if now < parsedTime + 86_400_000 {
+		return errors.New(DailyGiftFailed)
+	}
+
+	_, err = database.Database.Query("UPDATE accounts SET blobcoins = blobcoins + $1, \"lastDailyUsage\" = $2 WHERE username = $3",
+		DailyCoins,
+		strconv.FormatInt(now, 10),
+		u.Username)
+
+	return err
 }
 
 func Login(username string, password string) (*session.Session, error) {
