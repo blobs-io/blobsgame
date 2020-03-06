@@ -54,3 +54,33 @@ func GetUser(ctx *fiber.Ctx) {
 	}
 
 }
+
+func RedeemDailyGift(ctx *fiber.Ctx) {
+	requester := controller.Authorized(ctx)
+	if requester == nil {
+		err := ctx.Status(401).JSON(controller.DefaultResponse {
+			Message: controller.Unauthorized,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+		return
+	}
+
+	err := requester.RedeemDailyGift()
+	if err != nil {
+		if err.Error() == user.DailyGiftFailed {
+			err = ctx.Status(400).JSON(controller.DefaultResponse {
+				Message: err.Error(),
+			})
+		} else {
+			fmt.Println(err)
+			err = ctx.Status(500).JSON(controller.DefaultResponse {
+				Message: user.UnknownError,
+			})
+		}
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
