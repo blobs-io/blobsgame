@@ -47,6 +47,12 @@ function getTierByName(name) {
     }
 }
 
+function parseDistance(dist) {
+    if (dist > 1000)
+        return (dist / 1000).toFixed(2) + "K";
+    else return (dist).toFixed(0);
+}
+
 /* levelsystem helper functions/constants */
 const xpScale = 0.09;
 
