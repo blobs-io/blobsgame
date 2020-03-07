@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/blobs-io/blobsgame/database"
 	"github.com/blobs-io/blobsgame/http/web"
+	"github.com/blobs-io/blobsgame/models/room"
 	"github.com/blobs-io/blobsgame/utils/config"
 	"os/exec"
 )
@@ -28,7 +29,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
+
+	// Create rooms
+	room.Rooms = make(map[string]room.Room)
+	for i := 0; i < 3; i++ {
+		room.New(room.FFAMode)
+		room.New(room.EliminationMode)
+	}
+	fmt.Printf("Created %d rooms\n", len(room.Rooms))
+
 	// Init web server
 	web.Init(config.MainConfig.Port)
 }
