@@ -4,6 +4,7 @@ import (
 	"github.com/blobs-io/blobsgame/models/gamemap"
 	"github.com/blobs-io/blobsgame/models/item"
 	"github.com/blobs-io/blobsgame/models/player"
+	"strconv"
 )
 
 const (
@@ -29,11 +30,12 @@ func New(mode uint8) *Room {
 	r := Room {
 		Mode: mode,
 	}
+	r.ID = r.ModeToString() + strconv.Itoa(len(Rooms))
 
 	r.Players = make([]player.Player, 0)
 	r.Items = make([]item.Item, 0)
 
-	Rooms[r.ModeToString()] = r
+	Rooms[r.ID] = r
 
 	return &r
 }
