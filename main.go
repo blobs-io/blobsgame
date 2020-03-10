@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Running hash %s\n", res)
+	fmt.Printf("Running hash %s", res)
 
 	// Parse config files
 	err = config.ParseMainConfig("configs/config.json")
