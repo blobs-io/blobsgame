@@ -1,6 +1,25 @@
 declare const io: Function;
 declare const socket: any;
 declare const server: string;
+declare class RestClient {
+    public _key: string;
+    public key: string;
+    public authType: string;
+    public api: string;
+    public computedHeaders: any;
+
+    constructor(key: string, authType: "Session", api?: string);
+
+    fetchPromotions(): Promise<any[]>;
+    fetchUser(user: string): Promise<any>;
+    fetchRooms(): Promise<any>;
+    switchBlob(newBlob: string): Promise<any>;
+    redeemDailyBonus(): Promise<any>;
+    ping(): Promise<number>;
+    static extractSessionID(): string;
+}
+
+const rest: RestClient = new RestClient(RestClient.extractSessionID(), "Session");
 
 function randomNumber(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min) + min);
@@ -626,7 +645,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     // -------------
     // Canvas
     // -------------
-    function animationFrame(): any {
+    async function animationFrame(): Promise<any> {
         if (windowBlur) {
             return window.requestAnimationFrame(animationFrame);
         }
@@ -647,14 +666,12 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         // Ping
         if (Date.now() - lastTick > 2500) {
             displayLeaderboard();
-            const timestampBefore: number = Date.now();
-            fetch("/api/ping").then(async res => {
-                const request: any = await res.json();
-                const diff: number = ping = (request.arrived - timestampBefore);
-                const latencyElement: HTMLElement | null = document.getElementById("latency");
-                if (!latencyElement) return;
-                latencyElement.innerHTML = `• Ping: <span style="color: #${diff < 100 ? '00ff00' : (diff < 200 ? 'ccff99' : (diff < 250 ? 'ffff99': (diff < 500 ? 'ff9966' : 'ff0000')))}">${diff}ms</span>`;
-            });
+            ping = await rest.ping();
+
+            const latencyElement: HTMLElement | null = document.getElementById("latency");
+            if (!latencyElement) return;
+
+            latencyElement.innerHTML = `• Ping: <span style="color: #${ping < 100 ? '00ff00' : (ping < 200 ? 'ccff99' : (ping < 250 ? 'ffff99': (ping < 500 ? 'ff9966' : 'ff0000')))}">${ping}ms</span>`;
             lastTick = Date.now();
         }
 

@@ -5,6 +5,7 @@ import (
 	"github.com/blobs-io/blobsgame/models/item"
 	"github.com/blobs-io/blobsgame/models/player"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -30,7 +31,7 @@ func New(mode uint8) *Room {
 	r := Room {
 		Mode: mode,
 	}
-	r.ID = r.ModeToString() + strconv.Itoa(len(Rooms))
+	r.ID = strings.ToLower(r.ModeToString()) + strconv.Itoa(len(Rooms))
 
 	r.Players = make([]player.Player, 0)
 	r.Items = make([]item.Item, 0)

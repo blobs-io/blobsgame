@@ -68,7 +68,9 @@ const (
 	DailyCoins = 100
 
 	// Roles
+	GuestRole = -1
 	UserRole = 0
+	AdminRole = 1
 
 	// GetUser flags
 	UserDefaultSearch = 1
