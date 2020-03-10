@@ -34,6 +34,10 @@ func Init(port int) {
 	App.Get("/api/v1/users/:user", v1.GetUser)
 	App.Post("/api/v1/blobs/switch", v1.SwitchBlob)
 	App.Post("/api/v1/daily", v1.RedeemDailyGift)
+	App.Get("/api/v1/ping", v1.Ping)
+	App.Get("/api/v1/rooms", func(ctx *fiber.Ctx) {}) // TODO
+	App.Get("/api/v1/rooms/:id", func(ctx *fiber.Ctx) {}) // TODO
+	App.Get("/api/v1/rooms/:id/players", v1.GetPlayers)
 
 	fmt.Printf("Webserver listening on port %d\n", port)
 	err := App.Listen(port)
