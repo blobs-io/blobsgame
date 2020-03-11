@@ -1,5 +1,4 @@
 declare const io: Function;
-declare const socket: any;
 declare const server: string;
 declare class RestClient {
     public _key: string;
@@ -88,7 +87,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         return cookie.substr(cookie.indexOf("=") + 1);
     })();
     const ws: WebSocket = new WebSocket(
-        server.replace(/^https?/, "ws" + (useSecureWS ? "s" : ""))
+        server.replace(/^https?/, "ws" + (useSecureWS ? "s" : "")) + "/ws"
     );
     const objects: GameObject = {
         walls: [],
