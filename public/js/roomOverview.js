@@ -9,7 +9,7 @@ async function showOverview(guest, rest) {
         else if (state === 1) return "state-countdown";
         else if (state === 2) return "state-ingame";
     }
-    const rooms = await rest.fetchRooms();
+    const rooms = await rest.fetchRooms().then(v => v.json());
     const roomOverview = document.createElement("div"),
         closeBtn = document.createElement("button"),
         overviewHeader = document.createElement("span");
@@ -27,7 +27,7 @@ async function showOverview(guest, rest) {
     roomOverview.appendChild(closeBtn);
     roomOverview.appendChild(overviewHeader);
 
-    for (const room of rooms) {
+    for (const room of Object.values(rooms)) {
         const roomEntry = document.createElement("div"),
             roomLabel = document.createElement("span"),
             roomName = document.createElement("span"),
@@ -35,8 +35,8 @@ async function showOverview(guest, rest) {
             stateEl = document.createElement("span"),
             joinLink = document.createElement("a");
         roomEntry.className = "room-entry";
-        roomLabel.className = "room-label label-" + room.mode;
-        roomLabel.innerText = room.mode.toUpperCase();
+        roomLabel.className = "room-label label-" + modeToString(room.mode).toLowerCase();
+        roomLabel.innerText = modeToString(room.mode).toUpperCase();
         roomName.className = "room-name";
         roomName.innerText = room.id.toUpperCase();
         playerCount.className = "player-count";

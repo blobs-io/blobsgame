@@ -24,19 +24,6 @@ function getTier(br) {
     return result;
 }
 
-function nom(attackBlob, target) {
-    if (attackBlob.x < (target.x + 30) && attackBlob.x > (target.x - 30)) {
-        if (attackBlob.y < (target.y + 30) && attackBlob.y > (target.y - 30)) {
-
-            target.health -= Math.floor(Math.random() * 10) + 30;
-            if (target.health <= 0) {
-                socket.emit("singleplayerNomKey", { attackBlob, target }, "ffa");
-                target.health = 100;
-            }
-        }
-    }
-}
-
 function getTierByName(name) {
     switch (name) {
         case "bronze": return getTier(1000); break;
@@ -53,7 +40,16 @@ function parseDistance(dist) {
     else return (dist).toFixed(0);
 }
 
-/* levelsystem helper functions/constants */
+const modes = {
+    FFA: 0,
+    Elimination: 1
+};
+
+function modeToString(mode) {
+    return (Object.entries(modes).find(v => v[1] === mode) || [])[0];
+}
+
+/* level system helper functions/constants */
 const xpScale = 0.09;
 
 function xpToLevel(xp) {

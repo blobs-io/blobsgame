@@ -16,7 +16,15 @@ class RestClient {
     }
 
     fetchRooms() {
-        return fetch(`${this.api}/rooms`);
+        return fetch(`${this.api}/rooms`)
+    }
+
+    fetchRoom(id) {
+        return fetch(`${this.api}/rooms/${id}`);
+    }
+
+    fetchPlayers(roomId) {
+        return fetch(`${this.api}/rooms/${roomId}/players`);
     }
 
     switchBlob(newBlob) {

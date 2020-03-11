@@ -13,11 +13,15 @@ declare class RestClient {
     fetchPromotions(): Promise<any[]>;
     fetchUser(user: string): Promise<any>;
     fetchRooms(): Promise<any>;
+    fetchRoom(id: string): Promise<any>;
+    fetchPlayers(roomId: string): Promise<any>;
     switchBlob(newBlob: string): Promise<any>;
     redeemDailyBonus(): Promise<any>;
     ping(): Promise<number>;
     static extractSessionID(): string;
 }
+// functions.js
+declare function modeToString(mode: number): string;
 
 const rest: RestClient = new RestClient(RestClient.extractSessionID(), "Session");
 
@@ -64,7 +68,7 @@ function getRelativeCoordinates(x: number, y: number, ownBlob: {x: number, y: nu
     };
 }
 
-const useSecureWS: boolean = !document.location.href.startsWith("http://localhost");
+const useSecureWS: boolean = !document.location.href.startsWith("http://");
 
 // Phone controls
 if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
@@ -117,7 +121,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         admin: createImage("../../assets/emblems/emblem_admin.png")
     };
     const details: any = {
-        mode: getParameterByName("mode"),
+        mode: parseInt(getParameterByName("mode"), 10),
         id: getParameterByName("id"),
         singleplayer: false
     };
@@ -555,6 +559,10 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             FFA: "ffa",
             ELIMINATION: "elimination"
         };
+        static TypeID: any = {
+            FFA: 0,
+            ELIMINATION: 1
+        };
         public type: string;
         public blobs: BlobObject[];
         public createdAt: number;
@@ -636,9 +644,9 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         }
     }
 
-    if (!details.mode)
+    if (isNaN(details.mode))
         details.mode = Room.Type.FFA;
-    if (!details.id)
+    if (details.id.length === 0)
         details.id = "ffa1";
     let room: EliminationRoom | Room;
 
@@ -1570,10 +1578,18 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
     }
 
 
-    function modeToString(mode: string): string {
-        if (mode === "ffa") return "Free For All";
-        else if (mode === "elimination") return "Elimination";
-        return "";
+    function modeToFullString(mode: number): string {
+        switch (mode) {
+            case Room.TypeID.FFA:
+                return "Free For All";
+                break;
+            case Room.TypeID.ELIMINATION:
+                return "Elimination";
+                break;
+            default:
+                return "";
+                break;
+        }
     }
     // Last part
     console.log("%c You know JavaScript / TypeScript? Contribute to blobs! https://github.com/blobs-io/blobs.live", "color: green");
@@ -1581,23 +1597,24 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         {
             const headingElement: HTMLCollection = document.getElementsByClassName("heading");
             if (headingElement && headingElement[1]) {
-                headingElement[1].innerHTML = modeToString(details.mode) || "Unknown Gamemode";
+                headingElement[1].innerHTML = modeToFullString(details.mode) || "Unknown Gamemode";
             }
         }
         const bar = document.getElementById("bar-inside");
         if (!bar) return;
-        fetch("/api/players/" + details.id).then(async res => {
-            const data: any = await res.json();
-            for(const player of data) {
-                const tier: any = getTier(player.br || 0);
-                const spanElement: HTMLElement = document.createElement("span");
-                spanElement.className = "player";
-                spanElement.innerHTML = `<img src="../assets/emblems/${tier.emblemFile}" class="tier-image" width="20" height="20" alt="Tier" /><span class="player-name" style="color: #${tier.colorCode};">${player.owner}</span> (${player.br} BR)</span>`;
-                const playersElement: HTMLElement | null = document.getElementById("players");
-                if (playersElement)
-                    playersElement.appendChild(spanElement);
-            }
-        });
+
+        const data = await rest.fetchPlayers(details.id).then(v => v.json());
+
+        for(const player of data) {
+            const tier: any = getTier(player.br || 0);
+            const spanElement: HTMLElement = document.createElement("span");
+            spanElement.className = "player";
+            spanElement.innerHTML = `<img src="../assets/emblems/${tier.emblemFile}" class="tier-image" width="20" height="20" alt="Tier" /><span class="player-name" style="color: #${tier.colorCode};">${player.owner}</span> (${player.br} BR)</span>`;
+            const playersElement: HTMLElement | null = document.getElementById("players");
+            if (playersElement)
+                playersElement.appendChild(spanElement);
+        }
+
         let lastTick: number = Date.now();
         let itr: number = 0, val: number = 0;
         const interval: number = window.setInterval(() => {

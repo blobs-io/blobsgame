@@ -6,6 +6,7 @@ import (
 	"github.com/blobs-io/blobsgame/models/player"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -22,6 +23,7 @@ type Room struct {
 	Players []player.Player `json:"players"`
 	Items []item.Item `json:"items"`
 	Mode uint8 `json:"mode"`
+	State uint8 `json:"state"`
 	CreatedAt int64 `json:"createdAt"`
 }
 
@@ -32,6 +34,7 @@ func New(mode uint8) *Room {
 		Mode: mode,
 	}
 	r.ID = strings.ToLower(r.ModeToString()) + strconv.Itoa(len(Rooms))
+	r.CreatedAt = time.Now().UnixNano() / int64(time.Millisecond)
 
 	r.Players = make([]player.Player, 0)
 	r.Items = make([]item.Item, 0)
