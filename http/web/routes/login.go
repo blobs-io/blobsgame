@@ -5,6 +5,7 @@ import (
 	"github.com/blobs-io/blobsgame/models/user"
 	"github.com/gofiber/fiber"
 	"strconv"
+	"time"
 )
 
 type LoginRequestBody struct {
@@ -37,8 +38,10 @@ func Login(ctx *fiber.Ctx) {
 		ctx.Status(500).Write("an unknown error occurred")
 		return
 	}
-	cookie.Expire = int(sessInt)
-	ctx.Cookie("session", sess.SessionID, cookie)
+	cookie.Name = "session"
+	cookie.Value = sess.SessionID
+	cookie.Expires = time.Unix(0, sessInt)
+	ctx.Cookie(cookie)
 
 	ctx.Redirect("/app")
 }
