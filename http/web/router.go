@@ -2,10 +2,12 @@ package web
 
 import (
 	"fmt"
+
 	v1 "github.com/blobs-io/blobsgame/http/api/v1"
 	"github.com/blobs-io/blobsgame/http/gateway"
 	"github.com/blobs-io/blobsgame/http/web/routes"
 	"github.com/gofiber/fiber"
+	"github.com/gofiber/websocket"
 )
 
 var App *fiber.App
@@ -41,7 +43,7 @@ func Init(port int) {
 	App.Get("/api/v1/rooms/:id/players", v1.GetPlayers)
 
 	// WebSocket
-	App.WebSocket("/ws", gateway.Handle)
+	App.Get("/ws", websocket.New(gateway.Handle))
 
 	fmt.Printf("Webserver listening on port %d\n", port)
 	err := App.Listen(port)

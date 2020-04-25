@@ -2,14 +2,19 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"os/exec"
+	"time"
+
 	"github.com/blobs-io/blobsgame/database"
 	"github.com/blobs-io/blobsgame/http/web"
 	"github.com/blobs-io/blobsgame/models/room"
 	"github.com/blobs-io/blobsgame/utils/config"
-	"os/exec"
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	// Log commit hash
 	res, err := exec.Command("git", "rev-parse", "HEAD").Output()
 	if err != nil {
