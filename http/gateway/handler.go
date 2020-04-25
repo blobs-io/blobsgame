@@ -125,10 +125,13 @@ func handleEvent(c *WebSocketConnection, d *AnyMessage) {
 	case PlayerKickEvent:
 		PlayerKickEventCallback(c, d)
 	case NomKeyEvent:
+		NomKeyEventCallback(c, d)
 	case ItemCollectEvent:
+		ItemCollectEventCallback(c, d)
 	}
 }
 
 func handleClose(c *WebSocketConnection) {
+	c.Conn.Close()
 	delete(connections, c.ID)
 }
