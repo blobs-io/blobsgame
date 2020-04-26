@@ -39,7 +39,7 @@ func Handle(c *websocket.Conn) {
 		err := c.ReadJSON(&msg)
 		if err != nil {
 			fmt.Println(err)
-			handleClose(&ws)
+			//handleClose(&ws)
 			break
 		}
 
@@ -51,7 +51,7 @@ func Handle(c *websocket.Conn) {
 		case OpEvent:
 			handleEvent(&ws, &msg)
 		case OpClose:
-			handleClose(&ws)
+			//handleClose(&ws)
 			break
 		}
 	}
@@ -64,23 +64,20 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 	}
 	sessionID, ok := d.Data["session"].(string)
 
-	fmt.Println("event data", d.Data)
-
 	r, ok := room.Rooms[roomID]
 	if !ok {
 		return
 	}
-	fmt.Println("room", r)
 
 	if len(r.Players) >= room.PlayerLimit {
-		c.Kick(&r, RoomFullKick, "Too many players online")
+		c.Kick(r, RoomFullKick, "Too many players online")
 		return
 	}
 
 	if r.Mode == room.EliminationMode &&
 		r.State != room.CountdownState &&
 		r.State != room.WaitingState {
-		c.Kick(&r, RoomIngameKick, "Room is already in-game")
+		c.Kick(r, RoomIngameKick, "Room is already in-game")
 		return
 	}
 
@@ -112,11 +109,12 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 		return
 	}
 
-	r.Players = append(r.Players, p)
+	r.Players = append(r.Players, &p)
 
 	// TODO: check if room is elimination room and if it meets requirements for room start
 
 	// TODO: send room data to client
+	fmt.Println(r)
 }
 
 func handleHeartbeat(c *WebSocketConnection, d *AnyMessage) {

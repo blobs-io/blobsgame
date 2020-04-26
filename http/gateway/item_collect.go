@@ -30,7 +30,7 @@ func ItemCollectEventCallback(c *WebSocketConnection, d *AnyMessage) {
 
 	var targetItem *item.Item
 	for i := range r.Items {
-		currentItem := &r.Items[i]
+		currentItem := r.Items[i]
 		if currentItem.ID == itemID &&
 			p.X < (currentItem.X+item.ItemWidth) &&
 			p.X > (currentItem.X-item.ItemWidth) &&

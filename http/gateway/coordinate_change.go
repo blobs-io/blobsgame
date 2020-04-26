@@ -44,7 +44,7 @@ func CoordinateChangeEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		p.AntiCheatFlags += utils.Penalize(utils.ActionCoordinateDrift, int(yDrift))
 	}
 
-	kicked := c.HandleAntiCheatFlags(&r, p.AntiCheatFlags)
+	kicked := c.HandleAntiCheatFlags(r, p.AntiCheatFlags)
 	if kicked {
 		return
 	}

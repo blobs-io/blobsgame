@@ -36,19 +36,19 @@ const (
 
 type Room struct {
 	// Base
-	Map       gamemap.GameMap `json:"map"`
-	ID        string          `json:"id"`
-	Players   []player.Player `json:"players"`
-	Items     []item.Item     `json:"items"`
-	Mode      uint8           `json:"mode"`
-	State     uint8           `json:"state"`
-	CreatedAt int64           `json:"createdAt"`
+	Map       gamemap.GameMap  `json:"map"`
+	ID        string           `json:"id"`
+	Players   []*player.Player `json:"players"`
+	Items     []*item.Item     `json:"items"`
+	Mode      uint8            `json:"mode"`
+	State     uint8            `json:"state"`
+	CreatedAt int64            `json:"createdAt"`
 
 	// Elimination room
 	CountdownStarted int64 `json:"countdownStarted,omitempty"`
 }
 
-var Rooms map[string]Room
+var Rooms map[string]*Room
 
 func New(mode uint8) *Room {
 	r := Room{
@@ -59,10 +59,10 @@ func New(mode uint8) *Room {
 
 	// TODO: custom maps?
 	r.Map = gamemap.GameMaps["default"]
-	r.Players = make([]player.Player, 0)
-	r.Items = make([]item.Item, 0)
+	r.Players = make([]*player.Player, 0)
+	r.Items = make([]*item.Item, 0)
 
-	Rooms[r.ID] = r
+	Rooms[r.ID] = &r
 
 	return &r
 }
@@ -103,7 +103,7 @@ func (r *Room) GenerateGuestName() string {
 func (r *Room) GetPlayerByUsername(username string) *player.Player {
 	for i, p := range r.Players {
 		if p.Username == username {
-			return &r.Players[i]
+			return r.Players[i]
 		}
 	}
 	return nil
@@ -112,7 +112,7 @@ func (r *Room) GetPlayerByUsername(username string) *player.Player {
 func (r *Room) GetPlayerByWebSocketID(id string) *player.Player {
 	for i, p := range r.Players {
 		if p.ID == id {
-			return &r.Players[i]
+			return r.Players[i]
 		}
 	}
 	return nil

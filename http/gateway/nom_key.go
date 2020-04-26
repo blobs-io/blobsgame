@@ -30,7 +30,7 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 	}
 
 	for i := range r.Players {
-		target := &r.Players[i]
+		target := r.Players[i]
 
 		if (p.X > (target.X+player.Height) || p.X < (target.X-player.Height)) || (p.Y > (target.Y+player.Height) || p.Y < (target.Y-player.Height)) {
 			return

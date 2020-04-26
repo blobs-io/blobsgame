@@ -46,7 +46,7 @@ func main() {
 	}
 
 	// Create rooms
-	room.Rooms = make(map[string]room.Room)
+	room.Rooms = make(map[string]*room.Room)
 	for i := 0; i < 3; i++ {
 		room.New(room.FFAMode)
 		room.New(room.EliminationMode)
