@@ -12,20 +12,30 @@ import (
 )
 
 const (
+	// Modes
 	FFAMode         = 0
 	EliminationMode = 1
 
+	// Prefixes
 	FFAPrefix         = "FFA"
 	EliminationPrefix = "ELIM"
 
-	EliminationWaitingState   = 0
-	EliminationCountdownState = 1
-	EliminationIngameState    = 2
+	// Limits etc
+	PlayerLimit      = 100
+	MinPlayerStartup = 4
+	WaitingTime      = time.Second * 2
 
-	PlayerLimit = 100
+	// States
+	WaitingState   = 0
+	CountdownState = 1
+	IngameState    = 2
+
+	// Rewards
+
 )
 
 type Room struct {
+	// Base
 	Map       gamemap.GameMap `json:"map"`
 	ID        string          `json:"id"`
 	Players   []player.Player `json:"players"`
@@ -33,6 +43,9 @@ type Room struct {
 	Mode      uint8           `json:"mode"`
 	State     uint8           `json:"state"`
 	CreatedAt int64           `json:"createdAt"`
+
+	// Elimination room
+	CountdownStarted int64 `json:"countdownStarted,omitempty"`
 }
 
 var Rooms map[string]Room

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>blobs – login</title>
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
-    <link rel="stylesheet" type="text/css" href="/css/roomOverview.css" />
+    <link rel="stylesheet" type="text/css" href="/css/roomoverview.css" />
     <link rel="stylesheet" type="text/css" media="only screen and (max-width: 1025px)" href="/css/style.small.css" />
     <meta name="description" content="Be the best blob!">
     <meta name="author" content="y21">
@@ -40,18 +40,22 @@
     </form>
     <span class="reg-label">No account yet? <a href="/register">Register</a> &nbsp;<a href="/sources">Sources</a></span>
 </div>
-<center><input type="submit" value="Play as guest" id="guest-btn" style="background-color: #27ae60;" onclick="document.location.href='/game?guest=true'"></center>
+<div style="text-align: center;">
+    <input type="submit" value="Play as guest" id="guest-btn" style="background-color: #27ae60;" onclick="document.location.href='/game?guest=true'">
+</div>
 <a href="https://github.com/blobs-io/blobs.live" id="peek"></a>
 <span class="peek-label">Peek into the source</span>
 </body>
 <script src="/js/particles.js"></script>
-<script src="/js/roomOverview.js"></script>
+<script src="/js/functions.js"></script>
+<script src="/js/roomoverview.js"></script>
+<script src="/js/rest.js"></script>
 <script>
     // Redirect to /app if session cookie is set and app didn't redirect previously
     if (document.cookie.includes("session=") && !/[?&]nr/.test(document.location.search))
         document.location.href = "/app";
     
     initParticles();
-    document.getElementById("guest-btn").onclick = showOverview.bind(null, true);
+    document.getElementById("guest-btn").onclick = showOverview.bind(null, true, new RestClient());
 </script>
 </html>

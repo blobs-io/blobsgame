@@ -24,7 +24,7 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		return
 	}
 
-	if r.Mode == room.EliminationMode && r.State != room.EliminationIngameState {
+	if r.Mode == room.EliminationMode && r.State != room.IngameState {
 		return
 	}
 

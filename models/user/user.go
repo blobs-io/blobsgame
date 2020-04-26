@@ -67,7 +67,7 @@ const (
 	StartCoins  = 0
 	StartBlob   = "blobowo"
 	StartXP     = 0
-	DailyCoins  = 100
+	DailyCoins  = 20
 
 	// Roles
 	GuestRole = -1

@@ -74,19 +74,19 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 	}
 
 	if r.Mode == room.EliminationMode &&
-		r.State != room.EliminationCountdownState &&
-		r.State != room.EliminationWaitingState {
+		r.State != room.CountdownState &&
+		r.State != room.WaitingState {
 		c.Kick(&r, RoomIngameKick, "Room is already in-game")
 		return
 	}
-	
+
 	u, err := user.GetUser(data.Session, user.UserSessionSearch)
 
-	p := player.Player {
-		ID: c.ID,
+	p := player.Player{
+		ID:     c.ID,
 		Health: 100,
-		X:        rand.Intn(r.Map.MapSize.Width),
-		Y:        rand.Intn(r.Map.MapSize.Height),
+		X:      rand.Intn(r.Map.MapSize.Width),
+		Y:      rand.Intn(r.Map.MapSize.Height),
 	}
 
 	if err != nil && err.Error() == user.UserNotFound {
@@ -109,6 +109,8 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 	}
 
 	r.Players = append(r.Players, p)
+
+	// TODO: check if room is elimination room and if it meets requirements for room start
 
 	// TODO: send room data to client
 }
