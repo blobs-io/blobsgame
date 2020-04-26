@@ -159,14 +159,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         COORDINATE_CHANGE  = "coordinateChange",
         HEARTBEAT          = "heartbeat",
         KICK               = "kick",
-        KICK_PLAYER        = "kickPlayer",
         NOM_KEY            = "nomKey",
         STATECHANGE        = "stateChange",
         SP_NOM_KEY         = "singlePlayerNomKey",
         DIRECTION_CHANGE_C = "directionChange",
-        PLAYER_NOMMED      = "playerNommed",
-        COLLECT_ITEM       = "collectItem",
-        ITEM_UPDATE        = "updateItem",
+        PLAYER_NOMMED      = "playerNom",
+        COLLECT_ITEM       = "itemCollect",
+        ITEM_UPDATE        = "itemUpdate",
         STATSCHANGE        = "statsChange"
     }
     enum KickTypes {
@@ -1144,7 +1143,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 if (!targetUserElement || !targetUserReason) return;
                 ws.send(JSON.stringify({
                     op: OPCODE.EVENT,
-                    t: EventType.KICK_PLAYER,
+                    t: EventType.KICK,
                     d: {
                         // @ts-ignore
                         user: targetUserElement.value,
