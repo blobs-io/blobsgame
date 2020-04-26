@@ -1,5 +1,6 @@
 declare const io: Function;
 declare const server: string;
+// @ts-ignore
 declare class RestClient {
     public _key: string;
     public key: string;

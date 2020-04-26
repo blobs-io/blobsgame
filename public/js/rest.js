@@ -59,6 +59,10 @@ class RestClient {
     }
 
     static extractSessionID() {
-        return document.cookie.split(/; */).find(v => v.startsWith("session=")).split("=")[1];
+        const cookies = document.cookie.split(/; */);
+        const sessionCookie = cookies.find(v => v.startsWith("session="));
+        if (!sessionCookie) return null;
+        
+        return sessionCookie.split("=")[1];
     }
 }
