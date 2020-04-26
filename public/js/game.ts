@@ -145,6 +145,14 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         Blobpeek = "../assets/blobpeek.png",
         Blobnom = "../assets/blobnom.png"
     }
+    enum BlobID {
+        Blobowo,
+        Blobevil,
+        Blobeyes,
+        Blobkittenknife,
+        Blobpeek,
+        Blobnom
+    }
     enum ItemType {
         HEALTH = 0,
         COIN   = 1
@@ -794,7 +802,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
 
                 // Own blob
                 ownBlob.owner = eventData.user.username;
-                ownBlob.blob = eventData.user.blob;
+                ownBlob.blob = <BlobType>blobIDToString(eventData.user.blob);
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates.x = ownBlob.x = eventData.user.x;
                 ownBlob.directionChangeCoordinates.y = ownBlob.y = eventData.user.y;
@@ -1557,6 +1565,28 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             wsc.send(data);
         } else if (wsc.readyState === WebSocket.CONNECTING) {
             wsc.onopen = (): any => wsc.send(data);
+        }
+    }
+    function blobIDToString(id: BlobID): string | null {
+        switch (id) {
+            case BlobID.Blobowo:
+                return BlobType.Blobowo;
+                break;
+            case BlobID.Blobevil:
+                return BlobType.Blobevil;
+                break;
+            case BlobID.Blobeyes:
+                return BlobType.Blobeyes;
+                break;
+            case BlobID.Blobkittenknife:
+                return BlobType.Blobkittenknife;
+            case BlobID.Blobpeek:
+                return BlobType.Blobpeek;
+                break;
+            case BlobID.Blobnom:
+                return BlobType.Blobnom;
+            default:
+                return null;
         }
     }
 

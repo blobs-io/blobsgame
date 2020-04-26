@@ -17,6 +17,7 @@ const (
 	ItemCollectEvent      = "itemCollect"
 	ItemUpdateEvent       = "itemUpdate"
 	StatsChangeEvent      = "statsChange"
+	HeartbeatEvent        = "heartbeat"
 
 	// Kick types
 	RoomFullKick       = 0
@@ -28,6 +29,11 @@ const (
 	WinKick            = 6
 	RoomEndKick        = 7
 	FlagLimitKick      = 8
+
+	// Other
+	// Clients send a ping every N milliseconds
+	PingInterval      = 3000
+	PingIntervalLimit = 10000
 )
 
 type AnyMessage struct {

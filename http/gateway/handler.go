@@ -39,7 +39,7 @@ func Handle(c *websocket.Conn) {
 		err := c.ReadJSON(&msg)
 		if err != nil {
 			fmt.Println(err)
-			//handleClose(&ws)
+			handleClose(&ws)
 			break
 		}
 
@@ -51,7 +51,7 @@ func Handle(c *websocket.Conn) {
 		case OpEvent:
 			handleEvent(&ws, &msg)
 		case OpClose:
-			//handleClose(&ws)
+			handleClose(&ws)
 			break
 		}
 	}
@@ -111,10 +111,22 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 
 	r.Players = append(r.Players, &p)
 
-	// TODO: check if room is elimination room and if it meets requirements for room start
-
-	// TODO: send room data to client
 	fmt.Println(r)
+	c.Send(AnyMessage{
+		Op: OpEvent,
+		T:  HeartbeatEvent,
+		Data: map[string]interface{}{
+			"user":             p,
+			"users":            r.Players,
+			"objects":          r.Map.Objects,
+			"interval":         PingInterval,
+			"items":            r.Items,
+			"roomCreatedAt":    r.CreatedAt,
+			"state":            r.State,
+			"countdownStarted": r.CountdownStarted,
+		},
+	})
+	// TODO: check if room is elimination room and if it meets requirements for room start
 }
 
 func handleHeartbeat(c *WebSocketConnection, d *AnyMessage) {

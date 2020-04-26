@@ -14,7 +14,7 @@ type GameMapSize struct {
 }
 
 type GameMapObject struct {
-	NoNomAreas []GameMapNoNomArea `json:"noNomAreas"`
+	NoNomAreas []GameMapNoNomArea `json:"noNomArea"`
 	Walls      []GameMapWall      `json:"walls"`
 }
 
