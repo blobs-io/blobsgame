@@ -57,6 +57,8 @@ func New(mode uint8) *Room {
 	r.ID = strings.ToLower(r.ModeToString()) + strconv.Itoa(len(Rooms))
 	r.CreatedAt = time.Now().UnixNano() / int64(time.Millisecond)
 
+	// TODO: custom maps?
+	r.Map = gamemap.GameMaps["default"]
 	r.Players = make([]player.Player, 0)
 	r.Items = make([]item.Item, 0)
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/blobs-io/blobsgame/database"
 	"github.com/blobs-io/blobsgame/http/web"
+	"github.com/blobs-io/blobsgame/models/gamemap"
 	"github.com/blobs-io/blobsgame/models/room"
 	"github.com/blobs-io/blobsgame/utils/config"
 )
@@ -28,6 +29,15 @@ func main() {
 		panic(err)
 	}
 	err = config.ParseDatabaseConfig("configs/database.json")
+	if err != nil {
+		panic(err)
+	}
+	err = gamemap.LoadMaps()
+	if err != nil {
+		panic(err)
+	} else if len(gamemap.GameMaps) < 1 {
+		panic("no maps found")
+	}
 
 	// Init database connection
 	err = database.Init(config.DatabaseConfig)
