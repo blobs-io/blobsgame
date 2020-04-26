@@ -4,72 +4,74 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/blobs-io/blobsgame/database"
-	"github.com/blobs-io/blobsgame/models/ban"
-	"github.com/blobs-io/blobsgame/models/session"
-	"golang.org/x/crypto/bcrypt"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/blobs-io/blobsgame/database"
+	"github.com/blobs-io/blobsgame/models/ban"
+	"github.com/blobs-io/blobsgame/models/session"
+	"github.com/guregu/null"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	BR int `json:"br"`
-	CreatedAt string `json:"createdAt"`
-	Role uint8 `json:"role"`
-	Blobcoins int `json:"blobcoins"`
-	LastDailyUsage string `json:"lastDailyUsage"`
-	Distance int `json:"distance"`
-	Blobs string `json:"blobs"` //TODO: use string[] instead of string (needs database change)
-	ActiveBlob string `json:"activeBlob"`
-	Clan sql.NullString `json:"clan"`
-	Wins int `json:"wins"`
-	Losses int `json:"losses"`
-	XP int `json:"xp"`
+	Username       string      `json:"username"`
+	Password       string      `json:"password"`
+	BR             int         `json:"br"`
+	CreatedAt      string      `json:"createdAt"`
+	Role           int8        `json:"role"`
+	Blobcoins      int         `json:"blobcoins"`
+	LastDailyUsage string      `json:"lastDailyUsage"`
+	Distance       int         `json:"distance"`
+	Blobs          string      `json:"blobs"` //TODO: use string[] instead of string (needs database change)
+	ActiveBlob     string      `json:"activeBlob"`
+	Clan           null.String `json:"clan"`
+	Wins           int         `json:"wins"`
+	Losses         int         `json:"losses"`
+	XP             int         `json:"xp"`
 }
 
 type ExposableUser struct { // this is sent to users
-	Username string `json:"username"`
-	BR int `json:"br"`
-	CreatedAt string `json:"createdAt"`
-	Role uint8 `json:"role"`
-	Blobcoins int `json:"blobcoins"`
-	LastDailyUsage string `json:"lastDailyUsage"`
-	Distance int `json:"distance"`
-	Blobs string `json:"blobs"` //TODO: use string[] instead of string (needs database change)
-	ActiveBlob string `json:"activeBlob"`
-	Clan sql.NullString `json:"clan"`
-	Wins int `json:"wins"`
-	Losses int `json:"losses"`
-	XP int `json:"xp"`
+	Username       string      `json:"username"`
+	BR             int         `json:"br"`
+	CreatedAt      string      `json:"createdAt"`
+	Role           int8        `json:"role"`
+	Blobcoins      int         `json:"blobcoins"`
+	LastDailyUsage string      `json:"lastDailyUsage"`
+	Distance       int         `json:"distance"`
+	Blobs          string      `json:"blobs"` //TODO: use string[] instead of string (needs database change)
+	ActiveBlob     string      `json:"activeBlob"`
+	Clan           null.String `json:"clan"`
+	Wins           int         `json:"wins"`
+	Losses         int         `json:"losses"`
+	XP             int         `json:"xp"`
 }
 
 const (
 	// Error texts
-	BanText = "user is currently banned"
-	InvalidUserPass = "invalid username or password"
-	UserNotFound = "no user with that username was found"
-	InvalidUsernameLength = "username needs to be at least 3 characters long and must not exceed 14 characters"
-	InvalidPasswordLength = "password needs to be at least 4 characters long and must not exceed 128 characters"
+	BanText                = "user is currently banned"
+	InvalidUserPass        = "invalid username or password"
+	UserNotFound           = "no user with that username was found"
+	InvalidUsernameLength  = "username needs to be at least 3 characters long and must not exceed 14 characters"
+	InvalidPasswordLength  = "password needs to be at least 4 characters long and must not exceed 128 characters"
 	InvalidUsernamePattern = "username does not match pattern. Please only use letters, numbers and spaces"
-	UsernameTaken = "username is already taken"
-	UnknownError = "an unknown error occurred"
-	BlobNoAccess = "you cannot use this blob"
-	DailyGiftFailed = "you have already requested your daily gift, come back later" // TODO: display time left
+	UsernameTaken          = "username is already taken"
+	UnknownError           = "an unknown error occurred"
+	BlobNoAccess           = "you cannot use this blob"
+	DailyGiftFailed        = "you have already requested your daily gift, come back later" // TODO: display time left
 
 	// Properties
 	StartRating = 1000
-	StartCoins = 0
-	StartBlob = "blobowo"
-	StartXP = 0
-	DailyCoins = 100
+	StartCoins  = 0
+	StartBlob   = "blobowo"
+	StartXP     = 0
+	DailyCoins  = 100
 
 	// Roles
 	GuestRole = -1
-	UserRole = 0
+	UserRole  = 0
 	AdminRole = 1
 
 	// GetUser flags
@@ -120,17 +122,17 @@ func GetUser(target string, flags uint32) (*User, error) {
 }
 
 func (u *User) Expose(showHiddenProperties bool) ExposableUser {
-	usr := ExposableUser {
-		Username:       u.Username,
-		BR:             u.BR,
-		CreatedAt:      u.CreatedAt,
-		Role:           u.Role,
-		Distance:       u.Distance,
-		ActiveBlob:     u.ActiveBlob,
-		Clan:           u.Clan,
-		Wins:           u.Wins,
-		Losses:         u.Losses,
-		XP:             u.XP,
+	usr := ExposableUser{
+		Username:   u.Username,
+		BR:         u.BR,
+		CreatedAt:  u.CreatedAt,
+		Role:       u.Role,
+		Distance:   u.Distance,
+		ActiveBlob: u.ActiveBlob,
+		Clan:       u.Clan,
+		Wins:       u.Wins,
+		Losses:     u.Losses,
+		XP:         u.XP,
 	}
 	if showHiddenProperties {
 		usr.Blobcoins = u.Blobcoins
@@ -168,7 +170,7 @@ func (u *User) RedeemDailyGift() error {
 
 	now := time.Now().UnixNano() / 1_000_000
 
-	if now < parsedTime + 86_400_000 {
+	if now < parsedTime+86_400_000 {
 		return errors.New(DailyGiftFailed)
 	}
 
@@ -191,7 +193,7 @@ func Login(username string, password string) (*session.Session, error) {
 		if err != nil {
 			return nil, err
 		}
-		if time.Now().UnixNano() / 1000000 > dateStr {
+		if time.Now().UnixNano()/1000000 > dateStr {
 			err := ban.Delete(username)
 			if err != nil {
 				return nil, err
@@ -222,7 +224,7 @@ func Login(username string, password string) (*session.Session, error) {
 		}
 	}
 
-	return session.Register(username, (time.Now().UnixNano() / 1000000) + session.SessionDuration)
+	return session.Register(username, (time.Now().UnixNano()/1000000)+session.SessionDuration)
 }
 
 func Register(username string, password string) error {
@@ -264,7 +266,7 @@ func Register(username string, password string) error {
 		// BR
 		StartRating,
 		// Creation timestamp
-		strconv.FormatInt(time.Now().UnixNano() / int64(time.Millisecond), 10),
+		strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10),
 		// Role
 		UserRole,
 		// Coins
@@ -274,7 +276,7 @@ func Register(username string, password string) error {
 		// Start distance
 		0,
 		// Blobs
-		"[\"" + StartBlob + "\"]",
+		"[\""+StartBlob+"\"]",
 		// Active blob
 		StartBlob,
 		// Clan
@@ -291,7 +293,6 @@ func Register(username string, password string) error {
 		fmt.Println(err)
 		return errors.New(UnknownError)
 	}
-
 
 	return nil
 }

@@ -27,6 +27,7 @@ const (
 	EliminationKick    = 5
 	WinKick            = 6
 	RoomEndKick        = 7
+	FlagLimitKick      = 8
 )
 
 type AnyMessage struct {

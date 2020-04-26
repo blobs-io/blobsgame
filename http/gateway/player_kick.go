@@ -28,9 +28,18 @@ func PlayerKickEventCallback(c *WebSocketConnection, d *AnyMessage) {
 	}
 
 	if p.Role != user.AdminRole {
-		// TODO: kick requester
+		c.Kick(&r, ClientModKick, "Insufficient permissions")
 		return
 	}
 
-	// TODO: kick target
+	target := r.GetPlayerByUsername(data.User)
+	if target == nil {
+		return
+	}
+
+	conn, ok := connections[target.ID]
+	if !ok {
+		return
+	}
+	conn.Kick(&r, ModKick, data.Reason)
 }

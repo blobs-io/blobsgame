@@ -2,12 +2,14 @@ package gateway
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/blobs-io/blobsgame/models/player"
 	"github.com/blobs-io/blobsgame/models/room"
 	"github.com/blobs-io/blobsgame/models/session"
 	"github.com/blobs-io/blobsgame/models/user"
+	"github.com/blobs-io/blobsgame/utils"
 	"github.com/gofiber/websocket"
 )
 
@@ -67,31 +69,45 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 	}
 
 	if len(r.Players) >= room.PlayerLimit {
-		// TODO: send error message to client (too many players online)
+		c.Kick(&r, RoomFullKick, "Too many players online")
 		return
 	}
 
 	if r.Mode == room.EliminationMode &&
 		r.State != room.EliminationCountdownState &&
 		r.State != room.EliminationWaitingState {
-		// TODO: send error message to client (room is already in game)
+		c.Kick(&r, RoomIngameKick, "Room is already in-game")
+		return
+	}
+	
+	u, err := user.GetUser(data.Session, user.UserSessionSearch)
+
+	p := player.Player {
+		ID: c.ID,
+		Health: 100,
+		X:        rand.Intn(r.Map.MapSize.Width),
+		Y:        rand.Intn(r.Map.MapSize.Height),
+	}
+
+	if err != nil && err.Error() == user.UserNotFound {
+		p.Username = r.GenerateGuestName()
+		p.BR = player.GuestBR
+		p.Blob = player.BlobowoID
+		p.Guest = true
+		p.Role = user.GuestRole
+	} else if u != nil {
+		p.Username = u.Username
+		p.BR = u.BR
+		// TODO: write a function that converts a blob string to int
+		//p.Blob = u.ActiveBlob
+		p.Blob = player.BlobowoID
+		p.Guest = false
+		p.Role = u.Role
+		p.Coins = u.Blobcoins
+	} else {
 		return
 	}
 
-	// TODO: allow non-guests
-	// get user by session id
-	p := player.Player{
-		Username: r.GenerateGuestName(),
-		ID:       c.ID,
-		BR:       player.GuestBR,
-		Blob:     player.BlobowoID,
-		Guest:    true,
-		Health:   100,
-		Role:     user.GuestRole,
-		// TODO: randomize coordinates
-		X: 50,
-		Y: 50,
-	}
 	r.Players = append(r.Players, p)
 
 	// TODO: send room data to client
@@ -134,4 +150,36 @@ func handleEvent(c *WebSocketConnection, d *AnyMessage) {
 func handleClose(c *WebSocketConnection) {
 	c.Conn.Close()
 	delete(connections, c.ID)
+}
+
+func (c *WebSocketConnection) Send(d AnyMessage) error {
+	return c.Conn.WriteJSON(d)
+}
+
+func (c *WebSocketConnection) Kick(r *room.Room, kickType uint8, reason string) error {
+	err := c.Send(AnyMessage{
+		Op: OpClose,
+		T:  PlayerKickEvent,
+		Data: map[string]interface{}{
+			"type":    kickType,
+			"message": reason,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	r.RemovePlayer(r.GetPlayerIndexByWebSocketID(c.ID))
+
+	handleClose(c)
+	return nil
+}
+
+// HandleAntiCheatFlags checks whether the user has reached the flag limit and kicks them
+func (c *WebSocketConnection) HandleAntiCheatFlags(r *room.Room, flags int) bool {
+	if flags > utils.FlagLimit {
+		c.Kick(r, FlagLimitKick, "Too many flags")
+		return true
+	}
+	return false
 }

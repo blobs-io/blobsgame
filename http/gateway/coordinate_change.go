@@ -5,6 +5,7 @@ import (
 
 	"github.com/blobs-io/blobsgame/models/room"
 	"github.com/blobs-io/blobsgame/models/user"
+	"github.com/blobs-io/blobsgame/utils"
 )
 
 type CoordinateChangeEventData struct {
@@ -29,15 +30,20 @@ func CoordinateChangeEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		return
 	}
 
-	if math.Abs(float64(data.X-p.X)) > 50 {
+	xDrift, yDrift := math.Abs(float64(data.X-p.X)), math.Abs(float64(data.Y-p.Y))
 
+	if xDrift > utils.CoordinateDriftLimit {
+		p.AntiCheatFlags += utils.Penalize(utils.ActionCoordinateDrift, int(xDrift))
 	}
 
-	if math.Abs(float64(data.Y-p.Y)) > 50 {
-
+	if yDrift > utils.CoordinateDriftLimit {
+		p.AntiCheatFlags += utils.Penalize(utils.ActionCoordinateDrift, int(yDrift))
 	}
 
-	// TODO: kick if user has been flagged too many times
+	kicked := c.HandleAntiCheatFlags(&r, p.AntiCheatFlags)
+	if kicked {
+		return
+	}
 
 	if p.Role != user.AdminRole {
 		if data.X < 0 {

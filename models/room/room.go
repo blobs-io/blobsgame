@@ -71,13 +71,17 @@ func (r *Room) GenerateGuestName() string {
 	for {
 		name := "Guest" + strconv.Itoa(rand.Intn(PlayerLimit*10))
 
+		taken := false
 		for _, p := range r.Players {
 			if p.Username == name {
-				continue
+				taken = true
+				break
 			}
 		}
 
-		return name
+		if !taken {
+			return name
+		}
 	}
 }
 
@@ -97,4 +101,24 @@ func (r *Room) GetPlayerByWebSocketID(id string) *player.Player {
 		}
 	}
 	return nil
+}
+
+// GetPlayerIndexByWebSocketID returns -1 if it was not found
+func (r *Room) GetPlayerIndexByWebSocketID(id string) int {
+	for i, p := range r.Players {
+		if p.ID == id {
+			return i
+		}
+	}
+	return -1
+}
+
+func (r *Room) RemovePlayer(index int) bool {
+	if index < 0 || index >= len(r.Players) {
+		return false
+	}
+
+	r.Players[index] = r.Players[len(r.Players)-1]
+	r.Players = r.Players[:len(r.Players)-1]
+	return true
 }
