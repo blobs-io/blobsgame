@@ -31,9 +31,9 @@ const (
 )
 
 type AnyMessage struct {
-	Op   int         `json:"op"`
-	Data interface{} `json:"d"`
-	T    string      `json:"t"`
+	Op   int                    `json:"op"`
+	Data map[string]interface{} `json:"d"`
+	T    string                 `json:"t"`
 }
 
 type HelloPayload struct {

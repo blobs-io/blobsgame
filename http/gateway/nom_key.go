@@ -9,17 +9,13 @@ import (
 	"github.com/blobs-io/blobsgame/utils"
 )
 
-type NomKeyEventData struct {
-	Room string `json:"room"`
-}
-
 func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
-	data, ok := d.Data.(NomKeyEventData)
+	roomID, ok := d.Data["room"].(string)
 	if !ok {
 		return
 	}
 
-	r, ok := room.Rooms[data.Room]
+	r, ok := room.Rooms[roomID]
 	if !ok {
 		return
 	}
@@ -65,13 +61,13 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 
 		if !target.Guest && !p.Guest {
 			result = utils.CalculateRatingDiff(p.BR, target.BR)
-			if p.BR + result > player.BRLimit {
+			if p.BR+result > player.BRLimit {
 				p.BR = player.BRLimit
 			} else {
 				p.BR += result
 			}
 
-			if target.BR - result < 0 {
+			if target.BR-result < 0 {
 				target.BR = 0
 			} else {
 				target.BR -= result

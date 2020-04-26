@@ -7,18 +7,18 @@ import (
 	"github.com/blobs-io/blobsgame/models/room"
 )
 
-type ItemCollectEventData struct {
-	Room string `json:"room"`
-	Item string `json:"item"`
-}
-
 func ItemCollectEventCallback(c *WebSocketConnection, d *AnyMessage) {
-	data, ok := d.Data.(ItemCollectEventData)
+	roomID, ok := d.Data["room"].(string)
 	if !ok {
 		return
 	}
 
-	r, ok := room.Rooms[data.Room]
+	itemID, ok := d.Data["item"].(string)
+	if !ok {
+		return
+	}
+
+	r, ok := room.Rooms[roomID]
 	if !ok {
 		return
 	}
@@ -31,7 +31,7 @@ func ItemCollectEventCallback(c *WebSocketConnection, d *AnyMessage) {
 	var targetItem *item.Item
 	for i := range r.Items {
 		currentItem := &r.Items[i]
-		if currentItem.ID == data.Item &&
+		if currentItem.ID == itemID &&
 			p.X < (currentItem.X+item.ItemWidth) &&
 			p.X > (currentItem.X-item.ItemWidth) &&
 			p.Y < (currentItem.Y+item.ItemHeight) &&

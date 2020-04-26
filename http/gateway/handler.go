@@ -58,15 +58,19 @@ func Handle(c *websocket.Conn) {
 }
 
 func handleHello(c *WebSocketConnection, d *AnyMessage) {
-	data, ok := d.Data.(HelloPayload)
+	roomID, ok := d.Data["room"].(string)
 	if !ok {
 		return
 	}
+	sessionID, ok := d.Data["session"].(string)
 
-	r, ok := room.Rooms[data.Room]
+	fmt.Println("event data", d.Data)
+
+	r, ok := room.Rooms[roomID]
 	if !ok {
 		return
 	}
+	fmt.Println("room", r)
 
 	if len(r.Players) >= room.PlayerLimit {
 		c.Kick(&r, RoomFullKick, "Too many players online")
@@ -80,7 +84,7 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 		return
 	}
 
-	u, err := user.GetUser(data.Session, user.UserSessionSearch)
+	u, err := user.GetUser(sessionID, user.UserSessionSearch)
 
 	p := player.Player{
 		ID:     c.ID,
@@ -116,12 +120,12 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 }
 
 func handleHeartbeat(c *WebSocketConnection, d *AnyMessage) {
-	data, ok := d.Data.(HeartbeatPayload)
+	roomID, ok := d.Data["room"].(string)
 	if !ok {
 		return
 	}
 
-	r, ok := room.Rooms[data.Room]
+	r, ok := room.Rooms[roomID]
 	if !ok {
 		return
 	}

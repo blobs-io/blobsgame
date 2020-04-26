@@ -8,19 +8,23 @@ import (
 	"github.com/blobs-io/blobsgame/utils"
 )
 
-type CoordinateChangeEventData struct {
-	X    int    `json:"x"`
-	Y    int    `json:"y"`
-	Room string `json:"room"`
-}
-
 func CoordinateChangeEventCallback(c *WebSocketConnection, d *AnyMessage) {
-	data, ok := d.Data.(CoordinateChangeEventData)
+	roomID, ok := d.Data["room"].(string)
 	if !ok {
 		return
 	}
 
-	r, ok := room.Rooms[data.Room]
+	x, ok := d.Data["x"].(int)
+	if !ok {
+		return
+	}
+
+	y, ok := d.Data["y"].(int)
+	if !ok {
+		return
+	}
+
+	r, ok := room.Rooms[roomID]
 	if !ok {
 		return
 	}
@@ -30,7 +34,7 @@ func CoordinateChangeEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		return
 	}
 
-	xDrift, yDrift := math.Abs(float64(data.X-p.X)), math.Abs(float64(data.Y-p.Y))
+	xDrift, yDrift := math.Abs(float64(x-p.X)), math.Abs(float64(y-p.Y))
 
 	if xDrift > utils.CoordinateDriftLimit {
 		p.AntiCheatFlags += utils.Penalize(utils.ActionCoordinateDrift, int(xDrift))
@@ -46,20 +50,20 @@ func CoordinateChangeEventCallback(c *WebSocketConnection, d *AnyMessage) {
 	}
 
 	if p.Role != user.AdminRole {
-		if data.X < 0 {
-			data.X = 0
-		} else if data.X > r.Map.MapSize.Width {
-			data.X = r.Map.MapSize.Width
+		if x < 0 {
+			x = 0
+		} else if x > r.Map.MapSize.Width {
+			x = r.Map.MapSize.Width
 		}
 
-		if data.Y < 0 {
-			data.Y = 0
-		} else if data.Y > r.Map.MapSize.Height {
-			data.Y = r.Map.MapSize.Height
+		if y < 0 {
+			y = 0
+		} else if y > r.Map.MapSize.Height {
+			y = r.Map.MapSize.Height
 		}
 	}
 
 	// this might cause some problems later, not too sure yet
-	p.X = data.X
-	p.Y = data.Y
+	p.X = x
+	p.Y = y
 }

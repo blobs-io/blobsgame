@@ -12,12 +12,22 @@ type PlayerKickEventData struct {
 }
 
 func PlayerKickEventCallback(c *WebSocketConnection, d *AnyMessage) {
-	data, ok := d.Data.(PlayerKickEventData)
+	roomID, ok := d.Data["room"].(string)
 	if !ok {
 		return
 	}
 
-	r, ok := room.Rooms[data.Room]
+	userID, ok := d.Data["user"].(string)
+	if !ok {
+		return
+	}
+
+	reason, ok := d.Data["reason"].(string)
+	if !ok {
+		return
+	}
+
+	r, ok := room.Rooms[roomID]
 	if !ok {
 		return
 	}
@@ -32,7 +42,7 @@ func PlayerKickEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		return
 	}
 
-	target := r.GetPlayerByUsername(data.User)
+	target := r.GetPlayerByUsername(userID)
 	if target == nil {
 		return
 	}
@@ -41,5 +51,5 @@ func PlayerKickEventCallback(c *WebSocketConnection, d *AnyMessage) {
 	if !ok {
 		return
 	}
-	conn.Kick(&r, ModKick, data.Reason)
+	conn.Kick(&r, ModKick, reason)
 }
