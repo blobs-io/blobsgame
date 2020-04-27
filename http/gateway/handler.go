@@ -3,6 +3,7 @@ package gateway
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/blobs-io/blobsgame/models/player"
@@ -14,8 +15,9 @@ import (
 )
 
 type WebSocketConnection struct {
-	Conn *websocket.Conn
-	ID   string
+	Conn  *websocket.Conn
+	Mutex sync.Mutex
+	ID    string
 }
 
 var connections = make(map[string]WebSocketConnection, 0)
@@ -168,10 +170,20 @@ func handleClose(c *WebSocketConnection) {
 }
 
 func (c *WebSocketConnection) Send(d AnyMessage) error {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
 	return c.Conn.WriteJSON(d)
 }
 
 func (c *WebSocketConnection) Kick(r *room.Room, kickType uint8, reason string) error {
+	fmt.Println(AnyMessage{
+		Op: OpClose,
+		T:  PlayerKickEvent,
+		Data: map[string]interface{}{
+			"type":    kickType,
+			"message": reason,
+		},
+	})
 	err := c.Send(AnyMessage{
 		Op: OpClose,
 		T:  PlayerKickEvent,
