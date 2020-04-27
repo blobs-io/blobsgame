@@ -88,20 +88,19 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 		Health: 100,
 		X:      rand.Intn(r.Map.MapSize.Width),
 		Y:      rand.Intn(r.Map.MapSize.Height),
+		Conn:   c.Conn,
 	}
 
 	if err != nil && err.Error() == user.UserNotFound {
 		p.Username = r.GenerateGuestName()
 		p.BR = player.GuestBR
-		p.Blob = player.BlobowoID
+		p.Blob = user.StartBlob
 		p.Guest = true
 		p.Role = user.GuestRole
 	} else if u != nil {
 		p.Username = u.Username
 		p.BR = u.BR
-		// TODO: write a function that converts a blob string to int
-		//p.Blob = u.ActiveBlob
-		p.Blob = player.BlobowoID
+		p.Blob = user.StartBlob
 		p.Guest = false
 		p.Role = u.Role
 		p.Coins = u.Blobcoins
@@ -198,4 +197,25 @@ func (c *WebSocketConnection) HandleAntiCheatFlags(r *room.Room, flags int) bool
 		return true
 	}
 	return false
+}
+
+func WatchRoom(r *room.Room) {
+	for {
+		for _, p := range r.Players {
+			conn, ok := connections[p.ID]
+			if !ok {
+				continue
+			}
+
+			conn.Send(AnyMessage{
+				Op: OpEvent,
+				T:  CoordinateChangeEvent,
+				Data: map[string]interface{}{
+					"players": r.Players,
+				},
+			})
+		}
+
+		time.Sleep(time.Millisecond * 25)
+	}
 }

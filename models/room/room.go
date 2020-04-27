@@ -110,10 +110,9 @@ func (r *Room) GetPlayerByUsername(username string) *player.Player {
 }
 
 func (r *Room) GetPlayerByWebSocketID(id string) *player.Player {
-	for i, p := range r.Players {
-		if p.ID == id {
-			return r.Players[i]
-		}
+	index := r.GetPlayerIndexByWebSocketID(id)
+	if index > -1 {
+		return r.Players[index]
 	}
 	return nil
 }

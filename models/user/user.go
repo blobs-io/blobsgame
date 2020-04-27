@@ -62,10 +62,13 @@ const (
 	BlobNoAccess           = "you cannot use this blob"
 	DailyGiftFailed        = "you have already requested your daily gift, come back later" // TODO: display time left
 
+	// Valid blobs
+	Blobowo = "blobowo"
+
 	// Properties
 	StartRating = 1000
 	StartCoins  = 0
-	StartBlob   = "blobowo"
+	StartBlob   = Blobowo
 	StartXP     = 0
 	DailyCoins  = 20
 

@@ -10,17 +10,17 @@ import (
 
 func CoordinateChangeEventCallback(c *WebSocketConnection, d *AnyMessage) {
 	roomID, ok := d.Data["room"].(string)
-	if !ok {
+	var x, y int
+
+	if temp, ok := d.Data["x"].(float64); ok {
+		x = int(temp)
+	} else {
 		return
 	}
 
-	x, ok := d.Data["x"].(int)
-	if !ok {
-		return
-	}
-
-	y, ok := d.Data["y"].(int)
-	if !ok {
+	if temp, ok := d.Data["y"].(float64); ok {
+		y = int(temp)
+	} else {
 		return
 	}
 

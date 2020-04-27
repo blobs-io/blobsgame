@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/blobs-io/blobsgame/database"
+	"github.com/blobs-io/blobsgame/http/gateway"
 	"github.com/blobs-io/blobsgame/http/web"
 	"github.com/blobs-io/blobsgame/models/gamemap"
 	"github.com/blobs-io/blobsgame/models/room"
@@ -48,8 +49,9 @@ func main() {
 	// Create rooms
 	room.Rooms = make(map[string]*room.Room)
 	for i := 0; i < 3; i++ {
-		room.New(room.FFAMode)
-		room.New(room.EliminationMode)
+		go gateway.WatchRoom(room.New(room.FFAMode))
+
+		go gateway.WatchRoom(room.New(room.EliminationMode))
 	}
 	fmt.Printf("Created %d rooms\n", len(room.Rooms))
 
