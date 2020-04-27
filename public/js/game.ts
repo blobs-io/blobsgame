@@ -884,77 +884,6 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     }
                 }
             }
-            else if (eventType === EventType.KICK) {
-                let kickReason: string = "You have been kicked.\nReason: " + (eventData.message || ""), showAlert: boolean = true;
-                switch (eventData.type) {
-                    case KickTypes.CLIENT_MOD:
-                        kickReason += "\nThis is probably due to (a) client modification(s). Avoid doing so, as it is against the rules."
-                    break;
-                    case KickTypes.ELIMINATED:
-                        if (room instanceof EliminationRoom) {
-                            room.rewards.push({
-                                text: room.blobs.length + (room.blobs.length === 1 
-                                    ? "st" : (room.blobs.length === 2 
-                                    ? "nd" : (room.blobs.length === 3 ? "rd" : "th"))) + " place",
-                                gain: CoinChangeTable[room.blobs.length] || 0,
-                                gainCurrency: Currency.COINS,
-                                pos: 0
-                            });
-                            room.rewards.push({
-                                text: room.blobs.length + (room.blobs.length === 1 
-                                    ? "st" : (room.blobs.length === 2 
-                                    ? "nd" : (room.blobs.length === 3 ? "rd" : "th"))) + " place",
-                                gain: eventData.result,
-                                gainCurrency: Currency.BR,
-                                pos: 0
-                            });
-                            room.rewards.push({
-                                text: eventData.noms + " noms",
-                                gain: 5 * eventData.noms,
-                                gainCurrency: Currency.COINS,
-                                pos: 0
-                            });
-                            room.state = EliminationRoomState.ENDED;
-                            room.won = false;
-                        }
-                        showAlert = false;
-                    break;
-                    case KickTypes.MOD_KICK:
-                        kickReason += "\nThis is a mod-kick, which means that a moderator has noticed that you have violated the rules and taken action by kicking you from this room.\n";
-                    break;
-                    case KickTypes.WIN:
-                    console.log(eventData);
-                        if (room instanceof EliminationRoom) {
-                            room.rewards.push({
-                                text: "1st place",
-                                gain: CoinChangeTable[room.blobs.length] || 0,
-                                gainCurrency: Currency.COINS,
-                                pos: 0
-                            });
-                            room.rewards.push({
-                                text: "1st place",
-                                gain: eventData.result,
-                                gainCurrency: Currency.BR,
-                                pos: 0
-                            });
-                            room.rewards.push({
-                                text: eventData.noms + " noms",
-                                gain: 5 * eventData.noms,
-                                gainCurrency: Currency.COINS,
-                                pos: 0
-                            });
-                            room.state = EliminationRoomState.ENDED;
-                            room.won = true;
-                        }
-                        showAlert = false;
-                    break;
-                }
-                
-                if (showAlert) alert(kickReason)
-                showWSCloseNotification = false;
-                ownBlob.ready = false;
-                room.blobs.splice(room.blobs.findIndex(b => b.username === ownBlob.username), 1);
-            }
             else if (eventType === EventType.STATECHANGE) {
                 if (room instanceof EliminationRoom) {
                     room.countdownStarted = eventData.countdownStarted;
@@ -1027,6 +956,76 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     (ownBlob as any)[prop] = eventData[prop];
                 }
             }
+        } else if (op === OPCODE.CLOSE) {
+            let kickReason: string = "You have been kicked.\nReason: " + (eventData.message || ""), showAlert: boolean = true;
+            switch (eventData.type) {
+                case KickTypes.CLIENT_MOD:
+                    kickReason += "\nThis is probably due to (a) client modification(s). Avoid doing so, as it is against the rules."
+                break;
+                case KickTypes.ELIMINATED:
+                    if (room instanceof EliminationRoom) {
+                        room.rewards.push({
+                            text: room.blobs.length + (room.blobs.length === 1 
+                                ? "st" : (room.blobs.length === 2 
+                                ? "nd" : (room.blobs.length === 3 ? "rd" : "th"))) + " place",
+                            gain: CoinChangeTable[room.blobs.length] || 0,
+                            gainCurrency: Currency.COINS,
+                            pos: 0
+                        });
+                        room.rewards.push({
+                            text: room.blobs.length + (room.blobs.length === 1 
+                                ? "st" : (room.blobs.length === 2 
+                                ? "nd" : (room.blobs.length === 3 ? "rd" : "th"))) + " place",
+                            gain: eventData.result,
+                            gainCurrency: Currency.BR,
+                            pos: 0
+                        });
+                        room.rewards.push({
+                            text: eventData.noms + " noms",
+                            gain: 5 * eventData.noms,
+                            gainCurrency: Currency.COINS,
+                            pos: 0
+                        });
+                        room.state = EliminationRoomState.ENDED;
+                        room.won = false;
+                    }
+                    showAlert = false;
+                break;
+                case KickTypes.MOD_KICK:
+                    kickReason += "\nThis is a mod-kick, which means that a moderator has noticed that you have violated the rules and taken action by kicking you from this room.\n";
+                break;
+                case KickTypes.WIN:
+                console.log(eventData);
+                    if (room instanceof EliminationRoom) {
+                        room.rewards.push({
+                            text: "1st place",
+                            gain: CoinChangeTable[room.blobs.length] || 0,
+                            gainCurrency: Currency.COINS,
+                            pos: 0
+                        });
+                        room.rewards.push({
+                            text: "1st place",
+                            gain: eventData.result,
+                            gainCurrency: Currency.BR,
+                            pos: 0
+                        });
+                        room.rewards.push({
+                            text: eventData.noms + " noms",
+                            gain: 5 * eventData.noms,
+                            gainCurrency: Currency.COINS,
+                            pos: 0
+                        });
+                        room.state = EliminationRoomState.ENDED;
+                        room.won = true;
+                    }
+                    showAlert = false;
+                break;
+            }
+            
+            if (showAlert) alert(kickReason)
+            showWSCloseNotification = false;
+            ownBlob.ready = false;
+            room.blobs.splice(room.blobs.findIndex(b => b.username === ownBlob.username), 1);
         }
     });
     ws.onclose = () => {
