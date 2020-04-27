@@ -294,7 +294,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         static width: number = 30;
         static height: number = 30;
         public guest: boolean;
-        public owner: string;
+        public username: string;
         public br: number | undefined;
         public img: HTMLImageElement;
         public direction: number;
@@ -312,13 +312,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         public hudColors: number[];
 
         constructor(br: number,
-                    owner: string,
+                    username: string,
                     x: number = window.innerWidth / 2,
                     y: number = window.innerHeight / 2,
                     blob: BlobType = BlobType.Blobowo) {
             this.blob = blob;
             this.guest = false;
-            this.owner = owner;
+            this.username = username;
             this.br = br;
             this.img = new Image();
             this.direction = 0;
@@ -397,7 +397,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     canvasY: number = canvas.height / 2 - height;
                 const tier: Tier = getTier(this.br || 0);
                 if (!tier || !tier.tier) return;
-                if (this.owner === ownBlob.owner && this.owner) {
+                if (this.username === ownBlob.username && this.username) {
                     ctx.fillStyle = `#${tier.colorCode}`;
                     ctx.font = `${15 * scale}px Raleway`;
                     ctx.drawImage(this.img,
@@ -406,8 +406,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                         width * scale,
                         height * scale);
                     ctx.font = "16px Raleway";
-                    ctx.fillText(this.owner,
-                        canvasX - this.owner.length,
+                    ctx.fillText(this.username,
+                        canvasX - this.username.length,
                         canvasY - 27.5);
                     ctx.font = "13px Raleway";
                     ctx.fillText(`${this.br} BR`,
@@ -433,7 +433,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                             20 * scale,
                             20 * scale);
                     }
-                } else if (this.owner) {
+                } else if (this.username) {
                     const { canvasX: blobCanvasX, canvasY: blobCanvasY } = getRelativeCoordinates(
                         this.x,
                         this.y,
@@ -462,8 +462,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     ctx.drawImage(this.img, blobCanvasX, blobCanvasY, width * scale, height * scale);
                     if (displayUser) {
                         ctx.font = "16px Raleway";
-                        ctx.fillText(this.owner,
-                            blobCanvasX - this.owner.length,
+                        ctx.fillText(this.username,
+                            blobCanvasX - this.username.length,
                             (blobCanvasY) - 27.5);
                         ctx.font = "13px Raleway";
                         ctx.fillText(`${this.br} BR`,
@@ -503,8 +503,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             let obj;
             for(let i: number = 0; i < room.blobs.length; ++i) {
                 if (x < (room.blobs[i].x + 30) && x > (room.blobs[i].x - 30)) {
-                    if (y < (room.blobs[i].y + 30) && y > (room.blobs[i].y - 30) && room.blobs[i].owner !== ownBlob.owner) {
-                        if (excludeSelf && room.blobs[i].owner === ownBlob.owner) continue;
+                    if (y < (room.blobs[i].y + 30) && y > (room.blobs[i].y - 30) && room.blobs[i].username !== ownBlob.username) {
+                        if (excludeSelf && room.blobs[i].username === ownBlob.username) continue;
                         obj = room.blobs[i];
                         break;
                     }
@@ -784,14 +784,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         const { op, t: eventType, d: eventData } = JSON.parse(data);
         if (op === OPCODE.EVENT) {
             if (eventType === EventType.HEARTBEAT) {
+                console.log(eventData);
                 if (eventData.user.role === -1 && !/[?&]guest=true/.test(window.location.search))
                     return document.location.href = "/login/";
 
                 if (details.mode === Room.Type.ELIMINATION)
                     room = new EliminationRoom();
                 else room = new Room();
-
-                console.log(eventData);
 
                 // Items
                 for(const item of eventData.items) {
@@ -801,8 +800,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 }
 
                 // Own blob
-                ownBlob.owner = eventData.user.username;
-                ownBlob.blob = <BlobType>blobIDToString(eventData.user.blob);
+                ownBlob.username = eventData.user.username;
+                ownBlob.blob = eventData.user.blob;
                 ownBlob.directionChangedAt = Date.now();
                 ownBlob.directionChangeCoordinates.x = ownBlob.x = eventData.user.x;
                 ownBlob.directionChangeCoordinates.y = ownBlob.y = eventData.user.y;
@@ -817,9 +816,9 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     eventData.users = [];
                 for (let i: number = 0; i < eventData.users.length; ++i) {
                     const currentBlob: any = eventData.users[i];
-                    if (currentBlob.owner === ownBlob.owner ||
-                        room.blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) continue;
-                    const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner);
+                    if (currentBlob.username === ownBlob.username ||
+                        room.blobs.some((v: BlobObject) => v.username === currentBlob.username)) continue;
+                    const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.username);
                     newBlob.directionChangeCoordinates = {
                         x: currentBlob.x,
                         y: currentBlob.y
@@ -854,9 +853,9 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 if (!ownBlob || !ownBlob.ready) return;
                 for (let i: number = 0; i < eventData.players.length; ++i) {
                     const currentBlob: any = eventData.players[i];
-                    const target: BlobObject | undefined = room.blobs.find((v: BlobObject) => v.owner === currentBlob.owner);
+                    const target: BlobObject | undefined = room.blobs.find((v: BlobObject) => v.username === currentBlob.username);
                     if (!target) {
-                        const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.owner, currentBlob.x, currentBlob.y);
+                        const newBlob: BlobObject = new BlobObject(currentBlob.br, currentBlob.username, currentBlob.x, currentBlob.y);
                         newBlob.direction = currentBlob.direction;
                         newBlob.directionChangedAt = currentBlob.directionChangedAt;
                         newBlob.directionChangeCoordinates = currentBlob.directionChangeCoordinates;
@@ -864,10 +863,10 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                         newBlob
                             .setBlob(<BlobType>`../assets/${currentBlob.blob}.png`)
                             .then(() => newBlob.display(true, true));
-                        if (room.blobs.some((v: BlobObject) => v.owner === currentBlob.owner)) return;
+                        if (room.blobs.some((v: BlobObject) => v.username === currentBlob.username)) return;
                         room.blobs.push(newBlob);
                     } else {
-                        if (currentBlob.owner !== ownBlob.owner) {
+                        if (currentBlob.username !== ownBlob.username) {
                             target.direction = currentBlob.direction;
                             target.directionChangedAt = currentBlob.directionChangedAt;
                             target.directionChangeCoordinates = currentBlob.directionChangeCoordinates;
@@ -879,9 +878,9 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 }
 
                 for (let i: number = 0; i < room.blobs.length; ++i) {
-                    const blob: number = eventData.players.findIndex((v: BlobObject) => v.owner === room.blobs[i].owner);
+                    const blob: number = eventData.players.findIndex((v: BlobObject) => v.username === room.blobs[i].username);
                     if (blob === -1) {
-                        room.blobs.splice(room.blobs.findIndex((v: BlobObject) => v.owner === room.blobs[i].owner), 1);
+                        room.blobs.splice(room.blobs.findIndex((v: BlobObject) => v.username === room.blobs[i].username), 1);
                     }
                 }
             }
@@ -954,7 +953,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 if (showAlert) alert(kickReason)
                 showWSCloseNotification = false;
                 ownBlob.ready = false;
-                room.blobs.splice(room.blobs.findIndex(b => b.owner === ownBlob.owner), 1);
+                room.blobs.splice(room.blobs.findIndex(b => b.username === ownBlob.username), 1);
             }
             else if (eventType === EventType.STATECHANGE) {
                 if (room instanceof EliminationRoom) {
@@ -964,8 +963,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             }
             else if (eventType === EventType.PLAYER_NOMMED && room.type === Room.Type.FFA) {
                 displayLeaderboard();
-                const loser: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.loser.owner);
-                const winner: BlobObject | undefined = room.blobs.find(b => b.owner === eventData.winner.owner);
+                const loser: BlobObject | undefined = room.blobs.find(b => b.username === eventData.loser.username);
+                const winner: BlobObject | undefined = room.blobs.find(b => b.username === eventData.winner.username);
 
                 if (!loser || !winner) return;
 
@@ -987,14 +986,14 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 const nomUser = document.createElement("span");
                 const targetUser = document.createElement("span");
                 nomUser.className = "nom-user nom-entry";
-                nomUser.innerHTML = `${winner.owner} (+${eventData.result})`;
+                nomUser.innerHTML = `${winner.username} (+${eventData.result})`;
                 const newBRLabel = document.createElement("span");
                 const newBRLabelLoser = document.createElement("span");
                 newBRLabel.className = "new-br";
                 newBRLabel.innerHTML = winner.br + " BR";
                 const linebreakWinner = document.createElement("br");
                 targetUser.className = "target-user nom-entry";
-                targetUser.innerHTML = `${loser.owner} (-${eventData.result})`;
+                targetUser.innerHTML = `${loser.username} (-${eventData.result})`;
                 newBRLabelLoser.className = "new-br";
                 newBRLabelLoser.innerHTML = loser.br + " BR";
                 const linebreakLoser = document.createElement("br");
@@ -1351,7 +1350,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         context.fillStyle = "lightgreen";
         context.fillRect(canvas.width - 225 + (65 / (mapSize.width / ownBlob.x)), canvas.height - 75 + (65 / (mapSize.height / ownBlob.y)), 10, 10);
         for(let i: number = 0; i < room.blobs.length; ++i) {
-            if (room.blobs[i].owner !== ownBlob.owner) {
+            if (room.blobs[i].username !== ownBlob.username) {
                 context.fillStyle = "red";
                 context.fillRect(canvas.width - 225 + (65 / (mapSize.width / room.blobs[i].x)), canvas.height - 75 + (65 / (mapSize.height / room.blobs[i].y)), 10, 10);
             }
@@ -1414,8 +1413,8 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             const linebreak = document.createElement("br");
             leaderboardEntry.className = "leaderboard-entry";
             usernameEntry.className = "user-entry";
-            if (typeof sortedblobs[i].owner === "undefined") return;
-            usernameEntry.innerHTML = (i + 1) + ". " + sortedblobs[i].owner;
+            if (typeof sortedblobs[i].username === "undefined") return;
+            usernameEntry.innerHTML = (i + 1) + ". " + sortedblobs[i].username;
             brLabel.className = "user-br";
             brLabel.innerHTML = sortedblobs[i].br + " BR";
             leaderboardElement.appendChild(leaderboardEntry);
@@ -1567,29 +1566,6 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             wsc.onopen = (): any => wsc.send(data);
         }
     }
-    function blobIDToString(id: BlobID): string | null {
-        switch (id) {
-            case BlobID.Blobowo:
-                return BlobType.Blobowo;
-                break;
-            case BlobID.Blobevil:
-                return BlobType.Blobevil;
-                break;
-            case BlobID.Blobeyes:
-                return BlobType.Blobeyes;
-                break;
-            case BlobID.Blobkittenknife:
-                return BlobType.Blobkittenknife;
-            case BlobID.Blobpeek:
-                return BlobType.Blobpeek;
-                break;
-            case BlobID.Blobnom:
-                return BlobType.Blobnom;
-            default:
-                return null;
-        }
-    }
-
 
 
     // -------------
@@ -1638,7 +1614,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
             const tier: any = getTier(player.br || 0);
             const spanElement: HTMLElement = document.createElement("span");
             spanElement.className = "player";
-            spanElement.innerHTML = `<img src="../assets/emblems/${tier.emblemFile}" class="tier-image" width="20" height="20" alt="Tier" /><span class="player-name" style="color: #${tier.colorCode};">${player.owner}</span> (${player.br} BR)</span>`;
+            spanElement.innerHTML = `<img src="../assets/emblems/${tier.emblemFile}" class="tier-image" width="20" height="20" alt="Tier" /><span class="player-name" style="color: #${tier.colorCode};">${player.username}</span> (${player.br} BR)</span>`;
             const playersElement: HTMLElement | null = document.getElementById("players");
             if (playersElement)
                 playersElement.appendChild(spanElement);
