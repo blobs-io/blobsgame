@@ -40,7 +40,7 @@ func Login(ctx *fiber.Ctx) {
 	}
 	cookie.Name = "session"
 	cookie.Value = sess.SessionID
-	cookie.Expires = time.Unix(0, sessInt)
+	cookie.Expires = time.Unix(sessInt / 1000, 0)
 	ctx.Cookie(cookie)
 
 	ctx.Redirect("/app")
