@@ -20,7 +20,7 @@ type WebSocketConnection struct {
 	ID    string
 }
 
-var connections = make(map[string]WebSocketConnection, 0)
+var connections = make(map[string]*WebSocketConnection, 0)
 
 func Handle(c *websocket.Conn) {
 	id, err := session.Generate(8)
@@ -34,7 +34,7 @@ func Handle(c *websocket.Conn) {
 		Conn: c,
 		ID:   sid,
 	}
-	connections[sid] = ws
+	connections[sid] = &ws
 
 	for {
 		var msg AnyMessage
@@ -72,14 +72,14 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 	}
 
 	if len(r.Players) >= room.PlayerLimit {
-		c.Kick(r, RoomFullKick, "Too many players online")
+		c.Kick(RoomFullKick, "Too many players online")
 		return
 	}
 
 	if r.Mode == room.EliminationMode &&
 		r.State != room.CountdownState &&
 		r.State != room.WaitingState {
-		c.Kick(r, RoomIngameKick, "Room is already in-game")
+		c.Kick(RoomIngameKick, "Room is already in-game")
 		return
 	}
 
@@ -112,22 +112,43 @@ func handleHello(c *WebSocketConnection, d *AnyMessage) {
 
 	r.Players = append(r.Players, &p)
 
-	fmt.Println(r)
+	resData := map[string]interface{}{
+		"user":             p,
+		"users":            r.Players,
+		"objects":          r.Map.Objects,
+		"interval":         PingInterval,
+		"items":            r.Items,
+		"roomCreatedAt":    r.CreatedAt,
+	}
+
+	fmt.Println(r.Mode, len(r.Players), room.MinPlayerStartup, r.State, room.WaitingState)
+
+	if r.Mode == room.EliminationMode {
+		if len(r.Players) >= room.MinPlayerStartup && r.State == room.WaitingState {
+			r.State = room.CountdownState
+			r.CountdownStarted = time.Now().UnixNano() / int64(time.Millisecond)
+			BroadcastMessage(r, AnyMessage{
+				Op: OpEvent,
+				T:  StateChangeEvent,
+				Data: map[string]interface{}{
+					"state":            r.State,
+					"countdownStarted": r.CountdownStarted,
+				},
+			})
+		}
+
+		resData["state"] = r.State
+		resData["waitingTime"] = room.WaitingTime
+		resData["countdownStarted"] = r.CountdownStarted
+	}
+
+	fmt.Println(resData)
+
 	c.Send(AnyMessage{
-		Op: OpEvent,
-		T:  HeartbeatEvent,
-		Data: map[string]interface{}{
-			"user":             p,
-			"users":            r.Players,
-			"objects":          r.Map.Objects,
-			"interval":         PingInterval,
-			"items":            r.Items,
-			"roomCreatedAt":    r.CreatedAt,
-			"state":            r.State,
-			"countdownStarted": r.CountdownStarted,
-		},
+		Op:   OpEvent,
+		T:    HeartbeatEvent,
+		Data: resData,
 	})
-	// TODO: check if room is elimination room and if it meets requirements for room start
 }
 
 func handleHeartbeat(c *WebSocketConnection, d *AnyMessage) {
@@ -167,6 +188,12 @@ func handleEvent(c *WebSocketConnection, d *AnyMessage) {
 func handleClose(c *WebSocketConnection) {
 	c.Conn.Close()
 	delete(connections, c.ID)
+
+	// TODO: optimize this
+	r := room.FindLobbyByWebsocketID(c.ID)
+	if r != nil {
+		r.RemovePlayer(r.GetPlayerIndexByWebSocketID(c.ID))
+	}
 }
 
 func (c *WebSocketConnection) Send(d AnyMessage) error {
@@ -175,7 +202,7 @@ func (c *WebSocketConnection) Send(d AnyMessage) error {
 	return c.Conn.WriteJSON(d)
 }
 
-func (c *WebSocketConnection) Kick(r *room.Room, kickType uint8, reason string) error {
+func (c *WebSocketConnection) Kick(kickType uint8, reason string) error {
 	fmt.Println(AnyMessage{
 		Op: OpClose,
 		T:  PlayerKickEvent,
@@ -196,8 +223,6 @@ func (c *WebSocketConnection) Kick(r *room.Room, kickType uint8, reason string) 
 		return err
 	}
 
-	r.RemovePlayer(r.GetPlayerIndexByWebSocketID(c.ID))
-
 	handleClose(c)
 	return nil
 }
@@ -205,10 +230,21 @@ func (c *WebSocketConnection) Kick(r *room.Room, kickType uint8, reason string) 
 // HandleAntiCheatFlags checks whether the user has reached the flag limit and kicks them
 func (c *WebSocketConnection) HandleAntiCheatFlags(r *room.Room, flags int) bool {
 	if flags > utils.FlagLimit {
-		c.Kick(r, FlagLimitKick, "Too many flags")
+		c.Kick(FlagLimitKick, "Too many flags")
 		return true
 	}
 	return false
+}
+
+func BroadcastMessage(r *room.Room, d AnyMessage) {
+	for _, p := range r.Players {
+		conn, ok := connections[p.ID]
+		if !ok {
+			continue
+		}
+
+		conn.Send(d)
+	}
 }
 
 func WatchRoom(r *room.Room) {
@@ -219,6 +255,8 @@ func WatchRoom(r *room.Room) {
 				continue
 			}
 
+			// TODO: check p.LastPing
+
 			conn.Send(AnyMessage{
 				Op: OpEvent,
 				T:  CoordinateChangeEvent,
@@ -228,6 +266,23 @@ func WatchRoom(r *room.Room) {
 			})
 		}
 
+		if r.Mode == room.EliminationMode &&
+			r.State == room.CountdownState &&
+			(time.Now().UnixNano()/int64(time.Millisecond)) >= r.StartsAt() {
+			StartEliminationRoom(r)
+		}
+
 		time.Sleep(time.Millisecond * 25)
 	}
+}
+
+func StartEliminationRoom(r *room.Room) {
+	r.State = room.IngameState
+	BroadcastMessage(r, AnyMessage{
+		Op: OpEvent,
+		T:  StateChangeEvent,
+		Data: map[string]interface{}{
+			"state": r.State,
+		},
+	})
 }
