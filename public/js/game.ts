@@ -788,7 +788,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 if (eventData.user.role === -1 && !/[?&]guest=true/.test(window.location.search))
                     return document.location.href = "/login/";
 
-                if (details.mode === Room.Type.ELIMINATION)
+                if (modeToString(details.mode).toLowerCase() === Room.Type.ELIMINATION)
                     room = new EliminationRoom();
                 else room = new Room();
 
@@ -832,7 +832,7 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                     room.blobs.push(newBlob);
                 }
 
-                if (details.mode === Room.Type.ELIMINATION && room instanceof EliminationRoom) {
+                if (room instanceof EliminationRoom) {
                     room.state = eventData.state;
                     room.createdAt = eventData.roomCreatedAt;
                     EliminationRoom.waitingTime = eventData.waitingTime;
