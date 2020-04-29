@@ -22,8 +22,8 @@ const (
 
 	// Limits etc
 	PlayerLimit      = 100
-	MinPlayerStartup = 4
-	WaitingTime      = time.Second * 2
+	MinPlayerStartup = 2
+	WaitingTime      = 120000
 
 	// States
 	WaitingState   = 0
@@ -61,6 +61,10 @@ func New(mode uint8) *Room {
 	r.Map = gamemap.GameMaps["default"]
 	r.Players = make([]*player.Player, 0)
 	r.Items = make([]*item.Item, 0)
+
+	if mode == EliminationMode {
+		r.State = WaitingState
+	}
 
 	Rooms[r.ID] = &r
 
@@ -135,4 +139,28 @@ func (r *Room) RemovePlayer(index int) bool {
 	r.Players[index] = r.Players[len(r.Players)-1]
 	r.Players = r.Players[:len(r.Players)-1]
 	return true
+}
+
+func (r *Room) StartsAt() int64 {
+	if r.State == WaitingState {
+		return 0
+	}
+
+	return r.CountdownStarted + WaitingTime
+}
+
+func (r *Room) IsSingle() bool {
+	return len(r.Players) == 0
+}
+
+func FindLobbyByWebsocketID(id string) *Room {
+	for i, r := range Rooms {
+		pl := r.GetPlayerIndexByWebSocketID(id)
+		if pl < 0 {
+			continue
+		}
+
+		return Rooms[i]
+	}
+	return nil
 }
