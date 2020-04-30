@@ -42,7 +42,7 @@ type Player struct {
 	DirectionChangedAt         int64           `json:"directionChangedAt"`
 	Guest                      bool            `json:"guest"`
 	Distance                   int             `json:"distance"`
-	Health                     uint8           `json:"health"`
+	Health                     int8            `json:"health"`
 	AntiCheatFlags             int             `json:"antiCheatFlags"`
 	X                          int             `json:"x"`
 	Y                          int             `json:"y"`
