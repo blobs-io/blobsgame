@@ -32,8 +32,8 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 	for i := range r.Players {
 		target := r.Players[i]
 
-		if (p.X > (target.X+player.Height) || p.X < (target.X-player.Height)) || (p.Y > (target.Y+player.Height) || p.Y < (target.Y-player.Height)) {
-			return
+		if target.ID == p.ID || (p.X > (target.X+player.Height) || p.X < (target.X-player.Height)) || (p.Y > (target.Y+player.Height) || p.Y < (target.Y-player.Height)) {
+			continue
 		}
 
 		now := time.Now().UnixNano() / int64(time.Millisecond)
@@ -82,7 +82,16 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 			target.Y = newY
 			target.DirectionChangedAt = now
 
-			// TODO: send new coordinates to target
+			// TODO: store result, xp, ... in database
+			BroadcastMessage(r, AnyMessage {
+				Op: OpEvent,
+				T: PlayerNomEvent,
+				Data: map[string]interface{} {
+					"winner": p,
+					"loser": target,
+					"result": result,
+				},
+			})
 		}
 	}
 }
