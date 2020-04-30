@@ -49,7 +49,7 @@ func ItemCollectEventCallback(c *WebSocketConnection, d *AnyMessage) {
 
 	switch targetItem.Type {
 	case item.HealthItem:
-		p.Health += uint8(rand.Intn(5) + 10)
+		p.Health += int8(rand.Intn(5) + 10)
 	case item.CoinItem:
 		// TODO: generate random coins
 	}

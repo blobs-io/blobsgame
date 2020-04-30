@@ -42,7 +42,7 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		}
 
 		p.LastNom = now
-		target.Health -= uint8(rand.Intn(10) + 30)
+		target.Health -= int8(rand.Intn(10) + 30)
 		if target.Health > 0 {
 			break
 		}
