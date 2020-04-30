@@ -255,8 +255,6 @@ func WatchRoom(r *room.Room) {
 				continue
 			}
 
-			// TODO: check p.LastPing
-
 			conn.Send(AnyMessage{
 				Op: OpEvent,
 				T:  CoordinateChangeEvent,
