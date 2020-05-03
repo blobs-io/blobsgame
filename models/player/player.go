@@ -1,6 +1,8 @@
 package player
 
 import (
+	"github.com/blobs-io/blobsgame/database"
+	"github.com/blobs-io/blobsgame/utils"
 	"time"
 
 	"github.com/gofiber/websocket"
@@ -44,6 +46,7 @@ type Player struct {
 	Distance                   int             `json:"distance"`
 	Health                     int8            `json:"health"`
 	AntiCheatFlags             int             `json:"antiCheatFlags"`
+	IgnoreNextFlag             bool            `json:"ignoreNextFlag"`
 	X                          int             `json:"x"`
 	Y                          int             `json:"y"`
 	LastRegeneration           int64           `json:"lastRegeneration"`
@@ -54,6 +57,22 @@ type Player struct {
 	Conn                       *websocket.Conn `json:"-"`
 }
 
-func (p *Player) Update(br int, coins int, xp int) {
-	// TODO: write function that updates user stats
+func (p *Player) Update(br int, coins int, xp int) error {
+	rows, err := database.Database.Query(`UPDATE accounts SET "br" = "br" + $1, "blobcoins" = "blobcoins" + $2, "xp" = "xp" + $3 WHERE "username" = $4`, br, coins, xp, p.Username)
+	if err != nil {
+		return err
+	}
+
+	rows.Close()
+	return nil
+}
+
+func (p *Player) UpdateTier(tier utils.Promotion) error {
+	rows, err := database.Database.Query(`INSERT INTO recentPromotions ("user", "newTier", "drop") VALUES ($1, $2, $3)`, p.Username, tier.NewTier.Name, tier.Drop)
+	if err != nil {
+		return err
+	}
+
+	rows.Close()
+	return nil
 }
