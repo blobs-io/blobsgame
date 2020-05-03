@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -62,18 +63,38 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		if !target.Guest && !p.Guest {
 			result = utils.CalculateRatingDiff(p.BR, target.BR)
 			if p.BR+result > player.BRLimit {
-				p.BR = player.BRLimit
-			} else {
-				p.BR += result
+				result = (p.BR + result) - player.BRLimit
 			}
 
 			if target.BR-result < 0 {
-				target.BR = 0
-			} else {
-				target.BR -= result
+				result = target.BR
 			}
 
-			// TODO: tier promotion checking
+			p.BR += result
+			target.BR -= result
+
+			if err := p.Update(result, 0, 0); err != nil {
+				fmt.Println(err)
+			}
+
+			if err := target.Update(-result, 0, 0); err != nil {
+				fmt.Println(err)
+			}
+
+			winnerTier, loserTier := utils.PromotedTo(p.BR - result, p.BR), utils.PromotedTo(target.BR + result, target.BR)
+			if winnerTier.NewTier.Name != "" {
+				if err := p.UpdateTier(winnerTier); err != nil {
+					fmt.Println(err)
+				}
+			}
+
+			if loserTier.NewTier.Name != "" {
+				if err := target.UpdateTier(loserTier); err != nil {
+					fmt.Println(err)
+				}
+			}
+
+			target.IgnoreNextFlag = true
 
 			newX, newY := rand.Intn(r.Map.MapSize.Width), rand.Intn(r.Map.MapSize.Height)
 			target.DirectionChangeCoordinates.X = newX
@@ -82,7 +103,7 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 			target.Y = newY
 			target.DirectionChangedAt = now
 
-			// TODO: store result, xp, ... in database
+			// TODO: send new coordinates to loser
 			BroadcastMessage(r, AnyMessage {
 				Op: OpEvent,
 				T: PlayerNomEvent,
