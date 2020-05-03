@@ -36,12 +36,14 @@ func CoordinateChangeEventCallback(c *WebSocketConnection, d *AnyMessage) {
 
 	xDrift, yDrift := math.Abs(float64(x-p.X)), math.Abs(float64(y-p.Y))
 
-	if xDrift > utils.CoordinateDriftLimit {
+	if xDrift > utils.CoordinateDriftLimit && !p.IgnoreNextFlag {
 		p.AntiCheatFlags += utils.Penalize(utils.ActionCoordinateDrift, int(xDrift))
+		p.IgnoreNextFlag = false
 	}
 
-	if yDrift > utils.CoordinateDriftLimit {
+	if yDrift > utils.CoordinateDriftLimit && !p.IgnoreNextFlag {
 		p.AntiCheatFlags += utils.Penalize(utils.ActionCoordinateDrift, int(yDrift))
+		p.IgnoreNextFlag = false
 	}
 
 	kicked := c.HandleAntiCheatFlags(r, p.AntiCheatFlags)
