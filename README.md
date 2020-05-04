@@ -1,28 +1,22 @@
 # blobs game
 
-[![Build Status](https://travis-ci.org/blobs-io/blobsgame.svg?branch=master)](https://travis-ci.org/blobs-io/blobsgame)
-
-The official repository for the browser game "blobs"<br/>
+This repository contains the source code of the browser game "blobs"<br/>
 **Note:** This game is still in development. It may not work yet. <br />
-### Selfhosting notes
-If you plan to host this on your own you need to compile the rating system API using node-gyp. Please do not create any issues regarding compiling and other problems with the rating system in general on this repository. Instead, please use the other one.
-Internally it will send a request to the Discord API to execute a webhook. The authorization details (token and ID) are stored in the file `backend/Base.js`. If you do not wish to post traffic to Discord, leave values `undefined`.
-The backend code and some parts of the frontend code are in TypeScript, which means that you will have to transpile the TS Code into JavaScript. This can be done by installing `tsc` and running `npm run transpile`. The `transpile` npm script was made for Travis testing, but it can also be used to transpile. Here is an example on how you can install everything:<br/>
-```sh
-npm install
-npm run transpile
-chmod -R 777 scripts
-cd scripts && ./get-rs.sh && cd ..
-node-gyp configure build
-```
+> There is currently a rewrite going on. The code that is running on production can be found under the master branch. Any pull requests depending on that branch will be ignored.<br/>
 
+### Selfhosting notes
+If you plan on hosting this on your own, you will need to compile the source code using the Go compiler. The frontend part of the game is written in TypeScript, so you will also need to install TypeScript to transpile it. <br/>
+For convenience, we've written a Makefile which you can use to compile everything that's required.
+```shell script
+$ make all
+```
 A documentation for this which includes controls, a description for each gamemode, item type and more can be found [here](https://docs.blobs-game.com).
 
 ### What is this?
 __A:__ Blobs is a work-in-progress multiplayer game that involves blob characters (you may know these from Android) that “nom” players in order to gain blob rating, which shows how skilled you are at the game.
 
 ### Where can I play this game?
-__A:__ As stated above, this game is still a WIP and may not work yet. Its interface (login, registration and main menu) does exist and can be accessed through the internet by anybody [here](http://www.blobs-game.com) and all other pages should work well, means that you can register and login without any problems. The game should work fine, too, but there is not much yet.
+__A:__ As stated above, this game is still a WIP and may not work yet. Its interface (login, registration and main menu) does exist and can be accessed through the internet by anybody [here](http://blobs-game.com) and all other pages should work well, means that you can register and login without any problems. The game should work fine, too, but there is not much yet.
 
 ### Any ETA when this game is ready?
 __A:__ The game is playable, but it's lacking features. We are working on it to get it done as soon as possible. We do not know when this game is ready, but you can expect the first version to be ready in 2019.
