@@ -19,16 +19,7 @@ func Init(port int) {
 	App.Get("/", func(ctx *fiber.Ctx) {
 		ctx.Redirect("/login")
 	})
-	App.Static("/app", "./public/app")
-	App.Static("/login", "./public/login")
-	App.Static("/assets", "./public/assets")
-	App.Static("/clans", "./public/clans")
-	App.Static("/css", "./public/css")
-	App.Static("/game", "./public/game")
-	App.Static("/js", "./public/js")
-	App.Static("/register", "./public/register")
-	App.Static("/sources", "./public/sources")
-	App.Static("/verify", "./public/verify")
+	App.Static("/", "./public/")
 
 	App.Post("/login", routes.Login)
 	App.Post("/register", routes.Register)
