@@ -1,6 +1,7 @@
 package player
 
 import (
+	"errors"
 	"github.com/blobs-io/blobsgame/database"
 	"github.com/blobs-io/blobsgame/utils"
 	"time"
@@ -58,6 +59,9 @@ type Player struct {
 }
 
 func (p *Player) Update(br int, coins int, xp int) error {
+	if p.Guest {
+		return errors.New("target is a guest")
+	}
 	rows, err := database.Database.Query(`UPDATE accounts SET "br" = "br" + $1, "blobcoins" = "blobcoins" + $2, "xp" = "xp" + $3 WHERE "username" = $4`, br, coins, xp, p.Username)
 	if err != nil {
 		return err
