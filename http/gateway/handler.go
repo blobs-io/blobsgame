@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"fmt"
+	"github.com/guregu/null"
 	"math/rand"
 	"sync"
 	"time"
@@ -192,6 +193,7 @@ func handleClose(c *WebSocketConnection) {
 	// TODO: optimize this
 	r := room.FindLobbyByWebsocketID(c.ID)
 	if r != nil {
+		// TODO: Store travelled distance in DB if player is not a guest
 		r.RemovePlayer(r.GetPlayerIndexByWebSocketID(c.ID))
 	}
 }
@@ -235,6 +237,10 @@ func (c *WebSocketConnection) HandleAntiCheatFlags(r *room.Room, flags int) bool
 	}
 	return false
 }
+
+// sadly we have to define these functions in this package
+// because go doesn't like import cycles
+// (room functions that interact with anything websocket related)
 
 func BroadcastMessage(r *room.Room, d AnyMessage) {
 	for _, p := range r.Players {
@@ -283,4 +289,72 @@ func StartEliminationRoom(r *room.Room) {
 			"state": r.State,
 		},
 	})
+}
+
+func HandleDeath(r *room.Room, loser *player.Player, winner *player.Player) {
+	placement := len(r.Players) - 1
+
+	coinGain := room.GetRewardForPlacement(room.CoinRewardType, placement)
+	brGain := room.GetRewardForPlacement(room.BRRewardType, placement)
+
+	err := loser.Update(brGain, coinGain, room.DefaultXPGain)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	conn, ok := connections[loser.ID]
+	if !ok {
+		return
+	}
+
+	// TODO: loser is kicked instead of shown the result screen
+	conn.Send(AnyMessage {
+		Op: OpClose,
+		T: PlayerKickEvent,
+		Data: map[string]interface{} {
+			"type": EliminationKick,
+			"result": brGain,
+			"coinChange": coinGain,
+			"noms": loser.Noms,
+			"message": "You were nommed by " + winner.Username,
+		},
+	})
+
+	handleClose(conn)
+	HandleEnd(r)
+}
+
+func HandleEnd(r *room.Room) {
+	if !r.IsSingle() || r.State != room.IngameState {
+		return
+	}
+
+	winner := r.Players[0]
+	brGain := room.GetRewardForPlacement(room.BRRewardType, 0)
+	coinGain := room.GetRewardForPlacement(room.CoinRewardType, 0)
+	winner.Update(brGain, coinGain, room.WinXPGain)
+
+	conn, ok := connections[winner.ID]
+	if !ok {
+		return
+	}
+
+	// TODO: winner is kicked without a reason
+	// instead, don't use OpClose and send it as event instead
+	conn.Send(AnyMessage{
+		Op: OpClose,
+		T: PlayerKickEvent,
+		Data: map[string]interface{} {
+			"type": WinKick,
+			"result": brGain,
+			"noms": winner.Noms,
+			"message": null.NewString("", false),
+		},
+	})
+
+	handleClose(conn)
+
+	// TODO: delete room and create new room
+	// or alternatively, create a reset function on room struct
+	// that sets the state to waiting and other prep stuff
 }
