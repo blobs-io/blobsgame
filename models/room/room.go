@@ -23,15 +23,21 @@ const (
 	// Limits etc
 	PlayerLimit      = 100
 	MinPlayerStartup = 2
-	WaitingTime      = 120000
+	WaitingTime      = 12000
 
 	// States
 	WaitingState   = 0
 	CountdownState = 1
 	IngameState    = 2
 
-	// Rewards
+	// Reward types
+	// Used for GetRewardForPlacement+
+	CoinRewardType = 0
+	BRRewardType = 1
 
+	// Rewards
+	DefaultXPGain = 100
+	WinXPGain = 250
 )
 
 type Room struct {
@@ -48,7 +54,25 @@ type Room struct {
 	CountdownStarted int64 `json:"countdownStarted,omitempty"`
 }
 
-var Rooms map[string]*Room
+var (
+	Rooms map[string]*Room
+
+	// Rewards for elimination rooms
+	// index represents placement
+	// e.g. first place would get CoinRewards[0] coins
+	CoinRewards = []int{
+		75,
+		50,
+		25,
+	}
+	BRRewards = []int{
+		150,
+		100,
+		50,
+		25,
+		10,
+	}
+)
 
 func New(mode uint8) *Room {
 	r := Room{
@@ -150,7 +174,7 @@ func (r *Room) StartsAt() int64 {
 }
 
 func (r *Room) IsSingle() bool {
-	return len(r.Players) == 0
+	return len(r.Players) == 1
 }
 
 func FindLobbyByWebsocketID(id string) *Room {
@@ -163,4 +187,27 @@ func FindLobbyByWebsocketID(id string) *Room {
 		return Rooms[i]
 	}
 	return nil
+}
+
+func GetRewardForPlacement(rewardType uint8, placement int) int {
+	if placement < 0 {
+		return 0
+	}
+
+	switch rewardType {
+	case CoinRewardType:
+		if placement >= len(CoinRewards) {
+			return 0
+		}
+
+		return CoinRewards[placement]
+	case BRRewardType:
+		if placement >= len(BRRewards) {
+			return 0
+		}
+
+		return BRRewards[placement]
+	default:
+		return 0
+	}
 }
