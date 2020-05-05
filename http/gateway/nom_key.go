@@ -52,6 +52,7 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		target.Update(0, 0, player.DeathXPReward)
 
 		if r.Mode == room.EliminationMode {
+			HandleDeath(r, target, p)
 			// TODO: kick target and update br, coins, xp, etc
 			break
 		} else {
