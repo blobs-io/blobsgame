@@ -51,16 +51,19 @@ type ExposableUser struct { // this is sent to users
 
 const (
 	// Error texts
-	BanText                = "user is currently banned"
-	InvalidUserPass        = "invalid username or password"
-	UserNotFound           = "no user with that username was found"
-	InvalidUsernameLength  = "username needs to be at least 3 characters long and must not exceed 14 characters"
-	InvalidPasswordLength  = "password needs to be at least 4 characters long and must not exceed 128 characters"
-	InvalidUsernamePattern = "username does not match pattern. Please only use letters, numbers and spaces"
-	UsernameTaken          = "username is already taken"
-	UnknownError           = "an unknown error occurred"
-	BlobNoAccess           = "you cannot use this blob"
-	DailyGiftFailed        = "you have already requested your daily gift, come back later" // TODO: display time left
+	BanText                          = "user is currently banned"
+	InvalidUserPass                  = "invalid username or password"
+	UserNotFound                     = "no user with that username was found"
+	InvalidUsernameLength            = "username needs to be at least 3 characters long and must not exceed 14 characters"
+	InvalidPasswordLength            = "password needs to be at least 4 characters long and must not exceed 128 characters"
+	InvalidUsernamePattern           = "username does not match pattern. Please only use letters, numbers and spaces"
+	UsernameTaken                    = "username is already taken"
+	UnknownError                     = "an unknown error occurred"
+	BlobNoAccess                     = "you cannot use this blob"
+	DailyGiftFailed                  = "you have already requested your daily gift, come back later" // TODO: display time left
+	NoVerificationCode               = "user did not request a verification code"
+	AlreadyRequestedVerificationCode = "user already requested a verification code"
+	InvalidVerificationCode          = "invalid verification code"
 
 	// Valid blobs
 	Blobowo = "blobowo"
@@ -183,6 +186,96 @@ func (u *User) RedeemDailyGift() error {
 		u.Username)
 
 	return err
+}
+
+func (u *User) Verify(request bool, code string) (string, error) {
+	if request {
+		rows, err := database.Database.Query(`SELECT "code" FROM verifications WHERE "user" = $1`, u.Username)
+		if err != nil {
+			return "", err
+		}
+		defer rows.Close()
+
+		var code string
+		if rows.Next() {
+			rows.Scan(&code)
+			return code, nil
+		} else {
+			return "", errors.New(NoVerificationCode)
+		}
+	}
+
+	if code == "" {
+		_, err := u.Verify(true, "")
+		if err == nil {
+			return "", errors.New(AlreadyRequestedVerificationCode)
+		}
+
+		newCode, err := u.GenerateVerificationCode()
+		if err != nil {
+			return "", err
+		}
+
+		rows, err := database.Database.Query(`INSERT INTO verifications VALUES ($1, $2, $3)`,
+			u.Username,
+			newCode,
+			time.Now().UnixNano()/int64(time.Millisecond))
+		if err != nil {
+			return "", err
+		}
+		defer rows.Close()
+		return newCode, nil
+	} else {
+		username, err := GetUserFromVerificationCode(code)
+		if err != nil {
+			return "", errors.New(InvalidVerificationCode)
+		}
+
+		if err := DeleteVerificationCode(code); err != nil {
+			return "", err
+		}
+
+		return username, nil
+	}
+}
+
+func (u *User) GenerateVerificationCode() (string, error) {
+	for {
+		code, err := session.Generate(16)
+		if err != nil {
+			return "", err
+		}
+
+		_, err = GetUserFromVerificationCode(string(code))
+		if err == nil {
+			return string(code), nil
+		}
+	}
+}
+
+func GetUserFromVerificationCode(code string) (string, error) {
+	rows, err := database.Database.Query(`SELECT "user" FROM verifications WHERE "code" = $1`, code)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	var user string
+	if rows.Next() {
+		rows.Scan(&user)
+		return user, nil
+	} else {
+		return "", errors.New(InvalidVerificationCode)
+	}
+}
+
+func DeleteVerificationCode(code string) error {
+	rows, err := database.Database.Query(`DELETE FROM verifications WHERE "code" = $1`, code)
+	if err != nil {
+		return err
+	}
+	rows.Close()
+	return nil
 }
 
 func Login(username string, password string) (*session.Session, error) {
