@@ -12,6 +12,14 @@ type DailyGiftResponse struct {
 	Bonus int `json:"bonus"`
 }
 
+type RequestVerificationResponse struct {
+	Code string `json:"code"`
+}
+
+type RedeemVerificationResponse struct {
+	User string `json:"user"`
+}
+
 func GetUser(ctx *fiber.Ctx) {
 	target := ctx.Params("user")
 	if target == "" {
@@ -95,5 +103,46 @@ func RedeemDailyGift(ctx *fiber.Ctx) {
 	})
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+func Verify(ctx *fiber.Ctx) {
+	requester := controller.Authorized(ctx)
+	if requester == nil {
+		err := ctx.Status(401).JSON(controller.DefaultResponse{
+			Message: controller.Unauthorized,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+		return
+	}
+
+	requestedCode := ctx.Query("request") == "true"
+	code := ctx.Get("code")
+
+	val, err := requester.Verify(requestedCode, code)
+	if err != nil {
+		err := ctx.Status(400).JSON(controller.DefaultResponse{
+			Message: err.Error(),
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	if code == "" {
+		err := ctx.JSON(RequestVerificationResponse{
+			Code: val,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+	} else {
+		err := ctx.JSON(RedeemVerificationResponse{
+			User: val,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
