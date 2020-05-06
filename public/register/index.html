@@ -35,46 +35,29 @@
         <h1>Blobs</h1>
         <input type="text" placeholder="Username" name="username" id="user" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="password" placeholder="Password" name="password" id="pass" /><br/>
-        <div id="captcha">
-            <canvas width="250" height="100" id="captcha-canvas">
-                Please use a browser that supports the canvas tag
-            </canvas><br/>
-            <input type="text" maxlength="16" placeholder="Answer" name="captcha-input" id="captcha-input" style="
-    text-align: center;
-">
-        </div>
+        <input type="hidden" name="token" id="captcha-token" /><br />
         <input type="submit" value="Register" id="register-btn" />
         <span class="reg-label">Already have an account? <a href="../login">Login</a></span>
     </form>
 </div>
-<center><input type="submit" value="Play as guest" id="guest-btn" style="
+<div style="text-align: center;">
+    <input type="submit" value="Play as guest" id="guest-btn" style="
     background-color: #27ae60;
-    "  onclick="document.location.href='/game?guest=true'"></center>
+    " onclick="document.location.href='/game?guest=true'">
+</div>
 <a href="https://github.com/blobs-io/blobs.live" id="peek"></a>
 <span class="peek-label">Peek into the source</span>
 </body>
+<script src="https://www.google.com/recaptcha/api.js?render=6LdCUPMUAAAAAHu30n0EZ7mk8DLc_vATJZyK8u2m"></script>
 <script src="/js/particles.js"></script>
 <script>
-    initParticles();
-    (function() {
-        const server = document.location.href.match(/https?:\/\/[^\/]+/)[0];
-        const context = document.getElementById("captcha-canvas").getContext("2d");
-        context.fillStyle = "white";
-        context.font = "20px Arial";
-        context.fillText("Requesting captcha...", 6, 20);
+    // reCAPTCHA
+    grecaptcha.ready(() => {
+        grecaptcha.execute("6LdCUPMUAAAAAHu30n0EZ7mk8DLc_vATJZyK8u2m", { action: "homepage" }).then(token => {
+            document.getElementById("captcha-token").value = token;
+        });
+    });
 
-        fetch("/api/captcha/request").then(async res => {
-            if (res.status !== 200) {
-                return alert("An error occurred while trying to request a captcha");
-            }
-            const response = await res.json();
-            console.log(server + response.url);
-            const image = new Image();
-            image.src = server + response.url;
-            image.onload = () => {
-                context.drawImage(image, 0, 0, 250, 100);
-            };
-        }).catch(console.error);
-    })();
+    initParticles();
 </script>
 </html>
