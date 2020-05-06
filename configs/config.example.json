@@ -1,3 +1,6 @@
 {
-  "port": 2999
+  "port": 2999,
+  "tokens": {
+    "recaptcha": ""
+  }
 }
