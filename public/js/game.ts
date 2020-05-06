@@ -177,13 +177,13 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         STATSCHANGE        = "statsChange"
     }
     enum KickTypes {
-        ROOM_FULL = "roomFull",
-        ROOM_INGAME = "roomIngame",
-        TOO_MANY_SOCKETS = "tooManySockets",
-        CLIENT_MOD = "clientMod",
-        MOD_KICK = "modKick",
-        ELIMINATED = "eliminated",
-        WIN = "win",
+        ROOM_FULL,
+        ROOM_INGAME,
+        TOO_MANY_SOCKETS,
+        CLIENT_MOD,
+        MOD_KICK,
+        ELIMINATED,
+        WIN,
         ROOM_END = "roomEnd"
     }
     enum Direction {
@@ -784,7 +784,6 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
         const { op, t: eventType, d: eventData } = JSON.parse(data);
         if (op === OPCODE.EVENT) {
             if (eventType === EventType.HEARTBEAT) {
-                console.log(eventData);
                 if (eventData.user.role === -1 && !/[?&]guest=true/.test(window.location.search))
                     return document.location.href = "/login/";
 
@@ -939,7 +938,6 @@ if (["Android", "iOS"].some(v => window.navigator.userAgent.includes(v))) {
                 }, 3500);
             }
             else if (eventType === EventType.ITEM_UPDATE) {
-                console.log(eventData);
                 if (typeof eventData.old === "string") { // removed item
                     const item: number = objects.items.findIndex(i => i.id === eventData.old);
                     if (item < 0) return; // item somehow not found
