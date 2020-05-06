@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -354,7 +355,14 @@ func Register(username string, password string) error {
 		fmt.Println(err)
 		return errors.New(UnknownError)
 	}
-	_, err = database.Database.Query("INSERT INTO accounts VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
+
+	blobs := []string{StartBlob}
+	blobStr, err := json.Marshal(blobs)
+	if err != nil {
+		return errors.New(UnknownError)
+	}
+
+	rows, err := database.Database.Query("INSERT INTO accounts VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)",
 		// Username
 		username,
 		// Password hash
@@ -372,7 +380,7 @@ func Register(username string, password string) error {
 		// Start distance
 		0,
 		// Blobs
-		"[\""+StartBlob+"\"]",
+		string(blobStr),
 		// Active blob
 		StartBlob,
 		// Clan
@@ -384,11 +392,11 @@ func Register(username string, password string) error {
 		// Start XP
 		StartXP,
 	)
-
 	if err != nil {
 		fmt.Println(err)
 		return errors.New(UnknownError)
 	}
+	defer rows.Close()
 
 	return nil
 }
