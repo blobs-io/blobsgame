@@ -6,8 +6,13 @@ import (
 	"io/ioutil"
 )
 
+type Tokens struct {
+	Recaptcha string `json:"recaptcha"`
+}
+
 type Config struct {
 	Port int `json:"port"`
+	Tokens Tokens `json:"tokens"`
 }
 
 var MainConfig Config
