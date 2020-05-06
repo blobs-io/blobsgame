@@ -1,4 +1,9 @@
-const rest = new RestClient(RestClient.extractSessionID(), "Session");
+const session = RestClient.extractSessionID();
+if (!session) {
+    document.location.href = "/login";
+}
+
+const rest = new RestClient(session, "Session");
 document.getElementById("play-btn").addEventListener("click", showOverview.bind(null, false, rest));
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,12 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.getElementById("logout").addEventListener("click", () => {
     document.cookie = "session=null;expires=" + new Date(Date.now() - 1).toUTCString() + ";path=/";
-    document.location.href = "/";
+    document.location.href = "/login";
 });
 
 
-void (async function() {
-
+(async function() {
     const stats = await rest.fetchUser("@me").then(v => v.json());
     stats.level = Math.floor(xpToLevel(stats.xp));
 
