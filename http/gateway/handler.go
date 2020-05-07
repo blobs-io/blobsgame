@@ -193,8 +193,14 @@ func handleClose(c *WebSocketConnection) {
 	// TODO: optimize this
 	r := room.FindLobbyByWebsocketID(c.ID)
 	if r != nil {
-		// TODO: Store travelled distance in DB if player is not a guest
-		r.RemovePlayer(r.GetPlayerIndexByWebSocketID(c.ID))
+		playerIndex := r.GetPlayerIndexByWebSocketID(c.ID)
+		if playerIndex >= 0 {
+			player := r.Players[playerIndex]
+			if err := player.SaveDistance(); err != nil {
+				fmt.Println(err)
+			}
+			r.RemovePlayer(playerIndex)
+		}
 	}
 }
 
