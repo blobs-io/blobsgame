@@ -1,5 +1,12 @@
 package utils
 
+import (
+	"errors"
+	"fmt"
+	"github.com/blobs-io/blobsgame/database"
+	"time"
+)
+
 const (
 	BronzeBR = 0
 	BronzeColorCode = 0xb57156
@@ -15,6 +22,12 @@ const (
 
 	DiamondBR = 9000
 	DiamondColorCode = 0x16f7ef
+
+	PromotionLimit = 50
+	PromotionLimitErrorMessage = "promotion limit exceeded"
+
+	// Time to live in minutes
+	PromotionTLL = 1440
 )
 
 type Tier struct {
@@ -26,6 +39,13 @@ type Tier struct {
 type Promotion struct {
 	Drop bool `json:"drop"`
 	NewTier Tier `json:"newTier"`
+}
+
+type FullPromotion struct {
+	User string `json:"user"`
+	NewTier string `json:"newTier"`
+	Drop bool `json:"drop"`
+	PromotedAt int64 `json:"promotedAt"`
 }
 
 func GetTier(br int) Tier {
@@ -92,4 +112,45 @@ func PromotedTo(oldBR int, newBR int) Promotion {
 	}
 
 	return Promotion{}
+}
+
+func GetRecentPromotions(limit int) ([]FullPromotion, error) {
+	if limit < 0 || limit > PromotionLimit {
+		return nil, errors.New(PromotionLimitErrorMessage)
+	}
+
+	rows, err := database.Database.Query(`SELECT "user", "newTier", "drop", "promotedAt" FROM recentpromotions LIMIT $1`, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	promotions := make([]FullPromotion, 0)
+	for rows.Next() {
+		var p FullPromotion
+		rows.Scan(&p.User, &p.NewTier, &p.Drop, &p.PromotedAt)
+		promotions = append(promotions, p)
+	}
+
+	return promotions, nil
+}
+
+func CheckDeletePromotion(p FullPromotion) bool {
+	if (time.Now().UnixNano() / int64(time.Millisecond) - p.PromotedAt) / 1000 / 60 < PromotionTLL {
+		return false
+	}
+
+	rows, err := database.Database.Query(`DELETE FROM recentpromotions WHERE "user" = $1 AND "newTier" = $2`, p.User, p.NewTier)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer rows.Close()
+	return true
+}
+
+func CheckDeleteAllPromotions(promotions []FullPromotion) {
+	for _, p := range promotions {
+		CheckDeletePromotion(p)
+	}
 }
