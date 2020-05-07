@@ -51,6 +51,8 @@ func CoordinateChangeEventCallback(c *WebSocketConnection, d *AnyMessage) {
 		return
 	}
 
+	p.Distance += int(xDrift + yDrift)
+
 	if p.Role != user.AdminRole {
 		if x < 0 {
 			x = 0
