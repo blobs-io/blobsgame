@@ -22,7 +22,7 @@ document.getElementById("logout").addEventListener("click", () => {
     const stats = await rest.fetchUser("@me").then(v => v.json());
     stats.level = Math.floor(xpToLevel(stats.xp));
 
-    const promotions = []; // await rest.fetchPromotions().then(v => v.json());
+    const promotions = await rest.fetchPromotions().then(v => v.json());
 
     document.getElementById("br").innerHTML = `${stats.br} BR (${getTier(stats.br).tier})`;
     document.getElementById("blobcoins").innerHTML = `${stats.blobcoins} Blobcoins`;
@@ -56,7 +56,7 @@ document.getElementById("logout").addEventListener("click", () => {
         const promotionElement = document.createElement("span");
         promotionElement.className = "promotion";
         promotionElement.innerHTML = `
-                <span class="small material-icons">${promotion.drop === 0 ? "expand_less" : "expand_more"}</span> ${promotion.user} (${promotion.newTier})
+                <span class="small material-icons">${promotion.drop ? "expand_more" : "expand_less"}</span> ${promotion.user} (${promotion.newTier})
             `;
 
         document.getElementById("promotions")
