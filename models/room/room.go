@@ -177,6 +177,12 @@ func (r *Room) IsSingle() bool {
 	return len(r.Players) == 1
 }
 
+func (r *Room) Reset() {
+	r.State = WaitingState
+	r.CountdownStarted = 0
+	r.CreatedAt = time.Now().UnixNano() / int64(time.Millisecond)
+}
+
 func FindLobbyByWebsocketID(id string) *Room {
 	for i, r := range Rooms {
 		pl := r.GetPlayerIndexByWebSocketID(id)
