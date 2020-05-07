@@ -9,7 +9,7 @@
 	animation: 0.5s fade-center forwards;
 	left: 50%;
     transform: translateX(-50%);
-    border: 1px solid black;
+    border: 3px solid black;
 	border-radius: 2px;
 }
 .room-label {
