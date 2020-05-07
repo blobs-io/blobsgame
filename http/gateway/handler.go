@@ -307,7 +307,6 @@ func HandleDeath(r *room.Room, loser *player.Player, winner *player.Player) {
 		return
 	}
 
-	// TODO: loser is kicked instead of shown the result screen
 	conn.Send(AnyMessage {
 		Op: OpClose,
 		T: PlayerKickEvent,
@@ -339,8 +338,6 @@ func HandleEnd(r *room.Room) {
 		return
 	}
 
-	// TODO: winner is kicked without a reason
-	// instead, don't use OpClose and send it as event instead
 	conn.Send(AnyMessage{
 		Op: OpClose,
 		T: PlayerKickEvent,
@@ -354,7 +351,5 @@ func HandleEnd(r *room.Room) {
 
 	handleClose(conn)
 
-	// TODO: delete room and create new room
-	// or alternatively, create a reset function on room struct
-	// that sets the state to waiting and other prep stuff
+	r.Reset()
 }

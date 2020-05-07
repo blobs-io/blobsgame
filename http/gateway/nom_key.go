@@ -53,7 +53,6 @@ func NomKeyEventCallback(c *WebSocketConnection, d *AnyMessage) {
 
 		if r.Mode == room.EliminationMode {
 			HandleDeath(r, target, p)
-			// TODO: kick target and update br, coins, xp, etc
 			break
 		} else {
 			target.Health = 100
