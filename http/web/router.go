@@ -33,6 +33,7 @@ func Init(port int) {
 	App.Get("/api/v1/rooms/:id", v1.GetRoom)
 	App.Get("/api/v1/rooms/:id/players", v1.GetPlayers)
 	App.Get("/api/v1/verify", v1.Verify)
+	App.Get("/api/v1/promotions", v1.Promotions)
 
 	// WebSocket
 	App.Get("/ws", websocket.New(gateway.Handle))
