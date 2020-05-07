@@ -209,7 +209,7 @@ a:visited {
 }
 
 canvas {
-	border: 1px solid #2980b9;
+	border: none;
 	margin-top: 15px;
 	overflow: hidden;
 }
