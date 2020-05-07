@@ -80,3 +80,13 @@ func (p *Player) UpdateTier(tier utils.Promotion) error {
 	rows.Close()
 	return nil
 }
+
+func (p *Player) SaveDistance() error {
+	rows, err := database.Database.Query(`UPDATE accounts SET "distance" = "distance" + $1 WHERE "username" = $2`, p.Distance, p.Username)
+	if err != nil {
+		return err
+	}
+
+	rows.Close()
+	return nil
+}
