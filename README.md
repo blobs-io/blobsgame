@@ -10,13 +10,12 @@ For convenience, we've written a Makefile which you can use to compile everythin
 ```shell script
 $ make all
 ```
-A documentation for this which includes controls, a description for each gamemode, item type and more can be found [here](https://docs.blobs-game.com).
 
 ### What is this?
 __A:__ Blobs is a work-in-progress multiplayer game that involves blob characters (you may know these from Android) that “nom” players in order to gain blob rating, which shows how skilled you are at the game.
 
 ### Where can I play this game?
-__A:__ As stated above, this game is still a WIP and may not work yet. Its interface (login, registration and main menu) does exist and can be accessed through the internet by anybody [here](http://blobs-game.com) and all other pages should work well, means that you can register and login without any problems. The game should work fine, too, but there is not much yet.
+__A:__ As stated above, this game is still a WIP and may not work yet. Its interface (login, registration and main menu) does exist and can be accessed through the internet by anybody and all other pages should work well, means that you can register and login without any problems. The game should work fine, too, but there is not much yet.
 
 ### Any ETA when this game is ready?
 __A:__ The game is playable, but it's lacking features. We are working on it to get it done as soon as possible. We do not know when this game is ready, but you can expect the first version to be ready in 2019.
